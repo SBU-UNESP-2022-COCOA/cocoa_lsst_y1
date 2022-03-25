@@ -315,7 +315,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     for i in range(self.len_z_interp_2D):
       # THIS IS A NOT OK RULE FOR PNL - WE NEED TO MAKE SCALE CUTS SUCH THAT NL IS NOT IMPORTANT
       # MUCH BETTER WOULD BE TO CALL EUCLID EMULATOR WITH GROWTH PARAMETERS - THAT IS WHAT WE
-      # ARE GOING TO DO NEXT
+      # ARE GOING TO DO NEXT (https://github.com/miknab/EuclidEmulator2)
       lnPNL[i::self.len_z_interp_2D] = t1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D] + t3[i]
       lnPL[i::self.len_z_interp_2D]  = t2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D] + t3[i]
     #Growth-Split (gs) ENDS:
@@ -355,7 +355,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         z = self.z_interp_2D, lnP = lnPNL)
 
       #Growth-Split (gs) BEGINS:
-      ci.init_growth(z = self.z_interp_2D, G = G_growth)
+      ci.init_growth(z = self.z_interp_2D, G = G_growth_camb)
       #Growth-Split (gs) ENDS:
 
       ci.init_distances(z = self.z_interp_1D, chi = chi)
