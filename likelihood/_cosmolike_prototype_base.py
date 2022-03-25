@@ -6,9 +6,10 @@ import scipy
 from scipy.interpolate import UnivariateSpline
 import sys
 import time
+from scipy.integrate import odeint
 
 # Local
-from cobaya.likelihoods._base_classes import _DataSetLikelihood
+from cobaya.likelihoods.base_classes import DataSetLikelihood
 from cobaya.log import LoggedError
 from getdist import IniFile
 
@@ -67,7 +68,7 @@ default_chi = np.array([
    9533.114299897283,9554.700147330219,9575.985713926271
  ])
 
-class _cosmolike_prototype_base(_DataSetLikelihood):
+class _cosmolike_prototype_base(DataSetLikelihood):
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -198,6 +199,8 @@ class _cosmolike_prototype_base(_DataSetLikelihood):
     return {
       "H0": None,
       "omegam": None,
+      "omegam_growth": None,
+      "w_growth": None,
       "Pk_interpolator": {
         "z": self.z_interp_2D,
         "k_max": self.kmax_boltzmann * self.accuracyboost,
@@ -256,16 +259,66 @@ class _cosmolike_prototype_base(_DataSetLikelihood):
     PKNL = self.provider.get_Pk_interpolator(("delta_tot", "delta_tot"),
       nonlinear=True, extrap_kmax = self.extrap_kmax)
 
-    lnPL = np.empty(self.len_pkz_interp_2D)
+    #Growth-Split (gs) BEGINS:
+    zgs  = np.flip(np.concatenate((self.z_interp_2D, np.linspace(10.1,1000,3000)),axis=0)) 
+
+    def G_GROWTH_ODE(y, N):
+      OMG   = self.provider.get_param("omegam_growth")
+      WG    = self.provider.get_param("w_growth")
+      z     = 1.0/np.exp(N) - 1.0 
+      OLG   = (1.0 - OMG)
+      H2    = OMG*(1.0 + z)*(1.0 + z)*(1.0 + z) + OLG*(1.0 + z)**(3*(1.0 + WG)) # H^2(z)
+      OMG_A = OMG*(1.0 + z)*(1.0 + z)*(1.0 + z) / H2                       # Omega_m(z)
+      OLG_A = OLG*(1.0 + z)**(3.0*(1.0 + WG)) / H2                         # Omega_DE(z)
+      HPH   =  -1.5*OMG_A -1.5*OLG_A*(1.0 + WG)                            # dlnH/dlna
+      return [y[1], - (4 + HPH)*y[1] - (3.0 + HPH - 1.5 * OMG_A)*y[0]]     # [dG/dlna, d^2G/dlna^2]
+
+    def G_GEO_ODE(y, N):
+      OMG   = self.provider.get_param("omegam")
+      WG    = self.provider.get_param("w")
+      z     = 1.0/np.exp(N) - 1.0 
+      OLG   = (1.0 - OMG)
+      H2    = OMG*(1.0 + z)*(1.0 + z)*(1.0 + z) + OLG*(1.0 + z)**(3*(1.0 + WG)) # H^2(z)
+      OMG_A = OMG*(1.0 + z)*(1.0 + z)*(1.0 + z) / H2                       # Omega_m(z)
+      OLG_A = OLG*(1.0 + z)**(3.0*(1.0 + WG)) / H2                         # Omega_DE(z)
+      HPH   =  -1.5*OMG_A -1.5*OLG_A*(1.0 + WG)                            # dlnH/dlna
+      return [y[1], - (4 + HPH)*y[1] - (3.0 + HPH - 1.5 * OMG_A)*y[0]]     # [dG/dlna, d^2G/dlna^2]
+
+    def G_ODE_IC(z):
+      OMG   = self.provider.get_param("omegam_growth")
+      WG    = self.provider.get_param("w_growth")
+      OLG   = (1.0 - OMG)
+      H2    = OMG*(1.0 + z)*(1.0 + z)*(1.0 + z) + OLG*(1.0 + z)**(3.0*(1.0 + WG)) # H^2(z)
+      OLG_A = OLG*(1.0 + z)**(3.0*(1.0 + WG))/H2                                  # Omega_DE(z)
+      return [1.0, -0.6*(1.0 - WG)*OLG_A]
+
+    sol      = odeint(G_GROWTH_ODE, G_ODE_IC(zgs[0]), np.log(1.0/(1.0 + zgs)))[:,0]
+    G_growth = np.flip(sol)[0:len(self.z_interp_2D)]
+    G_growth = G_growth/G_growth[len(G_growth)-1]
+
+    sol2     = odeint(G_GEO_ODE, G_ODE_IC(zgs[0]), np.log(1.0/(1.0 + zgs)))[:,0]
+    G_geo = np.flip(sol)[0:len(self.z_interp_2D)]
+    G_geo = G_growth/G_growth[len(G_growth)-1]
+
+    G_geo_camb = np.sqrt(PKL.P(self.z_interp_2D, 0.0005)/PKL.P(0, 0.0005))*(1 + self.z_interp_2D)
+    G_geo_camb = G_geo_camb/G_geo_camb[len(G_geo)-1] 
+    
+    G_growth_camb = G_geo_camb * (G_growth/G_geo) # This way minimizes the impact of the small diff 
+                                                  # between CAMB growth factor and the ODE above
+
+    lnPL  = np.empty(self.len_pkz_interp_2D)
     lnPNL = np.empty(self.len_pkz_interp_2D)
-    #for i in range(self.len_k_interp_2D) :
-    #  lnPNL[i*self.len_z_interp_2D:(i+1)*self.len_z_interp_2D] = PKNL.logP(self.z_interp_2D, self.k_interp_2D[i])[0:self.len_z_interp_2D]
-    #  lnPL[i*self.len_z_interp_2D:(i+1)*self.len_z_interp_2D] = PKL.logP(self.z_interp_2D, self.k_interp_2D[i])[0:self.len_z_interp_2D]
-    tmp1 = PKNL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
-    tmp2 = PKL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
+    t1  = PKNL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
+    t2  = PKL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
+    t3  = 2.0*np.log(G_growth_camb/G_geo_camb)
+
     for i in range(self.len_z_interp_2D):
-      lnPNL[i::self.len_z_interp_2D] = tmp1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
-      lnPL[i::self.len_z_interp_2D] = tmp2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
+      # THIS IS A NOT OK RULE FOR PNL - WE NEED TO MAKE SCALE CUTS SUCH THAT NL IS NOT IMPORTANT
+      # MUCH BETTER WOULD BE TO CALL EUCLID EMULATOR WITH GROWTH PARAMETERS - THAT IS WHAT WE
+      # ARE GOING TO DO NEXT
+      lnPNL[i::self.len_z_interp_2D] = t1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D] + t3[i]
+      lnPL[i::self.len_z_interp_2D]  = t2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D] + t3[i]
+    #Growth-Split (gs) ENDS:
 
     # Cosmolike wants k in h/Mpc
     log10k_interp_2D = self.log10k_interp_2D - np.log10(h)
@@ -301,10 +354,9 @@ class _cosmolike_prototype_base(_DataSetLikelihood):
       ci.init_non_linear_power_spectrum(log10k = log10k_interp_2D,
         z = self.z_interp_2D, lnP = lnPNL)
 
-      G_growth = np.sqrt(PKL.P(self.z_interp_2D,0.0005)/PKL.P(0,0.0005))
-      G_growth = G_growth*(1 + self.z_interp_2D)/G_growth[len(G_growth)-1]
-
+      #Growth-Split (gs) BEGINS:
       ci.init_growth(z = self.z_interp_2D, G = G_growth)
+      #Growth-Split (gs) ENDS:
 
       ci.init_distances(z = self.z_interp_1D, chi = chi)
 

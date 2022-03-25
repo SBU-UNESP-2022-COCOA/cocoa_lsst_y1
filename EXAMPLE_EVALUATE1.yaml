@@ -75,30 +75,6 @@ params:
       loc: 0.25
       scale: 0.1
     proposal: 0.05
-  w0pwa:
-    prior:
-      min: -5 
-      max: -0.01
-    ref:
-      dist: norm
-      loc: -0.99
-      scale: 0.05
-    proposal: 0.05
-    latex: w_{0,\mathrm{DE}}+w_{a,\mathrm{DE}}
-    drop: true
-  w:
-    prior:
-      min: -3
-      max: -0.01
-    ref:
-      dist: norm
-      loc: -0.99
-      scale: 0.05
-    proposal: 0.05
-    latex: w_{0,\mathrm{DE}}
-  wa:
-    value: 'lambda w0pwa, w: w0pwa - w'
-    latex: w_{a,\mathrm{DE}}
   omegabh2:
     value: 'lambda omegab, H0: omegab*(H0/100)**2'
     latex: \Omega_\mathrm{b} h^2
@@ -135,7 +111,23 @@ params:
   omegan:
     derived: 'lambda omegan2, H0: omegan2/((H0/100)**2)'
     latex: \Omega_\mathrm{\\nu}
-
+  w:
+    value: -1
+    latex: w0
+  w_growth:
+    value: -1
+    latex: w_\mathrm{growth}
+  omegam_growth:
+    prior:
+      min: 0.1
+      max: 0.4
+    ref:
+      dist: norm
+      loc: 0.3
+      scale: 0.01
+    proposal: 0.01
+    latex: \Omega_\mathrm{m}^\mathrm{growth}
+    
 theory:
   camb:
     path: ./external_modules/code/CAMB
@@ -173,8 +165,7 @@ sampler:
       LSST_M5: -0.0158096
       LSST_A1_1: 0.606102
       LSST_A1_2: -1.51541
-      w0pwa: -0.9
-      w: -0.9
+      omegam_growth: 0.3
       LSST_BARYON_Q1: 0.0
       LSST_BARYON_Q2: 0.0
 
