@@ -1,6 +1,6 @@
-# cocoa_lsst_y1
+# Growth-Geometry split in LSST-Y1 analysis
 
-This branch is dedicated to the Growth-Geometry split (see: https://arxiv.org/abs/2010.05924, https://arxiv.org/abs/1410.5832) test in simulated lsst-y1 analysis.
+This branch is dedicated to implementation of the Growth-Geometry split (see: https://arxiv.org/abs/2010.05924 and https://arxiv.org/abs/1410.5832) in simulated lsst-y1 analysis.
 
 To calculate the non-linear matter power spectrum, we will load the Bacco Emulator. This emulator requires some extra packages not included in the original [Cocoa](https://github.com/SBU-UNESP-2022-COCOA/cocoa2) installation.
 
