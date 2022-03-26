@@ -62,10 +62,4 @@ Similar to the original Cocoa repository, the more straightforward way to instal
 
 Remember: With this installation method, users must activate the Conda environment whenever working with Cocoa, as shown below 
   
-     $ conda activate cocoa
-
-When loading conda cocoa environment for the first time, users must install git-lfs
-
-    $(cocoa) $CONDA_PREFIX/bin/git-lfs install
-
-**Users can now proceed to the section Installation of Cobaya base code** (original Cocoa)
+     $ conda activate cocoaemu
