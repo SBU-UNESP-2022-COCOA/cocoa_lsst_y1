@@ -2,7 +2,7 @@
 
 This branch is dedicated to the Growth-Geometry split (see: https://arxiv.org/abs/2010.05924, https://arxiv.org/abs/1410.5832) test in simulated lsst-y1 analysis.
 
-In order to calculate the non-linear matter power spectrum , we are going to load the [Bacco Emulator](https://baccoemu.readthedocs.io/en/latest/). This requires some extra packages not included in the original [Cocoa](https://github.com/SBU-UNESP-2022-COCOA/cocoa2) installation.
+To calculate the non-linear matter power spectrum, we will load the Bacco Emulator. This emulator requires some extra packages not included in the original [Cocoa](https://github.com/SBU-UNESP-2022-COCOA/cocoa2) installation.
 
 Similar to the original Cocoa repository, the more straightforward way to install most prerequisites is via Conda. Cocoa's internal scripts will then install any remaining missing packages, using a provided internal cache located at cocoa_installation_libraries. Assuming that the user had previously installed Minicoda (or Anaconda), the first step is to type the following commands to create the cocoa CondaEmu environment.
 
