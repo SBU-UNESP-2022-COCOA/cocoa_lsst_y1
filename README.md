@@ -41,7 +41,6 @@ Similar to the original Cocoa repository, the more straightforward way to instal
         'conda-forge::libgomp=10.3.0' \
         'conda-forge::certifi=2021.10.8' \
         'conda-forge::scikit-learn=1.0.1' \
-        'conda-forge::markdown=2.6.9' \
         'conda-forge::wheel=0.37.0' \
         'conda-forge::requests=2.27.1' \
         'conda-forge::urllib3=1.26.9'
@@ -51,6 +50,8 @@ Similar to the original Cocoa repository, the more straightforward way to instal
       $ conda activate cocoaemu
         
       $ $CONDA_PREFIX/bin/pip install --upgrade-strategy only-if-needed --no-cache-dir \
+           'oauthlib==3.2.0' \
+           'markdown==3.3.6' \
            'tensorflow-cpu==2.8.0' \
            'keras==2.8.0'  \
            'progressbar2=4.0.0'
