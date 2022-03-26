@@ -52,9 +52,13 @@ Similar to the original Cocoa repository, the more straightforward way to instal
       $ $CONDA_PREFIX/bin/pip install --upgrade-strategy only-if-needed --no-cache-dir \
            'oauthlib==3.2.0' \
            'markdown==3.3.6' \
-           'tensorflow-cpu==2.8.0' \
+           'oauthlib==0.4.6' \
+           'tensorflow==2.8.0' \
            'keras==2.8.0'  \
-           'progressbar2=4.0.0'
+           'progressbar2==4.0.0' \
+           'baccoemu==2.1.0'
+           
+      $ conda deactivate  # this finish installation
 
   
   
