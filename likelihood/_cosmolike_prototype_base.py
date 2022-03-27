@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 import os
 import numpy as np
 import scipy
-from scipy.interpolate import UnivariateSpline
+from scipy.interpolate import CubicSpline
 import sys
 import time
 from scipy.integrate import odeint
@@ -12,6 +12,11 @@ from scipy.integrate import odeint
 from cobaya.likelihoods.base_classes import DataSetLikelihood
 from cobaya.log import LoggedError
 from getdist import IniFile
+
+#Growth-Split (gs) BEGINS:
+import baccoemu
+import euclidemu
+#Growth-Split (gs) ENDS:
 
 import cosmolike_lsst_y1_interface as ci
 
@@ -140,8 +145,8 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     ci.init_cosmo_runmode(is_linear=False)
 
     # to set lens tomo bins, we need a default \chi(z)
-    ci.set_cosmological_parameters(omega_matter = default_omega_matter,
-      hubble = default_hubble, is_cached = False)
+    ci.set_cosmological_parameters(omega_matter = default_omega_matter, hubble = default_hubble, 
+      is_cached = False)
 
     # convert chi to Mpc/h
     ci.init_distances(default_z, default_chi*default_hubble/100.0)
@@ -160,8 +165,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     # FUNCTION `void init_baryons(char* scenario)`. SIMS INCLUDE
     # TNG100, HzAGN, mb2, illustris, eagle, owls_AGN_T80, owls_AGN_T85,
     # owls_AGN_T87, BAHAMAS_T76, BAHAMAS_T78, BAHAMAS_T80
-    ci.init_baryons_contamination(
-      self.use_baryonic_simulations_for_dv_contamination,
+    ci.init_baryons_contamination(self.use_baryonic_simulations_for_dv_contamination,
       self.which_baryonic_simulations_for_dv_contamination)
 
     if self.create_baryon_pca:
@@ -181,11 +185,9 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.baryon_pcs_qs = np.zeros(4)
     # ------------------------------------------------------------------------
 
-    self.do_cache_lnPL = np.zeros(
-      self.len_log10k_interp_2D*self.len_z_interp_2D)
+    self.do_cache_lnPL = np.zeros(self.len_log10k_interp_2D*self.len_z_interp_2D)
 
-    self.do_cache_lnPNL = np.zeros(
-      self.len_log10k_interp_2D*self.len_z_interp_2D)
+    self.do_cache_lnPNL = np.zeros(self.len_log10k_interp_2D*self.len_z_interp_2D)
 
     self.do_cache_chi = np.zeros(len(self.z_interp_1D))
 
@@ -201,6 +203,11 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       "omegam": None,
       "omegam_growth": None,
       "w_growth": None,
+      "As": None,
+      "omegab": None,
+      "ns": None,
+      "mnu": None,
+      "w": None,
       "Pk_interpolator": {
         "z": self.z_interp_2D,
         "k_max": self.kmax_boltzmann * self.accuracyboost,
@@ -308,22 +315,69 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     lnPL  = np.empty(self.len_pkz_interp_2D)
     lnPNL = np.empty(self.len_pkz_interp_2D)
-    t1  = PKNL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
     t2  = PKL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
     t3  = 2.0*np.log(G_growth_camb/G_geo_camb)
 
     for i in range(self.len_z_interp_2D):
-      # THIS IS A NOT OK RULE FOR PNL - WE NEED TO MAKE SCALE CUTS SUCH THAT NL IS NOT IMPORTANT
-      # MUCH BETTER WOULD BE TO CALL EUCLID EMULATOR WITH GROWTH PARAMETERS - THAT IS WHAT WE
-      # ARE GOING TO DO NEXT (https://github.com/miknab/EuclidEmulator2)
-      lnPNL[i::self.len_z_interp_2D] = t1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D] + t3[i]
-      lnPL[i::self.len_z_interp_2D]  = t2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D] + t3[i]
-    #Growth-Split (gs) ENDS:
+      lnPL[i::self.len_z_interp_2D]  = t2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
+      lnPL[i::self.len_z_interp_2D] += t3[i]
+      log10k_interp_2D = self.log10k_interp_2D - np.log10(h) # Cosmolike (and emuls): h/Mpc Units
+      lnPL += np.log((h**3))                                 # Cosmolike (and emuls): h/Mpc Units
 
-    # Cosmolike wants k in h/Mpc
-    log10k_interp_2D = self.log10k_interp_2D - np.log10(h)
-    lnPNL += np.log((h**3))
-    lnPL += np.log((h**3))
+    if use_bacco_emul == True:
+      for i in range(self.len_z_interp_2D):
+        # From Doc: Please note that omega_cold and sigma8_cold refer to the density parameter 
+        # From Doc: and linear variance of cold matter (cdm + baryons), which does not correspond
+        # From Doc: to the total matter content in massive neutrino cosmologies.
+        # Paper: https://arxiv.org/pdf/2004.06245.pdf (units seems to be h/Mpc)
+        omc_growth = self.provider.get_param("omegam_growth") - self.provider.get_param("omegan"),
+        params = {
+          'omega_cold'    :  omc_growth,
+          'A_s'           :  self.provider.get_param("As"), 
+          'omega_baryon'  :  self.provider.get_param("omegab"),
+          'ns'            :  self.provider.get_param("ns"),
+          'hubble'        :  self.provider.get_param("H0")/100.0,
+          'neutrino_mass' :  self.provider.get_param("mnu"),
+          'w0'            :  self.provider.get_param("w"),
+          'wa'            :  0.0,
+          'expfactor'     :  1.0/(1.0 + self.z_interp_2D[i])
+        }
+        kbt, bt = emulator.get_nonlinear_boost(k=k, cold=False, **params)
+        BaccoBoost = CubicSpline(kbt, bt, axis=0, extrapolate=None)
+
+        lnPL[i::self.len_z_interp_2D] = t2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D] + t3[i]
+
+        lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + 
+          np.log(np.array(BaccoBoost(self.k_interp_2D)))
+    else: 
+      if use_euclid_emul == True:
+        params = {
+          'Omm'           : self.provider.get_param("omegam_growth"),
+          'As'            : self.provider.get_param("As"),
+          'Omb'           : self.provider.get_param("omegab"),
+          'ns'            : self.provider.get_param("ns"),
+          'h'             : self.provider.get_param("H0")/100.0,
+          'mnu'           : self.provider.get_param("mnu"), 
+          'w'             : self.provider.get_param("w"),
+          'wa'            : 0.0
+        }
+        # From Doc: k with the wavenumbers in units of h / Mpc and a dictionary b indexed with 
+        # From Doc: the same index as the redshift array, e.g. b[1] is an array corresponding 
+        # From Doc: to redshifts[1], etc. This is always the case, even when only one redshift 
+        # From Doc: is requested, so accessing that array is always done via b[0].
+        # From Doc: (...) where now k=k_custom (in our case kbt = self.k_interp_2D)
+        kbt, bt = euclidemu2.get_boost(params, self.z_interp_2D, self.k_interp_2D)
+      
+        for i in range(self.len_z_interp_2D):  
+          lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + np.log(bt[i][:])  
+      else:
+        t1  = PKNL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
+        for i in range(self.len_z_interp_2D):
+          #VM ALERT: MUCH BETTER WOULD BE TO CALL EMULATORS WITH GROWTH PARAMETERS
+          lnPNL[i::self.len_z_interp_2D]  = t1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D] 
+          lnPNL[i::self.len_z_interp_2D] += t3[i]
+          lnPNL += np.log((h**3))
+    #Growth-Split (gs) ENDS:
 
     # Compute chi(z) - convert to Mpc/h
     chi = self.provider.get_comoving_radial_distance(self.z_interp_1D) * h
