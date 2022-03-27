@@ -322,6 +322,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       lnPL += np.log((h**3))                                 # Cosmolike (and emuls): h/Mpc Units
 
     if use_bacco_emul == True:
+    
       for i in range(self.len_z_interp_2D):
         # From Doc: Please note that omega_cold and sigma8_cold refer to the density parameter 
         # From Doc: and linear variance of cold matter (cdm + baryons), which does not correspond
@@ -349,6 +350,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnBoost
           
     else if use_euclid_emul == True:
+    
       params = {
         'Omm'           : self.provider.get_param("omegam_growth"),
         'As'            : self.provider.get_param("As"),
@@ -359,24 +361,26 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         'w'             : self.provider.get_param("w"),
         'wa'            : 0.0
       }
+
       # From Doc: k with the wavenumbers in units of h / Mpc and a dictionary b indexed with 
       # From Doc: the same index as the redshift array, e.g. b[1] is an array corresponding 
       # From Doc: to redshifts[1], etc. This is always the case, even when only one redshift 
       # From Doc: is requested, so accessing that array is always done via b[0].
       # From Doc: (...) where now k=k_custom (in our case kbt = self.k_interp_2D)
     
-      kbt, bt  = euclidemu2.get_boost(params, self.z_interp_2D, self.k_interp_2D)
+      kbt, bt = euclidemu2.get_boost(params, self.z_interp_2D, self.k_interp_2D)
       
       for i in range(self.len_z_interp_2D):  
         lnBoost  = np.log(bt[i][:])  
-        
         lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnBoost 
+    
     else:
+    
       # Compute non-linear matter power spectrum
       PKNL = self.provider.get_Pk_interpolator(("delta_tot", "delta_tot"), nonlinear=True, 
         extrap_kmax = self.extrap_kmax)
       
-      t1  = PKNL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
+      t1 = PKNL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
       
       for i in range(self.len_z_interp_2D):
         #VM ALERT: MUCH BETTER WOULD BE TO CALL EMULATORS WITH GROWTH PARAMETERS
@@ -391,7 +395,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     cache_alert = self.set_cache_alert(chi, lnPL, lnPNL)
 
     ci.set_cosmological_parameters(
-      omega_matter = self.provider.get_param("omegam"),
+      omega_matter = self.provider.get_param("omegam"), #Intrinsic Aligment - growth of geometry?
       hubble = self.provider.get_param("H0"),
       is_cached = cache_alert
     )
@@ -408,11 +412,9 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         self.provider.get_param("H0")
       ])
 
-      ci.init_linear_power_spectrum(log10k = log10k_interp_2D,
-        z = self.z_interp_2D, lnP = lnPL)
+      ci.init_linear_power_spectrum(log10k=log10k_interp_2D, z=self.z_interp_2D, lnP=lnPL)
 
-      ci.init_non_linear_power_spectrum(log10k = log10k_interp_2D,
-        z = self.z_interp_2D, lnP = lnPNL)
+      ci.init_non_linear_power_spectrum(log10k=log10k_interp_2D, z=self.z_interp_2D, lnP=lnPNL)
 
       #Growth-Split (gs) BEGINS:
       ci.init_growth(z = self.z_interp_2D, G = G_growth_camb)
