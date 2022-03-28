@@ -7,6 +7,8 @@ likelihood:
     path: ./external_modules/data/lsst_y1
     print_datavector: False
     print_datavector_file: "./projects/lsst_y1/chains/example1_lsst_y1_theory.modelvector"
+    non_linear_emul: 1
+    kmax_boltzmann: 10.0
 
 params:
   As_1e9:

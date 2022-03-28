@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 import os
 import numpy as np
 import scipy
-from scipy.interpolate import CubicSpline
+from scipy.interpolate import CubicSpline, interp1d
 import sys
 import time
 from scipy.integrate import odeint
@@ -14,8 +14,8 @@ from cobaya.log import LoggedError
 from getdist import IniFile
 
 #Growth-Split (gs) BEGINS:
-import baccoemu
-import euclidemu
+import euclidemu2
+import math
 #Growth-Split (gs) ENDS:
 
 import cosmolike_lsst_y1_interface as ci
@@ -119,13 +119,16 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       np.linspace(1080,2000,20)),axis=0) #CMB 6x2pt g_CMB (possible in the future)
     self.z_interp_1D[0] = 0
 
-    self.z_interp_2D = np.linspace(0,2.0,100)
-    self.z_interp_2D = np.concatenate((self.z_interp_2D, np.linspace(2.0,10.1,50)),axis=0)
+    #Growth-Split (gs) BEGINS:
+    self.z_interp_2D = np.linspace(0,2.0,95)
+    self.z_interp_2D = np.concatenate((self.z_interp_2D, np.linspace(2.0,10.0,5)),axis=0)
     self.z_interp_2D[0] = 0
-
+    #Growth-Split (gs) ENDS:
     self.len_z_interp_2D = len(self.z_interp_2D)
+    #Growth-Split (gs) BEGINS:
     self.len_log10k_interp_2D = 1200
     self.log10k_interp_2D = np.linspace(-4.2,2.0,self.len_log10k_interp_2D)
+    #Growth-Split (gs) ENDS:
 
     # Cobaya wants k in 1/Mpc
     self.k_interp_2D = np.power(10.0,self.log10k_interp_2D)
@@ -193,6 +196,9 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     self.do_cache_cosmo = np.zeros(2)
 
+    # ------------------------------------------------------------------------
+    if self.non_linear_emul == 1:
+      self.emulator = ee2=euclidemu2.PyEuclidEmulator()
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -202,13 +208,6 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       "H0": None,
       "omegam": None,
       "omegam_growth": None,
-      "omegab": None,
-      "omegan": None,
-      "w_growth": None,
-      "As": None,
-      "ns": None,
-      "mnu": None,
-      "w": None,
       "Pk_interpolator": {
         "z": self.z_interp_2D,
         "k_max": self.kmax_boltzmann * self.accuracyboost,
@@ -263,6 +262,10 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     PKL = self.provider.get_Pk_interpolator(("delta_tot", "delta_tot"), nonlinear=False, 
       extrap_kmax = self.extrap_kmax)
 
+    # Compute non-linear matter power spectrum
+    PKNL = self.provider.get_Pk_interpolator(("delta_tot", "delta_tot"), nonlinear=True, 
+        extrap_kmax = self.extrap_kmax)
+
     #Growth-Split (gs) BEGINS:
     zgs  = np.flip(np.concatenate((self.z_interp_2D, np.linspace(10.1,1000,3000)),axis=0)) 
 
@@ -309,84 +312,53 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     
     G_growth_camb = G_geo_camb * (G_growth/G_geo) # This way minimizes the impact of the small diff 
                                                   # between CAMB growth factor and the ODE above
-
     lnPL  = np.empty(self.len_pkz_interp_2D)
     lnPNL = np.empty(self.len_pkz_interp_2D)
-    t2  = PKL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
-    t3  = 2.0*np.log(G_growth_camb/G_geo_camb)
+    t1 = PKNL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
+    t2 = PKL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
+    t3 = 2.0*np.log(G_growth_camb/G_geo_camb)
+    log10k_interp_2D = self.log10k_interp_2D - np.log10(h) # Cosmolike (and emuls): h/Mpc Units
 
     for i in range(self.len_z_interp_2D):
       lnPL[i::self.len_z_interp_2D]  = t2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
       lnPL[i::self.len_z_interp_2D] += t3[i]
-      log10k_interp_2D = self.log10k_interp_2D - np.log10(h) # Cosmolike (and emuls): h/Mpc Units
-      lnPL += np.log((h**3))                                 # Cosmolike (and emuls): h/Mpc Units
-
-    if use_bacco_emul == True:
-    
-      for i in range(self.len_z_interp_2D):
-        # From Doc: Please note that omega_cold and sigma8_cold refer to the density parameter 
-        # From Doc: and linear variance of cold matter (cdm + baryons), which does not correspond
-        # From Doc: to the total matter content in massive neutrino cosmologies.
-        # Paper: https://arxiv.org/pdf/2004.06245.pdf (units seems to be h/Mpc)
-        
-        omc_growth = self.provider.get_param("omegam_growth") - self.provider.get_param("omegan")
-        
-        params = {
-          'omega_cold'    :  omc_growth,
-          'A_s'           :  self.provider.get_param("As"), 
-          'omega_baryon'  :  self.provider.get_param("omegab"),
-          'ns'            :  self.provider.get_param("ns"),
-          'hubble'        :  self.provider.get_param("H0")/100.0,
-          'neutrino_mass' :  self.provider.get_param("mnu"),
-          'w0'            :  self.provider.get_param("w"),
-          'wa'            :  0.0,
-          'expfactor'     :  1.0/(1.0 + self.z_interp_2D[i])
-        }
-        
-        kbt, bt    = emulator.get_nonlinear_boost(k=k, cold=False, **params)
-        BaccoBoost = CubicSpline(kbt, bt, axis=0, extrapolate=None)
-        lnBoost    = np.log(np.array(BaccoBoost(self.k_interp_2D)))
-
-        lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnBoost
-          
-    else if use_euclid_emul == True:
-    
+    lnPL += np.log((h**3)) 
+  
+    if self.non_linear_emul == 1:
       params = {
-        'Omm'           : self.provider.get_param("omegam_growth"),
-        'As'            : self.provider.get_param("As"),
-        'Omb'           : self.provider.get_param("omegab"),
-        'ns'            : self.provider.get_param("ns"),
-        'h'             : self.provider.get_param("H0")/100.0,
-        'mnu'           : self.provider.get_param("mnu"), 
-        'w'             : self.provider.get_param("w"),
-        'wa'            : 0.0
+        'Omm'  : self.provider.get_param("omegam_growth"),
+        'As'   : self.provider.get_param("As"),
+        'Omb'  : self.provider.get_param("omegab"),
+        'ns'   : self.provider.get_param("ns"),
+        'h'    : h,
+        'mnu'  : self.provider.get_param("mnu"), 
+        'w'    : self.provider.get_param("w"),
+        'wa'   : 0.0
       }
 
-      # From Doc: k with the wavenumbers in units of h / Mpc and a dictionary b indexed with 
-      # From Doc: the same index as the redshift array, e.g. b[1] is an array corresponding 
-      # From Doc: to redshifts[1], etc. This is always the case, even when only one redshift 
-      # From Doc: is requested, so accessing that array is always done via b[0].
-      # From Doc: (...) where now k=k_custom (in our case kbt = self.k_interp_2D)
+      kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D))
+      kbt, tmp_bt = self.emulator.get_boost(params, self.z_interp_2D, kbt)
+      logkbt = np.log10(kbt)
+
+      for i in range(self.len_z_interp_2D):    
+        interp = interp1d(logkbt, np.log(tmp_bt[i]), kind='linear', 
+          fill_value='extrapolate', assume_sorted=True)
+
+        lnbt = interp(log10k_interp_2D)
+        lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
+
+        lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnbt
     
-      kbt, bt = euclidemu2.get_boost(params, self.z_interp_2D, self.k_interp_2D)
-      
-      for i in range(self.len_z_interp_2D):  
-        lnBoost  = np.log(bt[i][:])  
-        lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnBoost 
-    
-    else:
-    
-      # Compute non-linear matter power spectrum
-      PKNL = self.provider.get_Pk_interpolator(("delta_tot", "delta_tot"), nonlinear=True, 
-        extrap_kmax = self.extrap_kmax)
-      
-      t1 = PKNL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
+    elif self.non_linear_emul == 2:      
       
       for i in range(self.len_z_interp_2D):
-        #VM ALERT: MUCH BETTER WOULD BE TO CALL EMULATORS WITH GROWTH PARAMETERS
-        lnPNL[i::self.len_z_interp_2D]  = t1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D] 
+        lnPNL[i::self.len_z_interp_2D]  = t1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]  
         lnPNL[i::self.len_z_interp_2D] += t3[i]
-        lnPNL += np.log((h**3))
+      lnPNL += np.log((h**3))   
+    
+    else:
+      raise LoggedError(self.log, "non_linear_emul = %d is an invalid option", non_linear_emul)
+    
     #Growth-Split (gs) ENDS:
 
     # Compute chi(z) - convert to Mpc/h
