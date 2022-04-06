@@ -291,7 +291,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       HPH   =  -1.5*OMG_A -1.5*OLG_A*(1.0 + WG)                            # dlnH/dlna
       return [y[1], - (4 + HPH)*y[1] - (3.0 + HPH - 1.5 * OMG_A)*y[0]]     # [dG/dlna, d^2G/dlna^2]
 
-    def G_ODE_IC(z):
+    def G_ODE_IC_GROWTH(z):
       OMG   = self.provider.get_param("omegam_growth")
       WG    = self.provider.get_param("w_growth")
       OLG   = (1.0 - OMG)
@@ -299,13 +299,21 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       OLG_A = OLG*(1.0 + z)**(3.0*(1.0 + WG))/H2                                  # Omega_DE(z)
       return [1.0, -0.6*(1.0 - WG)*OLG_A]
 
-    sol      = odeint(G_GROWTH_ODE, G_ODE_IC(zgs[0]), np.log(1.0/(1.0 + zgs)))[:,0]
+    def G_ODE_IC_GEO(z):
+      OMG   = self.provider.get_param("omegam")
+      WG    = self.provider.get_param("w")
+      OLG   = (1.0 - OMG)
+      H2    = OMG*(1.0 + z)*(1.0 + z)*(1.0 + z) + OLG*(1.0 + z)**(3.0*(1.0 + WG)) # H^2(z)
+      OLG_A = OLG*(1.0 + z)**(3.0*(1.0 + WG))/H2                                  # Omega_DE(z)
+      return [1.0, -0.6*(1.0 - WG)*OLG_A]
+
+    sol      = odeint(G_GROWTH_ODE, G_ODE_IC_GROWTH(zgs[0]), np.log(1.0/(1.0 + zgs)))[:,0]
     G_growth = np.flip(sol)[0:len(self.z_interp_2D)]
     G_growth = G_growth/G_growth[len(G_growth)-1]
 
-    sol2  = odeint(G_GEO_ODE, G_ODE_IC(zgs[0]), np.log(1.0/(1.0 + zgs)))[:,0]
-    G_geo = np.flip(sol)[0:len(self.z_interp_2D)]
-    G_geo = G_growth/G_growth[len(G_growth)-1]
+    sol2  = odeint(G_GEO_ODE, G_ODE_IC_GEO(zgs[0]), np.log(1.0/(1.0 + zgs)))[:,0]
+    G_geo = np.flip(sol2)[0:len(self.z_interp_2D)]
+    G_geo = G_geo/G_geo[len(G_geo)-1]
 
     G_geo_camb = np.sqrt(PKL.P(self.z_interp_2D, 0.0005)/PKL.P(0, 0.0005))*(1 + self.z_interp_2D)
     G_geo_camb = G_geo_camb/G_geo_camb[len(G_geo)-1] 
