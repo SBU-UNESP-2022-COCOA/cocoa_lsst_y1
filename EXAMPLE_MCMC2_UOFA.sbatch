@@ -24,7 +24,7 @@ echo Slurm job NAME is $SLURM_JOB_NAME
 echo Slurm job ID is $SLURM_JOBID
 
 cd $SLURM_SUBMIT_DIR
-conda activate cocoa
+conda activate cocoaemu
 source start_cocoa
 
 export OMP_PROC_BIND=close
