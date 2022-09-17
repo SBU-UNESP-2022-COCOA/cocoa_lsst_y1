@@ -126,7 +126,7 @@ params:
     latex: w_\mathrm{growth}
   omegam_growth:
     prior:
-      min: 0.1
+      min: 0.24
       max: 0.4
     ref:
       dist: norm
