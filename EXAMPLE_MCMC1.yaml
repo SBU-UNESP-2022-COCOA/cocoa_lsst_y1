@@ -3,11 +3,9 @@ debug: False
 stop_at_error: False
 
 likelihood:
-  sn.pantheon:
-    path: ./external_modules/data/sn_data
   planck_2018_highl_plik.TTTEEE:
     path: ./external_modules/
-    clik_file: plc_3.0/hi_l/plik/plik_rd12_HM_v22b_TTTEEE_35_900.clik
+    clik_file: plc_3.0/hi_l/plik/plik_rd12_HM_v22b_TTTEEE_33_396.clik
   planck_2018_lowl.EE:
     path: ./external_modules/
   lsst_y1.lsst_cosmic_shear:
