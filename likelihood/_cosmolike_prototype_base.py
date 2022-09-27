@@ -208,7 +208,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       "H0": None,
       "omegam": None,
       "omegam_growth": None,
-      "omegan": None,
+      "omegan2": None,
       "Pk_interpolator": {
         "z": self.z_interp_2D,
         "k_max": self.kmax_boltzmann * self.accuracyboost,
@@ -273,7 +273,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     def G_GROWTH_ODE(y, N):
       OMG   = self.provider.get_param("omegam_growth")
       WG    = self.provider.get_param("w_growth")
-      f_nu  = self.provider.get_param("omegan")/self.provider.get_param("omegam_growth")
+      f_nu  = self.provider.get_param("omegan2")/(h**2)/self.provider.get_param("omegam_growth")
       z     = 1.0/np.exp(N) - 1.0 
       OLG   = (1.0 - OMG)
       H2    = OMG*(1.0 + z)*(1.0 + z)*(1.0 + z) + OLG*(1.0 + z)**(3*(1.0 + WG)) # H^2(z)
@@ -285,7 +285,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     def G_GEO_ODE(y, N):
       OMG   = self.provider.get_param("omegam")
       WG    = self.provider.get_param("w")
-      f_nu  = self.provider.get_param("omegan")/self.provider.get_param("omegam")
+      f_nu  = self.provider.get_param("omegan2")/(h**2)/self.provider.get_param("omegam")
       z     = 1.0/np.exp(N) - 1.0 
       OLG   = (1.0 - OMG)
       H2    = OMG*(1.0 + z)*(1.0 + z)*(1.0 + z) + OLG*(1.0 + z)**(3*(1.0 + WG)) # H^2(z)
