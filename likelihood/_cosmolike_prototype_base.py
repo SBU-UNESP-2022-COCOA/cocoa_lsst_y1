@@ -208,6 +208,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       "H0": None,
       "omegam": None,
       "omegam_growth": None,
+      "omegan": None,
       "Pk_interpolator": {
         "z": self.z_interp_2D,
         "k_max": self.kmax_boltzmann * self.accuracyboost,
@@ -268,28 +269,30 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     #Growth-Split (gs) BEGINS:
     zgs  = np.flip(np.concatenate((self.z_interp_2D, np.linspace(10.1,1000,3000)),axis=0)) 
-
+    
     def G_GROWTH_ODE(y, N):
       OMG   = self.provider.get_param("omegam_growth")
       WG    = self.provider.get_param("w_growth")
+      f_nu  = self.provider.get_param("omegan")/self.provider.get_param("omegam_growth")
       z     = 1.0/np.exp(N) - 1.0 
       OLG   = (1.0 - OMG)
       H2    = OMG*(1.0 + z)*(1.0 + z)*(1.0 + z) + OLG*(1.0 + z)**(3*(1.0 + WG)) # H^2(z)
       OMG_A = OMG*(1.0 + z)*(1.0 + z)*(1.0 + z) / H2                       # Omega_m(z)
       OLG_A = OLG*(1.0 + z)**(3.0*(1.0 + WG)) / H2                         # Omega_DE(z)
       HPH   =  -1.5*OMG_A -1.5*OLG_A*(1.0 + WG)                            # dlnH/dlna
-      return [y[1], - (4 + HPH)*y[1] - (3.0 + HPH - 1.5 * OMG_A)*y[0]]     # [dG/dlna, d^2G/dlna^2]
+      return [y[1], - (4 + HPH)*y[1] - (3.0 + HPH - 1.5 * OMG_A * (1-f_nu))*y[0]]     # [dG/dlna, d^2G/dlna^2]
 
     def G_GEO_ODE(y, N):
       OMG   = self.provider.get_param("omegam")
       WG    = self.provider.get_param("w")
+      f_nu  = self.provider.get_param("omegan")/self.provider.get_param("omegam")
       z     = 1.0/np.exp(N) - 1.0 
       OLG   = (1.0 - OMG)
       H2    = OMG*(1.0 + z)*(1.0 + z)*(1.0 + z) + OLG*(1.0 + z)**(3*(1.0 + WG)) # H^2(z)
       OMG_A = OMG*(1.0 + z)*(1.0 + z)*(1.0 + z) / H2                       # Omega_m(z)
       OLG_A = OLG*(1.0 + z)**(3.0*(1.0 + WG)) / H2                         # Omega_DE(z)
       HPH   =  -1.5*OMG_A -1.5*OLG_A*(1.0 + WG)                            # dlnH/dlna
-      return [y[1], - (4 + HPH)*y[1] - (3.0 + HPH - 1.5 * OMG_A)*y[0]]     # [dG/dlna, d^2G/dlna^2]
+      return [y[1], - (4 + HPH)*y[1] - (3.0 + HPH - 1.5 * OMG_A* (1-f_nu))*y[0]]     # [dG/dlna, d^2G/dlna^2]
 
     def G_ODE_IC_GROWTH(z):
       OMG   = self.provider.get_param("omegam_growth")

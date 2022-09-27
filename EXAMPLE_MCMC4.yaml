@@ -12,7 +12,7 @@ likelihood:
   bao.sdss_dr12_consensus_bao:
     path: ./external_modules/data/
 
-  lsst_y1.lsst_cosmic_shear:
+  lsst_y1.lsst_3x2pt:
     path: ./external_modules/data/lsst_y1
     non_linear_emul: 1
     kmax_boltzmann: 5.0
@@ -192,7 +192,9 @@ sampler:
         ]
       - [2,
           [
-            LSST_DZ_S1, LSST_DZ_S2, LSST_DZ_S3, LSST_DZ_S4, LSST_DZ_S5, LSST_A1_1, LSST_A1_2, 
+            LSST_DZ_S1, LSST_DZ_S2, LSST_DZ_S3, LSST_DZ_S4, LSST_DZ_S5, LSST_A1_1, LSST_A1_2,
+            LSST_B1_1, LSST_B1_2, LSST_B1_3, LSST_B1_4, LSST_B1_5,
+            LSST_DZ_L1, LSST_DZ_L2, LSST_DZ_L3, LSST_DZ_L4, LSST_DZ_L5, 
             omegam_growth
           ]
         ]
@@ -215,4 +217,4 @@ sampler:
     # ---------------------------------------------------------------------
     Rminus1_single_split: 4
 
-output: ./projects/lsst_y1/chains/EXAMPLE_MCMC3
+output: ./projects/lsst_y1/chains/EXAMPLE_MCMC4

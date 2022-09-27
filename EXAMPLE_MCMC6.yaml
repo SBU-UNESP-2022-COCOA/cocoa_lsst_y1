@@ -11,8 +11,12 @@ likelihood:
     path: ./external_modules/data/
   bao.sdss_dr12_consensus_bao:
     path: ./external_modules/data/
-
-  lsst_y1.lsst_cosmic_shear:
+  planck_2018_highl_plik.TTTEEE:
+    path: ./external_modules/
+    clik_file: plc_3.0/hi_l/plik/plik_rd12_HM_v22b_TTTEEE_33_396.clik
+  planck_2018_lowl.EE:
+    path: ./external_modules/
+  lsst_y1.lsst_3x2pt:
     path: ./external_modules/data/lsst_y1
     non_linear_emul: 1
     kmax_boltzmann: 5.0
@@ -78,7 +82,14 @@ params:
   mnu:
     value: 0.06
   tau:
-    value: 0.05
+    prior:
+      min: 0.01
+      max: 0.2
+    ref:
+      dist: norm
+      loc: 0.055
+      scale: 0.006
+    proposal: 0.003
     latex: \tau_\mathrm{reio}
   omegal:
     latex: \Omega_\Lambda
@@ -187,18 +198,29 @@ sampler:
     blocking:
       - [1,
           [
-            As_1e9, ns, H0, omegab, omegam
+            As_1e9, ns, H0, omegab, omegam, tau 
           ]
         ]
       - [2,
           [
-            LSST_DZ_S1, LSST_DZ_S2, LSST_DZ_S3, LSST_DZ_S4, LSST_DZ_S5, LSST_A1_1, LSST_A1_2, 
+            LSST_DZ_S1, LSST_DZ_S2, LSST_DZ_S3, LSST_DZ_S4, LSST_DZ_S5, LSST_A1_1, LSST_A1_2,
+            LSST_B1_1, LSST_B1_2, LSST_B1_3, LSST_B1_4, LSST_B1_5,
+            LSST_DZ_L1, LSST_DZ_L2, LSST_DZ_L3, LSST_DZ_L4, LSST_DZ_L5, 
             omegam_growth
           ]
         ]
       - [25,
           [
             LSST_M1, LSST_M2, LSST_M3, LSST_M4, LSST_M5
+          ]
+        ]
+      - [50,
+          [
+            A_cib_217, gal545_A_217, calib_217T, galf_TE_A_217, ps_A_100_100,
+            galf_TE_A_100_143, ps_A_217_217, ksz_norm, A_planck, calib_100T,
+            ps_A_143_217, ps_A_143_143, gal545_A_100, galf_TE_A_143_217,
+            gal545_A_143_217, galf_TE_A_100_217, galf_TE_A_143, gal545_A_143,
+            xi_sz_cib, galf_TE_A_100, A_sz
           ]
         ]
     # --------------------------------------
@@ -215,4 +237,4 @@ sampler:
     # ---------------------------------------------------------------------
     Rminus1_single_split: 4
 
-output: ./projects/lsst_y1/chains/EXAMPLE_MCMC3
+output: ./projects/lsst_y1/chains/EXAMPLE_MCMC6
