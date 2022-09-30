@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#SBATCH --job-name=ggsplit
-#SBATCH --output=ggsplit-%A_%a.out
-#SBATCH -e ggsplit-%A_%a.out.err
+#SBATCH --job-name=lsst_ggsplit
+#SBATCH --output=lsst_ggsplit-%A_%a.out
+#SBATCH -e lsst_ggsplit-%A_%a.out.err
 #SBATCH --nodes=1
 #SBATCH --ntasks=4
 #SBATCH --cpus-per-task=7

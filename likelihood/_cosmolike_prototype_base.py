@@ -259,6 +259,14 @@ class _cosmolike_prototype_base(DataSetLikelihood):
   def set_cosmo_related(self):
     h = self.provider.get_param("H0")/100.0
 
+    OM_GROWTH = self.provider.get_param("omegam_growth")
+    if OM_GROWTH < -50:
+      OM_GROWTH = self.provider.get_param("omegam")
+
+    W_GROWTH = self.provider.get_param("w_growth")
+    if W_GROWTH < -50:
+      W_GROWTH = self.provider.get_param("w")
+
     # Compute linear matter power spectrum
     PKL = self.provider.get_Pk_interpolator(("delta_tot", "delta_tot"), nonlinear=False, 
       extrap_kmax = self.extrap_kmax)
@@ -271,9 +279,9 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     zgs  = np.flip(np.concatenate((self.z_interp_2D, np.linspace(10.1,1000,3000)),axis=0)) 
     
     def G_GROWTH_ODE(y, N):
-      OMG   = self.provider.get_param("omegam_growth")
-      WG    = self.provider.get_param("w_growth")
-      f_nu  = self.provider.get_param("omegan2")/(h**2)/self.provider.get_param("omegam_growth")
+      OMG   = OM_GROWTH
+      WG    = W_GROWTH
+      f_nu  = self.provider.get_param("omegan2")/(h**2)/OM_GROWTH
       z     = 1.0/np.exp(N) - 1.0 
       OLG   = (1.0 - OMG)
       H2    = OMG*(1.0 + z)*(1.0 + z)*(1.0 + z) + OLG*(1.0 + z)**(3*(1.0 + WG)) # H^2(z)
@@ -295,8 +303,8 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       return [y[1], - (4 + HPH)*y[1] - (3.0 + HPH - 1.5 * OMG_A* (1-f_nu))*y[0]]     # [dG/dlna, d^2G/dlna^2]
 
     def G_ODE_IC_GROWTH(z):
-      OMG   = self.provider.get_param("omegam_growth")
-      WG    = self.provider.get_param("w_growth")
+      OMG   = OM_GROWTH
+      WG    = W_GROWTH
       OLG   = (1.0 - OMG)
       H2    = OMG*(1.0 + z)*(1.0 + z)*(1.0 + z) + OLG*(1.0 + z)**(3.0*(1.0 + WG)) # H^2(z)
       OLG_A = OLG*(1.0 + z)**(3.0*(1.0 + WG))/H2                                  # Omega_DE(z)
@@ -337,13 +345,13 @@ class _cosmolike_prototype_base(DataSetLikelihood):
   
     if self.non_linear_emul == 1:
       params = {
-        'Omm'  : self.provider.get_param("omegam_growth"),
+        'Omm'  : OM_GROWTH,
         'As'   : self.provider.get_param("As"),
         'Omb'  : self.provider.get_param("omegab"),
         'ns'   : self.provider.get_param("ns"),
         'h'    : h,
         'mnu'  : self.provider.get_param("mnu"), 
-        'w'    : self.provider.get_param("w"),
+        'w'    : W_GROWTH,
         'wa'   : 0.0
       }
 
