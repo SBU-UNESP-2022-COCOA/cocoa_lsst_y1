@@ -6,6 +6,7 @@ import scipy
 from scipy.interpolate import UnivariateSpline
 import sys
 import time
+import pandas as pd #KZ
 
 # Local
 from cobaya.likelihoods.base_classes import DataSetLikelihood
@@ -180,11 +181,26 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.baryon_pcs_qs = np.zeros(4)
     # ------------------------------------------------------------------------
 
-    self.do_cache_lnPL = np.zeros(
+    self.do_cache_lnPL_MM = np.zeros(    #KZ: rename
       self.len_log10k_interp_2D*self.len_z_interp_2D)
 
-    self.do_cache_lnPNL = np.zeros(
+    self.do_cache_lnPNL_MM = np.zeros(  #KZ: rename
       self.len_log10k_interp_2D*self.len_z_interp_2D)
+
+    # KZ begin do chache for pk_weyl
+    self.do_cache_lnPL_WM = np.zeros( 
+      self.len_log10k_interp_2D*self.len_z_interp_2D)
+    
+    self.do_cache_lnPNL_WM = np.zeros(  
+      self.len_log10k_interp_2D*self.len_z_interp_2D)
+
+    self.do_cache_lnPL_WW = np.zeros( 
+      self.len_log10k_interp_2D*self.len_z_interp_2D)
+    
+    self.do_cache_lnPNL_WW = np.zeros(  
+      self.len_log10k_interp_2D*self.len_z_interp_2D)
+
+    # KZ end
 
     self.do_cache_chi = np.zeros(len(self.z_interp_1D))
 
@@ -202,7 +218,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         "z": self.z_interp_2D,
         "k_max": self.kmax_boltzmann * self.accuracyboost,
         "nonlinear": (True,False),
-        "vars_pairs": ([("delta_tot", "delta_tot")])
+        "vars_pairs": (["delta_tot", "delta_tot"],["Weyl","Weyl"], ["Weyl", "delta_tot"]) #KZ: let camb output pk for weyl, can't have () here
       },
       "comoving_radial_distance": {
         "z": self.z_interp_1D
@@ -224,12 +240,12 @@ class _cosmolike_prototype_base(DataSetLikelihood):
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
 
-  def set_cache_alert(self, chi, lnPL, lnPNL):
+  def set_cache_alert(self, chi, lnPL_MM, lnPNL_MM, lnPL_WM, lnPNL_WM, lnPL_WW, lnPNL_WW):    #KZ: add WM/WW
     cache_alert_1 = np.array_equal(self.do_cache_chi, chi)
 
-    cache_alert_2 = np.array_equal(self.do_cache_lnPL, lnPL)
+    cache_alert_2 = np.array_equal(self.do_cache_lnPL_MM, lnPL_MM)   #KZ: rename
 
-    cache_alert_3 = np.array_equal(self.do_cache_lnPNL, lnPNL)
+    cache_alert_3 = np.array_equal(self.do_cache_lnPNL_MM, lnPNL_MM)  #KZ: rename
 
     cache_alert_4 = np.array_equal(
       self.do_cache_cosmo,
@@ -238,6 +254,18 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         self.provider.get_param("H0")
       ])
     )
+
+    # KZ begin
+    cache_alert_5 = np.array_equal(self.do_cache_lnPL_WM, lnPL_WM)  
+    
+    cache_alert_6 = np.array_equal(self.do_cache_lnPNL_WM, lnPNL_WM) 
+    
+    cache_alert_7 = np.array_equal(self.do_cache_lnPL_WW, lnPL_WW)  
+    
+    cache_alert_8 = np.array_equal(self.do_cache_lnPNL_WW, lnPNL_WW) 
+
+    return cache_alert_1 and cache_alert_2 and cache_alert_3 and cache_alert_4 and cache_alert_5 and cache_alert_6 and cache_alert_7 and cache_alert_8 and not self.force_cache_false
+    # KZ end
 
     return cache_alert_1 and cache_alert_2 and cache_alert_3 and cache_alert_4 and not self.force_cache_false
 
@@ -248,34 +276,121 @@ class _cosmolike_prototype_base(DataSetLikelihood):
   def set_cosmo_related(self):
     h = self.provider.get_param("H0")/100.0
 
+    ###KZ begin
+
     # Compute linear matter power spectrum
-    PKL = self.provider.get_Pk_interpolator(("delta_tot", "delta_tot"),
+    PKL_MM = self.provider.get_Pk_interpolator(("delta_tot", "delta_tot"),
       nonlinear=False, extrap_kmax = self.extrap_kmax)
 
     # Compute non-linear matter power spectrum
-    PKNL = self.provider.get_Pk_interpolator(("delta_tot", "delta_tot"),
+    PKNL_MM = self.provider.get_Pk_interpolator(("delta_tot", "delta_tot"),
       nonlinear=True, extrap_kmax = self.extrap_kmax)
 
-    lnPL = np.empty(self.len_pkz_interp_2D)
-    lnPNL = np.empty(self.len_pkz_interp_2D)
+    # Compute linear power spectrum for Weyl-Matter, rescale to the unit of PK_MM
+    PKL_WM = self.provider.get_Pk_interpolator(("Weyl", "delta_tot"),
+      nonlinear=False, extrap_kmax = self.extrap_kmax)
+
+    # Compute non-linear power spectrum for Weyl-Matter, rescale to the unit of PK_MM
+    PKNL_WM = self.provider.get_Pk_interpolator(("Weyl", "delta_tot"),
+      nonlinear=True, extrap_kmax = self.extrap_kmax)
+
+    # Compute linear power spectrum for Weyl-Weyl, rescale to the unit of PK_MM
+    PKL_WW = self.provider.get_Pk_interpolator(("Weyl", "Weyl"),
+      nonlinear=False, extrap_kmax = self.extrap_kmax)
+
+    # Compute npn-linear power spectrum for Weyl-Weyl, rescale to the unit of PK_MM
+    PKNL_WW = self.provider.get_Pk_interpolator(("Weyl", "Weyl"),
+      nonlinear=True, extrap_kmax = self.extrap_kmax)
+
+    lnPL_MM = np.empty(self.len_pkz_interp_2D) 
+    lnPNL_MM = np.empty(self.len_pkz_interp_2D) 
     #for i in range(self.len_k_interp_2D) :
-    #  lnPNL[i*self.len_z_interp_2D:(i+1)*self.len_z_interp_2D] = PKNL.logP(self.z_interp_2D, self.k_interp_2D[i])[0:self.len_z_interp_2D]
-    #  lnPL[i*self.len_z_interp_2D:(i+1)*self.len_z_interp_2D] = PKL.logP(self.z_interp_2D, self.k_interp_2D[i])[0:self.len_z_interp_2D]
-    tmp1 = PKNL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
-    tmp2 = PKL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
+    #  lnPNL_MM[i*self.len_z_interp_2D:(i+1)*self.len_z_interp_2D] = PKNL_MM.logP(self.z_interp_2D, self.k_interp_2D[i])[0:self.len_z_interp_2D]
+    #  lnPL_MM[i*self.len_z_interp_2D:(i+1)*self.len_z_interp_2D] = PKL_MM.logP(self.z_interp_2D, self.k_interp_2D[i])[0:self.len_z_interp_2D]
+    tmp1 = PKNL_MM.logP(self.z_interp_2D, self.k_interp_2D).flatten()
+    tmp2 = PKL_MM.logP(self.z_interp_2D, self.k_interp_2D).flatten()
     for i in range(self.len_z_interp_2D):
-      lnPNL[i::self.len_z_interp_2D] = tmp1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
-      lnPL[i::self.len_z_interp_2D] = tmp2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
+      lnPNL_MM[i::self.len_z_interp_2D] = tmp1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
+      lnPL_MM[i::self.len_z_interp_2D] = tmp2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]  
+
+    #get Pk for weyl-matter
+    lnPL_WM = np.empty(self.len_pkz_interp_2D) 
+    lnPNL_WM = np.empty(self.len_pkz_interp_2D) 
+    #for i in range(self.len_k_interp_2D) :
+    #  lnPNL_MM[i*self.len_z_interp_2D:(i+1)*self.len_z_interp_2D] = PKNL_MM.logP(self.z_interp_2D, self.k_interp_2D[i])[0:self.len_z_interp_2D]
+    #  lnPL_MM[i*self.len_z_interp_2D:(i+1)*self.len_z_interp_2D] = PKL_MM.logP(self.z_interp_2D, self.k_interp_2D[i])[0:self.len_z_interp_2D]
+    tmp1 = PKNL_WM.logP(self.z_interp_2D, self.k_interp_2D).flatten()
+    tmp2 = PKL_WM.logP(self.z_interp_2D, self.k_interp_2D).flatten()
+    for i in range(self.len_z_interp_2D):
+      lnPNL_WM[i::self.len_z_interp_2D] = tmp1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
+      lnPL_WM[i::self.len_z_interp_2D] = tmp2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]  
+
+    #get Pk for weyl-weyl
+    lnPL_WW = np.empty(self.len_pkz_interp_2D) 
+    lnPNL_WW = np.empty(self.len_pkz_interp_2D) 
+    #for i in range(self.len_k_interp_2D) :
+    #  lnPNL_MM[i*self.len_z_interp_2D:(i+1)*self.len_z_interp_2D] = PKNL_MM.logP(self.z_interp_2D, self.k_interp_2D[i])[0:self.len_z_interp_2D]
+    #  lnPL_MM[i*self.len_z_interp_2D:(i+1)*self.len_z_interp_2D] = PKL_MM.logP(self.z_interp_2D, self.k_interp_2D[i])[0:self.len_z_interp_2D]
+    tmp1 = PKNL_WW.logP(self.z_interp_2D, self.k_interp_2D).flatten()
+    tmp2 = PKL_WW.logP(self.z_interp_2D, self.k_interp_2D).flatten()
+    for i in range(self.len_z_interp_2D):
+      lnPNL_WW[i::self.len_z_interp_2D] = tmp1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
+      lnPL_WW[i::self.len_z_interp_2D] = tmp2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]  
 
     # Cosmolike wants k in h/Mpc
     log10k_interp_2D = self.log10k_interp_2D - np.log10(h)
-    lnPNL += np.log((h**3))
-    lnPL += np.log((h**3))
+    lnPNL_MM += np.log((h**3))
+    lnPL_MM += np.log((h**3))
+    
+    lnPNL_WM += np.log((h**3))
+    lnPL_WM += np.log((h**3))
+
+    lnPNL_WW += np.log((h**3))
+    lnPL_WW += np.log((h**3))
+
+    #rescale for weyl-matter, weyl-weyl: the factor in poisson equation.
+    #factors in log is plus/minus here
+    #use a k in the middle:
+    factor_wm = lnPNL_MM[1000*self.len_z_interp_2D : 1001*self.len_z_interp_2D] - lnPNL_WM[1000*self.len_z_interp_2D : 1001*self.len_z_interp_2D]
+    factor_ww = lnPNL_MM[1000*self.len_z_interp_2D : 1001*self.len_z_interp_2D] - lnPNL_WW[1000*self.len_z_interp_2D : 1001*self.len_z_interp_2D]
+
+
+    for i in range(self.len_z_interp_2D):
+      lnPNL_WM[i::self.len_z_interp_2D] = lnPNL_WM[i::self.len_z_interp_2D] + factor_wm[i]
+    for i in range(self.len_z_interp_2D):
+      lnPNL_WW[i::self.len_z_interp_2D] = lnPNL_WW[i::self.len_z_interp_2D] + factor_ww[i] + np.log(1.2)
+
+
+
+    ### test
+    # print(self.len_z_interp_2D)
+    # print(self.len_k_interp_2D)
+    # print(len(lnPNL_MM))
+    # print(lnPNL_MM)
+    # print(lnPNL_WW)
+    # print(len(lnPNL_WW[3::self.len_z_interp_2D]))
+    # print(len(factor_ww))
+
+
+
+    # ##test: output Pk to check it's correct
+    # df = pd.DataFrame({"lnPNL_MM": lnPNL_MM})
+    # df.to_csv("pk_mm_test0.csv", index=False) 
+
+    # df = pd.DataFrame({"lnPNL_WM": lnPNL_WM})
+    # df.to_csv("pk_wm_test0.csv", index=False) 
+
+    # df = pd.DataFrame({"lnPNL_WW": lnPNL_WW})
+    # df.to_csv("pk_ww_test0.csv", index=False) 
+    
+    
 
     # Compute chi(z) - convert to Mpc/h
     chi = self.provider.get_comoving_radial_distance(self.z_interp_1D) * h
 
-    cache_alert = self.set_cache_alert(chi, lnPL, lnPNL)
+    cache_alert = self.set_cache_alert(chi, lnPL_MM, lnPNL_MM, lnPL_WM, lnPNL_WM, lnPL_WW, lnPNL_WW) #KZ: add WM/WW  
+
+    ###KZ end
 
     ci.set_cosmological_parameters(
       omega_matter = self.provider.get_param("omegam"),
@@ -286,22 +401,38 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     if cache_alert == False :
       self.do_cache_chi = np.copy(chi)
 
-      self.do_cache_lnPL = np.copy(lnPL)
-
-      self.do_cache_lnPNL = np.copy(lnPNL)
+      ##KZ begin
+      self.do_cache_lnPL_MM = np.copy(lnPL_MM)  
+      self.do_cache_lnPNL_MM = np.copy(lnPNL_MM)
+      ##KZ end
 
       self.do_cache_cosmo = np.array([
         self.provider.get_param("omegam"),
         self.provider.get_param("H0")
       ])
 
+      ##KZ begin
+      self.do_cache_lnPL_WM = np.copy(lnPL_WM)  
+
+      self.do_cache_lnPNL_WM = np.copy(lnPNL_WM)
+
+      self.do_cache_lnPL_WW = np.copy(lnPL_WW)  
+
+      self.do_cache_lnPNL_WW = np.copy(lnPNL_WW)
+
       ci.init_linear_power_spectrum(log10k = log10k_interp_2D,
-        z = self.z_interp_2D, lnP = lnPL)
+        z = self.z_interp_2D, lnP_MM = lnPL_MM)
 
       ci.init_non_linear_power_spectrum(log10k = log10k_interp_2D,
-        z = self.z_interp_2D, lnP = lnPNL)
+        z = self.z_interp_2D, lnP_MM = lnPNL_MM)
 
-      G_growth = np.sqrt(PKL.P(self.z_interp_2D,0.0005)/PKL.P(0,0.0005))
+      ci.init_non_linear_power_spectrum_weyl_matter(log10k = log10k_interp_2D,
+        z = self.z_interp_2D, lnP_WM = lnPNL_WM)      
+      ci.init_non_linear_power_spectrum_weyl_weyl(log10k = log10k_interp_2D,
+        z = self.z_interp_2D, lnP_WW = lnPNL_WW)
+    
+      G_growth = np.sqrt(PKL_MM.P(self.z_interp_2D,0.0005)/PKL_MM.P(0,0.0005))  #KZ: rename
+      ##KZ end
       G_growth = G_growth*(1 + self.z_interp_2D)/G_growth[len(G_growth)-1]
 
       ci.init_growth(z = self.z_interp_2D, G = G_growth)

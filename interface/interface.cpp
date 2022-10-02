@@ -456,13 +456,13 @@ void cpp_init_size_data_vector()
 }
 
 void cpp_init_linear_power_spectrum(std::vector<double> io_log10k,
-std::vector<double> io_z, std::vector<double> io_lnP)
+std::vector<double> io_z, std::vector<double> io_lnP_MM)  //KZ
 {
   spdlog::debug("\x1b[90m{}\x1b[0m: Begins", "init_linear_power_spectrum");
 
   {
     bool debug_fail = false;
-    if (io_z.size()*io_log10k.size() != io_lnP.size())
+    if (io_z.size()*io_log10k.size() != io_lnP_MM.size())
     {
       debug_fail = true;
     }
@@ -477,8 +477,8 @@ std::vector<double> io_z, std::vector<double> io_lnP)
     {
       spdlog::critical(
         "\x1b[90m{}\x1b[0m: incompatible input w/ k.size = {}, z.size = {}, "
-        "and lnP.size = {}", "init_linear_power_spectrum", io_log10k.size(),
-        io_z.size(), io_lnP.size());
+        "and lnP_MM.size = {}", "init_linear_power_spectrum", io_log10k.size(), //KZ
+        io_z.size(), io_lnP_MM.size()); //KZ
       exit(1);
     }
 
@@ -486,8 +486,8 @@ std::vector<double> io_z, std::vector<double> io_lnP)
     {
       spdlog::critical(
         "\x1b[90m{}\x1b[0m: bad input w/ k.size = {}, z.size = {}, "
-        "and lnP.size = {}", "init_linear_power_spectrum", io_log10k.size(),
-        io_z.size(), io_lnP.size());
+        "and lnP_MM.size = {}", "init_linear_power_spectrum", io_log10k.size(), //KZ
+        io_z.size(), io_lnP_MM.size()); //KZ
       exit(1);
     }
   }
@@ -496,8 +496,8 @@ std::vector<double> io_z, std::vector<double> io_lnP)
   int nz = static_cast<int>(io_z.size());
   double* log10k = io_log10k.data();
   double* z = io_z.data();
-  double* lnP = io_lnP.data();
-  setup_p_lin(&nlog10k, &nz, &log10k, &z, &lnP, 1);
+  double* lnP_MM = io_lnP_MM.data(); //KZ
+  setup_p_lin(&nlog10k, &nz, &log10k, &z, &lnP_MM, 1); //KZ
 
   // force initialization - imp to avoid seg fault when openmp is on
   const double io_a = 1.0;
@@ -510,13 +510,13 @@ std::vector<double> io_z, std::vector<double> io_lnP)
 }
 
 void cpp_init_non_linear_power_spectrum(std::vector<double> io_log10k,
-std::vector<double> io_z, std::vector<double> io_lnP)
+std::vector<double> io_z, std::vector<double> io_lnP_MM) //KZ
 {
   spdlog::debug("\x1b[90m{}\x1b[0m: Begins", "init_non_linear_power_spectrum");
 
   {
     bool debug_fail = false;
-    if (io_z.size()*io_log10k.size() != io_lnP.size())
+    if (io_z.size()*io_log10k.size() != io_lnP_MM.size()) //KZ
     {
       debug_fail = true;
     }
@@ -531,8 +531,8 @@ std::vector<double> io_z, std::vector<double> io_lnP)
     {
       spdlog::critical(
         "\x1b[90m{}\x1b[0m: incompatible input w/ k.size = {}, z.size = {}, "
-        "and lnP.size = {}", "init_non_linear_power_spectrum", io_log10k.size(),
-        io_z.size(), io_lnP.size());
+        "and lnP_MM.size = {}", "init_non_linear_power_spectrum", io_log10k.size(), //KZ
+        io_z.size(), io_lnP_MM.size()); //KZ
       exit(1);
     }
 
@@ -540,8 +540,8 @@ std::vector<double> io_z, std::vector<double> io_lnP)
     {
       spdlog::critical(
         "\x1b[90m{}\x1b[0m: bad input w/ k.size = {}, z.size = {}, "
-        "and lnP.size = {}", "init_non_linear_power_spectrum", io_log10k.size(),
-        io_z.size(), io_lnP.size());
+        "and lnP_MM.size = {}", "init_non_linear_power_spectrum", io_log10k.size(), //KZ
+        io_z.size(), io_lnP_MM.size()); //KZ
       exit(1);
     }
   }
@@ -550,8 +550,8 @@ std::vector<double> io_z, std::vector<double> io_lnP)
   int nz = static_cast<int>(io_z.size());
   double* log10k = io_log10k.data();
   double* z = io_z.data();
-  double* lnP = io_lnP.data();
-  setup_p_nonlin(&nlog10k, &nz, &log10k, &z, &lnP, 1);
+  double* lnP_MM = io_lnP_MM.data(); //KZ
+  setup_p_nonlin(&nlog10k, &nz, &log10k, &z, &lnP_MM, 1); //KZ
 
   // force initialization - imp to avoid seg fault when openmp is on
   const double io_a = 1.0;
@@ -562,6 +562,117 @@ std::vector<double> io_z, std::vector<double> io_lnP)
 
   return;
 }
+////KZ begin
+
+void cpp_init_non_linear_power_spectrum_weyl_matter(std::vector<double> io_log10k,
+std::vector<double> io_z, std::vector<double> io_lnP_WM)
+{
+  spdlog::debug("\x1b[90m{}\x1b[0m: Begins", "init_non_linear_power_spectrum_weyl_matter");
+
+  {
+    bool debug_fail = false;
+    if (io_z.size()*io_log10k.size() != io_lnP_WM.size())
+    {
+      debug_fail = true;
+    }
+    else
+    {
+      if (io_z.size() == 0)
+      {
+        debug_fail = true;
+      }
+    }
+    if (debug_fail)
+    {
+      spdlog::critical(
+        "\x1b[90m{}\x1b[0m: incompatible input w/ k.size = {}, z.size = {}, "
+        "and lnP_WM.size = {}", "init_non_linear_power_spectrum_weyl_matter", io_log10k.size(),
+        io_z.size(), io_lnP_WM.size());
+      exit(1);
+    }
+
+    if(io_z.size() < 5 || io_log10k.size() < 5)
+    {
+      spdlog::critical(
+        "\x1b[90m{}\x1b[0m: bad input w/ k.size = {}, z.size = {}, "
+        "and lnP_WM.size = {}", "init_non_linear_power_spectrum_weyl_matter", io_log10k.size(),
+        io_z.size(), io_lnP_WM.size());
+      exit(1);
+    }
+  }
+
+  int nlog10k = static_cast<int>(io_log10k.size());
+  int nz = static_cast<int>(io_z.size());
+  double* log10k = io_log10k.data();
+  double* z = io_z.data();
+  double* lnP_WM = io_lnP_WM.data();
+  setup_p_nonlin_weyl_matter(&nlog10k, &nz, &log10k, &z, &lnP_WM, 1);
+
+  // force initialization - imp to avoid seg fault when openmp is on
+  const double io_a = 1.0;
+  const double io_k = 0.1*cosmology.coverH0;
+  p_nonlin_weyl_matter(io_k, io_a);
+
+  spdlog::debug("\x1b[90m{}\x1b[0m: Ends", "init_non_linear_power_spectrum_weyl_matter");
+
+  return;
+}
+
+void cpp_init_non_linear_power_spectrum_weyl_weyl(std::vector<double> io_log10k,
+std::vector<double> io_z, std::vector<double> io_lnP_WW)
+{
+  spdlog::debug("\x1b[90m{}\x1b[0m: Begins", "init_non_linear_power_spectrum_weyl_weyl");
+
+  {
+    bool debug_fail = false;
+    if (io_z.size()*io_log10k.size() != io_lnP_WW.size())
+    {
+      debug_fail = true;
+    }
+    else
+    {
+      if (io_z.size() == 0)
+      {
+        debug_fail = true;
+      }
+    }
+    if (debug_fail)
+    {
+      spdlog::critical(
+        "\x1b[90m{}\x1b[0m: incompatible input w/ k.size = {}, z.size = {}, "
+        "and lnP_WW.size = {}", "init_non_linear_power_spectrum_weyl_weyl", io_log10k.size(),
+        io_z.size(), io_lnP_WW.size());
+      exit(1);
+    }
+
+    if(io_z.size() < 5 || io_log10k.size() < 5)
+    {
+      spdlog::critical(
+        "\x1b[90m{}\x1b[0m: bad input w/ k.size = {}, z.size = {}, "
+        "and lnP_WW.size = {}", "init_non_linear_power_spectrum_weyl_weyl", io_log10k.size(),
+        io_z.size(), io_lnP_WW.size());
+      exit(1);
+    }
+  }
+
+  int nlog10k = static_cast<int>(io_log10k.size());
+  int nz = static_cast<int>(io_z.size());
+  double* log10k = io_log10k.data();
+  double* z = io_z.data();
+  double* lnP_WW = io_lnP_WW.data();
+  setup_p_nonlin_weyl_weyl(&nlog10k, &nz, &log10k, &z, &lnP_WW, 1);
+
+  // force initialization - imp to avoid seg fault when openmp is on
+  const double io_a = 1.0;
+  const double io_k = 0.1*cosmology.coverH0;
+  p_nonlin_weyl_weyl(io_k, io_a);
+
+  spdlog::debug("\x1b[90m{}\x1b[0m: Ends", "init_non_linear_power_spectrum_weyl_weyl");
+
+  return;
+}
+
+////KZ end
 
 // Growth: D = G * a
 void cpp_init_growth(std::vector<double> io_z, std::vector<double> io_G)
@@ -2062,7 +2173,7 @@ PYBIND11_MODULE(cosmolike_lsst_y1_interface, m)
     "Load Linear Matter Power Spectrum from Cobaya to Cosmolike",
     py::arg("log10k"),
     py::arg("z"),
-    py::arg("lnP")
+    py::arg("lnP_MM") //KZ
   );
 
   m.def("init_non_linear_power_spectrum",
@@ -2070,8 +2181,26 @@ PYBIND11_MODULE(cosmolike_lsst_y1_interface, m)
     "Load Matter Power Spectrum from Cobaya to Cosmolike",
     py::arg("log10k"),
     py::arg("z"),
-    py::arg("lnP")
+    py::arg("lnP_MM") //KZ
   );
+
+    ////KZ begin
+  m.def("init_non_linear_power_spectrum_weyl_matter",
+    &cpp_init_non_linear_power_spectrum_weyl_matter,
+    "Load weyl-matter Power Spectrum from Cobaya to Cosmolike",
+    py::arg("log10k"),
+    py::arg("z"),
+    py::arg("lnP_WM")
+  );
+
+  m.def("init_non_linear_power_spectrum_weyl_weyl",
+    &cpp_init_non_linear_power_spectrum_weyl_weyl,
+    "Load Weyl-Weyl Power Spectrum from Cobaya to Cosmolike",
+    py::arg("log10k"),
+    py::arg("z"),
+    py::arg("lnP_WW")
+  );
+  ////KZ end
 
   m.def("init_growth",
     &cpp_init_growth,
