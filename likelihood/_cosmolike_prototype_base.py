@@ -206,9 +206,11 @@ class _cosmolike_prototype_base(DataSetLikelihood):
   def get_requirements(self):
     return {
       "H0": None,
+      "omegab": None,
       "omegam": None,
       "omegam_growth": None,
       "omegan2": None,
+      "w_growth": None,
       "Pk_interpolator": {
         "z": self.z_interp_2D,
         "k_max": self.kmax_boltzmann * self.accuracyboost,

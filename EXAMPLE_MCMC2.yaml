@@ -40,16 +40,25 @@ params:
       scale: 0.01
     proposal: 0.01
     latex: n_\mathrm{s}
-  H0:
+  theta_MC_100:
     prior:
-      min: 61
-      max: 73
+      min: 0.5
+      max: 10
     ref:
       dist: norm
-      loc: 67.32
-      scale: 5
-    proposal: 3
+      loc: 1.04109
+      scale: 0.001
+    proposal: 0.001
+    latex: 100\theta_\mathrm{MC}
+    drop: true
+    renames: theta
+  cosmomc_theta:
+    value: 'lambda theta_MC_100: 1.e-2*theta_MC_100'
+    derived: false
+  H0:
     latex: H_0
+    min: 20
+    max: 100
   omegab:
     prior:
       min: 0.04
@@ -193,7 +202,7 @@ sampler:
     blocking:
       - [1,
           [
-            logA, ns, H0, omegab, omegam, tau 
+            logA, ns, theta_MC_100, omegab, omegam, tau 
           ]
         ]
       - [2,
