@@ -13,8 +13,8 @@ likelihood:
 params:
   logA:
     prior:
-      min: 2.83321
-      max: 3.21888
+      min: 2.84
+      max: 3.21
     ref:
       dist: norm
       loc: 3.0448
