@@ -6,8 +6,8 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=4
 #SBATCH --cpus-per-task=7
-#SBATCH --partition=long-28core
-#SBATCH -t 48:00:00
+#SBATCH --partition=extended-28core
+#SBATCH -t 7-00:00:00
 
 echo Running on host `hostname`
 echo Time is `date`

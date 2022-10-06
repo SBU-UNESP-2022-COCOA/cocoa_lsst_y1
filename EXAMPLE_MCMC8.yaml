@@ -1,0 +1,235 @@
+timing: True
+debug: False
+stop_at_error: False
+
+likelihood:
+  sn.pantheon:
+    path: ./external_modules/data/sn_data
+  bao.sixdf_2011_bao:
+    path: ./external_modules/data/
+  bao.sdss_dr7_mgs:
+    path: ./external_modules/data/
+  bao.sdss_dr12_consensus_bao:
+    path: ./external_modules/data/
+
+  lsst_y1.lsst_cosmic_shear:
+    path: ./external_modules/data/lsst_y1
+    data_file: LSST_Y1.dataset
+    print_datavector: False
+    non_linear_emul: 1
+    kmax_boltzmann: 5.0
+
+params:
+  logA:
+    prior:
+      min: 2.83321
+      max: 3.21888
+    ref:
+      dist: norm
+      loc: 3.0448
+      scale: 0.15
+    proposal: 0.15
+    latex: \log(10^{10} A_\mathrm{s})
+    drop: true
+  As:
+    value: 'lambda logA: 1e-10*np.exp(logA)'
+    latex: A_\mathrm{s}
+  ns:
+    prior:
+      min: 0.92
+      max: 1.00
+    ref:
+      dist: norm
+      loc: 0.96605
+      scale: 0.01
+    proposal: 0.01
+    latex: n_\mathrm{s}
+  H0:
+    prior:
+      min: 61
+      max: 73
+    ref:
+      dist: norm
+      loc: 67.32
+      scale: 5
+    proposal: 3
+    latex: H_0
+  omegab:
+    prior:
+      min: 0.04
+      max: 0.06
+    ref:
+      dist: norm
+      loc: 0.0495
+      scale: 0.004
+    proposal: 0.004
+    latex: \Omega_\mathrm{b}
+    drop: true
+  omegam:
+    prior:
+      min: 0.1
+      max: 0.5
+    ref:
+      dist: norm
+      loc: 0.316
+      scale: 0.02
+    proposal: 0.02
+    latex: \Omega_\mathrm{m}
+    drop: true
+  mnu:
+    value: 0.06
+  tau:
+    value: 0.05
+    latex: \tau_\mathrm{reio}
+  omegal:
+    latex: \Omega_\Lambda
+  omegamh2:
+    derived: 'lambda omegam, H0: omegam*(H0/100)**2'
+    latex: \Omega_\mathrm{m} h^2
+  omegabh2:
+    value: 'lambda omegab, H0: omegab*(H0/100)**2'
+    latex: \Omega_\mathrm{b} h^2
+  omegach2:
+    value: 'lambda omegam, omegab, mnu, H0: (omegam-omegab)*(H0/100)**2-(mnu*(3.046/3)**0.75)/94.0708'
+    latex: \Omega_\mathrm{c} h^2
+  omegan2:
+    latex: \Omega_\mathrm{\\nu} h^2
+  omegan:
+    derived: 'lambda omegan2, H0: omegan2/((H0/100)**2)'
+    latex: \Omega_\mathrm{\\nu}
+  sigma8:
+    latex: \sigma_8
+  s8h5:
+    derived: 'lambda sigma8, H0: sigma8*(H0*1e-2)**(-0.5)'
+    latex: \sigma_8/h^{0.5}
+  s8omegamp5:
+    derived: 'lambda sigma8, omegam: sigma8*omegam**0.5'
+    latex: \sigma_8 \Omega_\mathrm{m}^{0.5}
+  s8omegamp25:
+    derived: 'lambda sigma8, omegam: sigma8*omegam**0.25'
+    latex: \sigma_8 \Omega_\mathrm{m}^{0.25}
+  sigma8:
+    latex: \sigma_8
+  LSST_BARYON_Q1:
+    value: 0.0
+    latex: Q1_\mathrm{LSST}^1
+  LSST_BARYON_Q2:
+    value: 0.0
+    latex: Q2_\mathrm{LSST}^2
+  w:
+    prior:
+      min: -3
+      max: -0.01
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.05
+    proposal: 0.05
+    latex: w_{0,\mathrm{DE}}
+  w_growth:
+    prior:
+      min: -1.3
+      max: -0.7
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.05
+    proposal: 0.05
+    latex: w_\mathrm{growth}
+  omegam_growth:
+    prior:
+      min: 0.24
+      max: 0.4
+    ref:
+      dist: norm
+      loc: 0.3
+      scale: 0.01
+    proposal: 0.01
+    latex: \Omega_\mathrm{m}^\mathrm{growth}
+
+theory:
+  camb:
+    path: ./external_modules/code/CAMB
+    stop_at_error: False
+    use_renames: True
+    extra_args:
+      halofit_version: takahashi
+      AccuracyBoost: 1.15
+      lens_potential_accuracy: 1.0
+      num_massive_neutrinos: 1
+      nnu: 3.046
+      dark_energy_model: ppf
+      accurate_massive_neutrino_transfers: false
+      k_per_logint: 20
+
+sampler:
+  mcmc:
+    # ---------------------------------------------------------------------
+    # File (w/ path) or matrix defining a covariance matrix for the proposal:
+    # - null (default): will be generated from params info (prior and proposal)
+    # - matrix: remember to set `covmat_params` to the parameters in the matrix
+    covmat: "./projects/des_y3/EXAMPLE_MCMC26.covmat"
+    covmat_params:
+    # --------------------------------------
+    # --------------------------------------
+    # Proposal covariance matrix learning
+    # --------------------------------------
+    # --------------------------------------
+    learn_proposal: True
+    # Don't learn if convergence better than...
+    learn_proposal_Rminus1_min: 0.03
+    # (even earlier if a param is not in the given covariance matrix)
+    learn_proposal_Rminus1_max_early: 2000.
+    # --------------------------------------
+    # --------------------------------------
+    # Convergence and stopping
+    # --------------------------------------
+    # --------------------------------------
+    # Maximum number of posterior evaluations
+    max_samples: .inf
+    # Gelman-Rubin R-1 on means
+    Rminus1_stop: 0.02
+    # Gelman-Rubin R-1 on std deviations
+    Rminus1_cl_stop: 0.2
+    Rminus1_cl_level: 0.95
+    # --------------------------------------
+    # --------------------------------------
+    # Exploiting speed hierarchy
+    # --------------------------------------
+    # --------------------------------------
+    measure_speeds: False
+    drag: False
+    oversample_power: 0.6
+    oversample_thin: True
+    blocking:
+      - [1,
+          [
+            logA, ns, H0, omegab, omegam, w
+          ]
+        ]
+      - [2,
+          [
+            LSST_DZ_S1, LSST_DZ_S2, LSST_DZ_S3, LSST_DZ_S4, LSST_DZ_S5, LSST_A1_1, LSST_A1_2, 
+            omegam_growth, w_growth
+          ]
+        ]
+      - [25,
+          [
+            LSST_M1, LSST_M2, LSST_M3, LSST_M4, LSST_M5
+          ]
+        ]
+    # --------------------------------------
+    # --------------------------------------
+    # Avoid chain getting suck forever
+    # --------------------------------------
+    # --------------------------------------
+    max_tries: 10000
+    burn_in: 0
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    # When no MPI used, number of fractions of the chain to compare
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    Rminus1_single_split: 4
+
+output: ./projects/lsst_y1/chains/EXAMPLE_MCMC8

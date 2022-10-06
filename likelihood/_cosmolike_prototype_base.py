@@ -373,7 +373,11 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       for i in range(self.len_z_interp_2D):
         lnPNL[i::self.len_z_interp_2D]  = t1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]  
         lnPNL[i::self.len_z_interp_2D] += t3[i]
-      lnPNL += np.log((h**3))   
+      lnPNL += np.log((h**3))
+
+
+    elif self.non_linear_emul == 100: #Using only linear power spectrum, for determining scale cuts
+      lnPNL = lnPL  
     
     else:
       raise LoggedError(self.log, "non_linear_emul = %d is an invalid option", non_linear_emul)
