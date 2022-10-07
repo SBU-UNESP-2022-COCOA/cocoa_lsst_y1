@@ -1,0 +1,6 @@
+output: ./projects/lsst_y1/chains/EXAMPLE_MCMC101
+
+post:
+  suffix: NL_THIN
+  skip: 0.5
+  thin: 20

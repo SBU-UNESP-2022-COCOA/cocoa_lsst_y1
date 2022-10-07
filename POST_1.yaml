@@ -1,0 +1,22 @@
+output: ./projects/lsst_y1/chains/EXAMPLE_MCMC100
+
+
+#Recompute MCMC100 with linear PK input
+post:
+  suffix: LIN
+  skip: 0.5
+  thin: 20
+  remove:
+    lsst_y1.lsst_cosmic_shear:
+      path: ./external_modules/data/lsst_y1
+      data_file: LSST_Y1.dataset
+      print_datavector: False
+      non_linear_emul: 1
+      kmax_boltzmann: 5.0
+  add:
+    lsst_y1.lsst_cosmic_shear:
+      path: ./external_modules/data/lsst_y1
+      data_file: LSST_Y1.dataset
+      print_datavector: False
+      non_linear_emul: 100
+      kmax_boltzmann: 5.0

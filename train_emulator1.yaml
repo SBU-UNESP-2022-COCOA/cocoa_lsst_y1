@@ -306,6 +306,7 @@ emulator:
   sampling:
       scalecut_mask: ./projects/lsst_y1/data/lsst_3x2.mask
       n_mcmc: 10000
+      n_mcmc: 10
       n_emcee_walkers: 120
       n_burn_in: 5000
       n_thin: 5
