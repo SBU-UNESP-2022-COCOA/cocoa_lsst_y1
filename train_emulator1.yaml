@@ -293,7 +293,9 @@ emulator:
       chi_sq_cut: 8e+4
       n_train_iter: 6
       n_lhs: 4800
+      #n_lhs: 48 #KZ debug
       n_resample: 9600
+      #n_resample: 96 #KZ debug
       emu_type: nn
       batch_size: 32
       n_epochs: 100
@@ -306,7 +308,7 @@ emulator:
   sampling:
       scalecut_mask: ./projects/lsst_y1/data/lsst_3x2.mask
       n_mcmc: 10000
-      n_mcmc: 10
+      #n_mcmc: 10 #KZ debug
       n_emcee_walkers: 120
       n_burn_in: 5000
       n_thin: 5
