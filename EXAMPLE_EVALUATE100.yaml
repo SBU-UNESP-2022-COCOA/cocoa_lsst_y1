@@ -5,9 +5,9 @@ stop_at_error: True
 likelihood:
   lsst_y1.lsst_3x2pt:
     path: ./external_modules/data/lsst_y1
-    data_file: LSST_Y1.dataset
+    data_file: LSST_Y1_no_scale_cut.dataset
     print_datavector: True
-    print_datavector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
+    print_datavector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory_no_scale_cut.modelvector"
     non_linear_emul: 1
     kmax_boltzmann: 5.0
 
@@ -172,5 +172,5 @@ sampler:
       LSST_M4: -0.0158096
       LSST_M5: -0.0158096
 
-output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE3
+output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE100
 

@@ -1,12 +1,12 @@
 #!/bin/bash
 
-#SBATCH --job-name=lsst_emu2
-#SBATCH --output=lsst_emu2-%A_%a.out
-#SBATCH -e lsst_emu2-%A_%a.out.err
+#SBATCH --job-name=lsst_emu5
+#SBATCH --output=lsst_emu5-%A_%a.out
+#SBATCH -e lsst_emu5-%A_%a.out.err
 #SBATCH --nodes=1
-#SBATCH --ntasks=24
+#SBATCH --ntasks=28
 #SBATCH --cpus-per-task=1
-#SBATCH --partition=long-24core
+#SBATCH --partition=long-28core
 #SBATCH -t 48:00:00
 
 echo Running on host `hostname`
@@ -34,4 +34,4 @@ else
   export OMP_NUM_THREADS=1
 fi
 
-$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 train_emulator3.py ./projects/lsst_y1/train_emulator2.yaml -f
+$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 train_emulator5.py ./projects/lsst_y1/train_emulator5.yaml -f

@@ -7,7 +7,7 @@ likelihood:
     path: ./external_modules/data/lsst_y1
     data_file: LSST_Y1_linear.dataset
     print_datavector: False
-    non_linear_emul: 100
+    non_linear_emul: 2
     kmax_boltzmann: 5.0
 
 params:
@@ -203,4 +203,4 @@ sampler:
     # ---------------------------------------------------------------------
     Rminus1_single_split: 4
 
-output: ./projects/lsst_y1/chains/EXAMPLE_MCMC101
+output: ./projects/lsst_y1/chains/EXAMPLE_MCMC102

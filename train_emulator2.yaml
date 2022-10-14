@@ -3,18 +3,17 @@ debug: False
 stop_at_error: False
 
 likelihood:
-  lsst_y1.lsst_3x2pt:
+  lsst_y1.lsst_cosmic_shear:
     path: ./external_modules/data/lsst_y1
     data_file: LSST_Y1_no_scale_cut.dataset
     print_datavector: False
     non_linear_emul: 1
     kmax_boltzmann: 5.0
-
 params:
   logA:
     prior:
-      min: 2.84
-      max: 3.21
+      min: 2.8955 #2.84
+      max: 3.1545 #3.21
     ref:
       dist: norm
       loc: 3.0448
@@ -27,8 +26,8 @@ params:
     latex: A_\mathrm{s}
   ns:
     prior:
-      min: 0.92
-      max: 1.00
+      min: 0.932 #0.92
+      max: 0.988 #1.00
     ref:
       dist: norm
       loc: 0.96605
@@ -37,8 +36,8 @@ params:
     latex: n_\mathrm{s}
   H0:
     prior:
-      min: 61
-      max: 73
+      min: 62.8 #61
+      max: 71.2 #73
     ref:
       dist: norm
       loc: 67.32
@@ -47,8 +46,8 @@ params:
     latex: H_0
   omegab:
     prior:
-      min: 0.04
-      max: 0.06
+      min: 0.043 #0.04
+      max: 0.057 #0.06
     ref:
       dist: norm
       loc: 0.0495
@@ -58,8 +57,8 @@ params:
     drop: true
   omegam:
     prior:
-      min: 0.1
-      max: 0.5
+      min: 0.264 #0.24
+      max: 0.376 #0.4
     ref:
       dist: norm
       loc: 0.316
@@ -115,8 +114,8 @@ params:
     latex: w_\mathrm{growth}
   omegam_growth:
     prior:
-      min: 0.24
-      max: 0.4
+      min: 0.264 #0.24
+      max: 0.376 #0.4
     ref:
       dist: norm
       loc: 0.3
@@ -161,7 +160,7 @@ params:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.003 #special case for EXAMPLE_EVALUATE3 DZ_S4 = 0.07
     ref:
       dist: norm
       loc: 0.0
@@ -179,66 +178,18 @@ params:
       scale: 0.002
     proposal: 0.002
     latex: \Delta z_\mathrm{s,LSST}^5
-  # Lensing photo-z errors
-  LSST_DZ_L1:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: \Delta z_\mathrm{l,LSST}^1
-  LSST_DZ_L2:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: \Delta z_\mathrm{l,LSST}^2
-  LSST_DZ_L3:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: \Delta z_\mathrm{l,LSST}^3
-  LSST_DZ_L4:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: \Delta z_\mathrm{l,LSST}^4
-  LSST_DZ_L5:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: \Delta z_\mathrm{l,LSST}^5
   LSST_A1_1:
+    # prior:
+    #   min: -5
+    #   max:  5
+    # ref:
+    #   dist: norm
+    #   loc: 0.5
+    #   scale: 0.1
+    # proposal: 0.5
     prior:
-      min: -5
-      max:  5
+      min: 0
+      max:  1
     ref:
       dist: norm
       loc: 0.5
@@ -246,9 +197,17 @@ params:
     proposal: 0.5
     latex: A_\mathrm{1-IA,LSST}^1
   LSST_A1_2:
+    # prior:
+    #   min: -5
+    #   max:  5
+    # ref:
+    #   dist: norm
+    #   loc: 0.
+    #   scale: 0.1
+    # proposal: 0.5
     prior:
-      min: -5
-      max:  5
+      min: -2.0
+      max:  2.0
     ref:
       dist: norm
       loc: 0.
@@ -283,17 +242,18 @@ params:
     value: 0.0
     latex: A_\mathrm{BTA-IA,LSST}^1
   LSST_BTA_2:
-    value: 0.0
+    value: 0
     latex: A_\mathrm{BTA-IA,LSST}^2
   LSST_BTA_3:
-    value: 0.0
+    value: 0
     latex: A_\mathrm{BTA-IA,LSST}^3
   LSST_BTA_4:
-    value: 0.0
+    value: 0
     latex: A_\mathrm{BTA-IA,LSST}^4
   LSST_BTA_5:
-    value: 0.0
+    value: 0
     latex: A_\mathrm{BTA-IA,LSST}^5
+  #shear calibration need to be set to 0 for training emulators
   LSST_M1:
     value: 0.0
     latex: m_\mathrm{LSST}^1
@@ -309,21 +269,6 @@ params:
   LSST_M5:
     value: 0.0
     latex: m_\mathrm{LSST}^5
-  LSST_B1_1:
-    value: 1.0
-    latex: b_\mathrm{1-LSST}^1
-  LSST_B1_2:
-    value: 1.0
-    latex: b_\mathrm{1-LSST}^2
-  LSST_B1_3:
-    value: 1.0
-    latex: b_\mathrm{1-LSST}^3
-  LSST_B1_4:
-    value: 1.0
-    latex: b_\mathrm{1-LSST}^4
-  LSST_B1_5:
-    value: 1.0
-    latex: b_\mathrm{1-LSST}^5
   LSST_BARYON_Q1:
     value: 0.0
     latex: Q1_\mathrm{LSST}^1
@@ -355,36 +300,40 @@ theory:
 
 emulator:
   io:
-      savedir: ./projects/lsst_y1/emulator_output/baseline_3x2     
+      savedir: ./projects/lsst_y1/emulator_output/baseline_cosmic_shear_2     
       save_train_data: true             
       save_intermediate_model: true
   training:
-      dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector
+      dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory_no_scale_cut.modelvector #should be full data vector even 2x2 not used, to prevent 0/0
       chi_sq_cut: 8e+4
-      n_train_iter: 6
-      n_lhs: 4800
-      n_resample: 9600
+      n_train_iter: 1
+      #n_lhs: 4800
+      #n_lhs: 48 #KZ debug
+      n_lhs: 60000
+      #n_resample: 9600
+      n_resample: 9600 #KZ debug
       emu_type: nn
       batch_size: 32
       n_epochs: 100
   shear_calib:
       mask: ./projects/lsst_y1/data/emu_files/shear_calib_mask.npy
       prior_std: 0.005, 0.005, 0.005, 0.005, 0.005
-  galaxy_bias:
-      mask: ./projects/lsst_y1/data/emu_files/bias_mask.npy
-      prior_std: 0.15, 0.15, 0.15, 0.15, 0.1
   baryons:
       n_pcas_baryon: 0
       prior_Q1: -3., 12.
   sampling:
       scalecut_mask: ./projects/lsst_y1/data/lsst_3x2.mask
+      #sampling here doesn't matter if n_train_iter=1, but still save here for comparison
       n_mcmc: 10000
+      #n_mcmc: 10 #KZ debug
       n_emcee_walkers: 120
       n_burn_in: 5000
+      #n_burn_in: 0 #KZ debug
       n_thin: 5
-      temper0: 0.05
-      temper_increment: 0.1
-  probe: '3x2pt'
+      #n_thin: 1 #KZ debug
+      temper0: 0.01
 
+      temper_increment: 0.1
+  probe: 'cosmic_shear'
 
 output: ./projects/lsst_y1/chains/train_emulator2
