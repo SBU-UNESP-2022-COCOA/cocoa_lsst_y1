@@ -5,6 +5,7 @@ stop_at_error: True
 likelihood:
   lsst_y1.lsst_3x2pt:
     path: ./external_modules/data/lsst_y1
+    data_file: LSST_Y1_linear.dataset
     print_datavector: True
     print_datavector_file: "./projects/lsst_y1/data/example4_lsst_y1_theory.modelvector"
     kmax_boltzmann: 5.0
