@@ -1,7 +1,7 @@
-data_file = example3_lsst_y1_theory.modelvector
+data_file = example4_lsst_y1_theory.modelvector
 cov_file = cov_lsst_y1
 #mask_file = lsst_3x2_baryon.mask
-mask_file = lsst_3x2_cs_only.mask
+mask_file = lsst_3x2.mask
 #mask_file = ones.mask
 nz_lens_file = lens_LSSTY1.nz 
 nz_source_file = source_LSSTY1.nz

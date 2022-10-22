@@ -3,26 +3,24 @@ debug: False
 stop_at_error: False
 
 likelihood:
-  lsst_y1.lsst_cosmic_shear:
+  lsst_y1.lsst_cosmic_shear_T2:
+    data_file: LSST_Y1_dv1.dataset
     path: ./external_modules/data/lsst_y1
-    print_datavector: False
-    print_datavector_file: "./projects/lsst_y1/chains/example1_lsst_y1_theory.modelvector"
 
 params:
-  As_1e9:
+  logA:
     prior:
-      min: 0.5
-      max: 5
+      min: 1.61
+      max: 3.91
     ref:
       dist: norm
-      loc: 2.1
-      scale: 0.65
-    proposal: 0.4
-    latex: 10^9 A_\mathrm{s})
+      loc: 3.0675
+      scale: 0.005
+    proposal: 0.005
+    latex: \log(10^{10} A_\mathrm{s})
     drop: true
-    renames: A
   As:
-    value: 'lambda As_1e9: 1e-9 * As_1e9'
+    value: 'lambda logA: 1e-10*np.exp(logA)'
     latex: A_\mathrm{s}
   ns:
     prior:
@@ -30,9 +28,9 @@ params:
       max: 1.07
     ref:
       dist: norm
-      loc: 0.96605
-      scale: 0.01
-    proposal: 0.01
+      loc: 0.97
+      scale: 0.003
+    proposal: 0.003
     latex: n_\mathrm{s}
   H0:
     prior:
@@ -40,79 +38,48 @@ params:
       max: 91
     ref:
       dist: norm
-      loc: 67.32
-      scale: 5
-    proposal: 3
+      loc: 69.0
+      scale: 0.3
+    proposal: 0.3
     latex: H_0
-  omegab:
-    prior:
-      min: 0.03
-      max: 0.07
-    ref:
-      dist: norm
-      loc: 0.0495
-      scale: 0.004
-    proposal: 0.004
-    latex: \Omega_\mathrm{b}
-    drop: true
-  omegam:
-    prior:
-      min: 0.1
-      max: 0.9
-    ref:
-      dist: norm
-      loc: 0.316
-      scale: 0.02
-    proposal: 0.02
-    latex: \Omega_\mathrm{m}
-    drop: true
-  mnu:
-    prior:
-      min: 0.06
-      max: 0.6
-    ref:
-      dist: norm
-      loc: 0.25
-      scale: 0.1
-    proposal: 0.05
-  w0pwa:
-    prior:
-      min: -5 
-      max: -0.01
-    ref:
-      dist: norm
-      loc: -0.99
-      scale: 0.05
-    proposal: 0.05
-    latex: w_{0,\mathrm{DE}}+w_{a,\mathrm{DE}}
-    drop: true
-  w:
-    prior:
-      min: -3
-      max: -0.01
-    ref:
-      dist: norm
-      loc: -0.99
-      scale: 0.05
-    proposal: 0.05
-    latex: w_{0,\mathrm{DE}}
-  wa:
-    value: 'lambda w0pwa, w: w0pwa - w'
-    latex: w_{a,\mathrm{DE}}
   omegabh2:
-    value: 'lambda omegab, H0: omegab*(H0/100)**2'
+    prior:
+      min: 0.01
+      max: 0.04
+    ref:
+      dist: norm
+      loc: 0.0228528
+      scale: 0.001
+    proposal: 0.001
     latex: \Omega_\mathrm{b} h^2
   omegach2:
-    value: 'lambda omegam, omegab, mnu, H0: (omegam-omegab)*(H0/100)**2-(mnu*(3.046/3)**0.75)/94.0708'
+    prior:
+      min: 0.001
+      max: 0.99
+    ref:
+      dist: norm
+      loc: 0.1199772
+      scale: 0.001
+    proposal: 0.001
     latex: \Omega_\mathrm{c} h^2
+  mnu:
+    value: 0.06
   tau:
-    value: 0.0697186
+    value: 0.0543
     latex: \tau_\mathrm{reio}
   omegal:
     latex: \Omega_\Lambda
+  omegam:
+    latex: \Omega_\mathrm{m}
   omegamh2:
     derived: 'lambda omegam, H0: omegam*(H0/100)**2'
     latex: \Omega_\mathrm{m} h^2
+  omegab:
+    derived: 'lambda omegabh2, H0: omegabh2/((H0/100)**2)'
+    latex: \Omega_\mathrm{b}
+  omegac:
+    derived: 'lambda omegach2, H0: omegach2/((H0/100)**2)'
+    latex: \Omega_\mathrm{c}
   sigma8:
     latex: \sigma_8
   s8h5:
@@ -124,6 +91,9 @@ params:
   s8omegamp25:
     derived: 'lambda sigma8, omegam: sigma8*omegam**0.25'
     latex: \sigma_8 \Omega_\mathrm{m}^{0.25}
+  A:
+    derived: 'lambda As: 1e9*As'
+    latex: 10^9 A_\mathrm{s}
   age:
     latex: '{\rm{Age}}/\mathrm{Gyr}'
   rdrag:
@@ -135,22 +105,51 @@ params:
   omegan:
     derived: 'lambda omegan2, H0: omegan2/((H0/100)**2)'
     latex: \Omega_\mathrm{\\nu}
-  LSST_BARYON_Q1:
+  zstar:
+    latex: z_*
+  rstar:
+    latex: r_*
+  thetastar:
+    latex: 100\theta_*
+  DAstar:
+    latex: D_\mathrm{A}/\mathrm{Gpc}
+  zdrag:
+    latex: z_\mathrm{drag}
+  kd:
+    latex: k_\mathrm{D}
+  thetad:
+    latex: 100\theta_\mathrm{D}
+  zeq:
+    latex: z_\mathrm{eq}
+  keq:
+    latex: k_\mathrm{eq}
+  thetaeq:
+    latex: 100\theta_\mathrm{eq}
+  thetarseq:
+    latex: 100\theta_\mathrm{s,eq}
+  DHBBN:
+    derived: "lambda DH: 10**5*DH"
+    latex: 10^5 \mathrm{D}/\mathrm{H}
+  zrei:
+    latex: z_\mathrm{re}
+  nrun:
     value: 0.0
-    latex: Q1_\mathrm{LSST}^1
-  LSST_BARYON_Q2:
+    latex: n_\mathrm{run}
+  nrunrun:
     value: 0.0
-    latex: Q2_\mathrm{LSST}^2
+    latex: n_\mathrm{run,run}
+  omegak:
+    value: 0.0
+    latex: \Omega_k
 
 theory:
   camb:
     path: ./external_modules/code/CAMB
-    stop_at_error: False
     use_renames: True
     extra_args:
       halofit_version: takahashi
       AccuracyBoost: 1.15
-      lens_potential_accuracy: 1.0
+      lens_potential_accuracy: 1.1
       num_massive_neutrinos: 1
       nnu: 3.046
       dark_energy_model: ppf
@@ -163,7 +162,7 @@ sampler:
     # File (w/ path) or matrix defining a covariance matrix for the proposal:
     # - null (default): will be generated from params info (prior and proposal)
     # - matrix: remember to set `covmat_params` to the parameters in the matrix
-    covmat: ./projects/lsst_y1/LSSTONLY_3x2pt.covmat
+    covmat: "./projects/lsst_y1/ref.covmat"
     covmat_params:
     # --------------------------------------
     # --------------------------------------
@@ -173,6 +172,8 @@ sampler:
     learn_proposal: True
     # Don't learn if convergence better than...
     learn_proposal_Rminus1_min: 0.03
+    # (even earlier if a param is not in the given covariance matrix)
+    learn_proposal_Rminus1_max_early: 2000.
     # --------------------------------------
     # --------------------------------------
     # Convergence and stopping
@@ -195,7 +196,7 @@ sampler:
     blocking:
       - [1,
           [
-            As_1e9, ns, H0, omegab, omegam, mnu, w0pwa, w 
+            logA, ns, H0, omegabh2, omegach2
           ]
         ]
       - [4,
