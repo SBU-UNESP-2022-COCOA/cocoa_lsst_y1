@@ -4,9 +4,9 @@
 #SBATCH --output=lsst_emu-%A_%a.out
 #SBATCH -e lsst_emu-%A_%a.out.err
 #SBATCH --nodes=1
-#SBATCH --ntasks=28
+#SBATCH --ntasks=24
 #SBATCH --cpus-per-task=1
-#SBATCH --partition=long-28core
+#SBATCH --partition=long-24core
 #SBATCH -t 48:00:00
 
 echo Running on host `hostname`
@@ -20,7 +20,7 @@ echo Number of cpus per task is $$SLURM_CPUS_PER_TASK
 cd $SLURM_SUBMIT_DIR
 module purge > /dev/null 2>&1
 
-source /gpfs/home/kuzhong/.conda/etc/profile.d/conda.sh
+source ~/.bashrc
 module load slurm
 conda activate cocoa
 source start_cocoa

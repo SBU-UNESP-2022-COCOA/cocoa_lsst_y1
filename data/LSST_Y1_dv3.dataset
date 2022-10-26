@@ -1,4 +1,4 @@
-data_file = example3_lsst_y1_theory.modelvector
+data_file = dv3_lsst_y1_theory.modelvector
 cov_file = cov_lsst_y1
 #mask_file = lsst_3x2_baryon.mask
 mask_file = lsst_3x2.mask

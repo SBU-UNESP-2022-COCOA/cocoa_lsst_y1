@@ -162,12 +162,12 @@ sampler:
   evaluate:
     N: 3
     override:
-      # fiducial
-      logA: 3.065240119721949874
+      # minus 4sigma omegmam
+      logA: 3.069763294681243426
       ns: 0.97
       H0: 69.0
       omegabh2: 0.0228528
-      omegach2: 0.1201938093974471156
+      omegach2: 0.1197605906025528966
       LSST_DZ_S1: 0.0
       LSST_DZ_S2: 0.0
       LSST_DZ_S3: 0.0

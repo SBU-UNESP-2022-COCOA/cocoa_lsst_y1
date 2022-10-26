@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#SBATCH --job-name=lsst_lcdm
-#SBATCH --output=lsst_lcdm-%A_%a.out
-#SBATCH -e lsst_lcdm-%A_%a.out.err
+#SBATCH --job-name=lsst_post
+#SBATCH --output=lsst_post-%A_%a.out
+#SBATCH -e lsst_post-%A_%a.out.err
 #SBATCH --nodes=1
 #SBATCH --ntasks=4
-#SBATCH --cpus-per-task=10
-#SBATCH --partition=extended-40core
-#SBATCH -t 7-00:00:00
+#SBATCH --cpus-per-task=6
+#SBATCH --partition=long-24core
+#SBATCH -t 48:00:00
 
 echo Running on host `hostname`
 echo Time is `date`
@@ -32,4 +32,4 @@ else
   export OMP_NUM_THREADS=1
 fi
 
-$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} cobaya-run ./projects/lsst_y1/EXAMPLE_MCMC${SLURM_ARRAY_TASK_ID}.yaml -r
+$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} cobaya-run ./projects/lsst_y1/POST_${SLURM_ARRAY_TASK_ID}.yaml -f

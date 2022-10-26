@@ -1,9 +1,9 @@
-probe: 'cosmic_shear'
+probe: '3x2pt'
 
 
 data_vector_file: "./projects/lsst_y1/data/dv1_lsst_y1_theory.modelvector"
-data_vector_used_for_training: "./projects/lsst_y1/data/example3_lsst_y1_theory_no_scale_cut.modelvector"
-n_dim: 12 #Total parameter number used FOR EMULATION
+data_vector_used_for_training: "./projects/lsst_y1/data/dv1_lsst_y1_theory_no_scale_cut.modelvector"
+n_dim: 17 #Total parameter number used FOR EMULATION
 
 emu_file: "./projects/lsst_y1/emulator_output/baseline_cosmic_shear/model_0"
 
@@ -19,5 +19,7 @@ galaxy_bias_mask: "./projects/lsst_y1/data/emu_files/bias_mask.npy"
 lens_ntomo: 5
 source_ntomo: 5
 
-params: !defaults [params_lsst_cosmic_shear]
+bias_fid: '0.15, 0.15, 0.15, 0.15, 0.1'
+
+params: !defaults [params_lsst_3x2pt]
 

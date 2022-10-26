@@ -14,7 +14,7 @@ import numpy as np
 import h5py as h5
 
 
-class lsst_emu_cs_lcdm(Likelihood):
+class lsst_emu_3x2pt_lcdm(Likelihood):
     def initialize(self):
 
 
@@ -58,8 +58,10 @@ class lsst_emu_cs_lcdm(Likelihood):
         #self.config_args_baryons = self.config_args_emu['baryons']
         
         if self.probe!='cosmic_shear':
-            self.config_args_bias  = self.config_args_emu['galaxy_bias']
-            self.bias_fid          = split_with_comma(self.config_args_bias['bias_fid'])
+            #self.config_args_bias  = self.config_args_emu['galaxy_bias']
+            #self.bias_fid          = split_with_comma(self.config_args_bias['bias_fid'])
+            print("testing", self.bias_fid)
+            # self.bias_fid          = self.split_with_comma(self.bias_fid)
             self.galaxy_bias_mask  = self.galaxy_bias_mask
 
         if self.probe!='cosmic_shear':
@@ -67,7 +69,7 @@ class lsst_emu_cs_lcdm(Likelihood):
         else:
             self.n_sample_dims    = self.n_dim + self.source_ntomo + self.n_pcas_baryon
 
-        #super(lsst_emu_cs_lcdm, self).initialize()
+        #super(lsst_emu_3x2pt_lcdm, self).initialize()
 
     def get_requirements(self):
         return {
@@ -76,6 +78,12 @@ class lsst_emu_cs_lcdm(Likelihood):
           "omegam": None
         }
 
+    def split_with_comma(configline):
+        configline_split = configline.split(',')
+        configline_list = []
+        for obj in configline_split:
+            configline_list.append(float(obj))
+        return np.array(configline_list)
 
     def get_full_cov(self, cov_file):
         print("Getting covariance...")
@@ -112,8 +120,11 @@ class lsst_emu_cs_lcdm(Likelihood):
       H0 = self.provider.get_param("H0")
       omegab = self.provider.get_param("omegab")
       omegam = self.provider.get_param("omegam")
+      omegabh2 = self.provider.get_param("omegabh2")
+      omegach2 = self.provider.get_param("omegach2")
       
-      theta = np.append(theta, [logAs, ns, H0, omegab, omegam])  #NEED this order for now
+      #theta = np.append(theta, [logAs, ns, H0, omegab, omegam])  #NEED this order for now
+      theta = np.append(theta, [logAs, ns, H0, omegabh2, omegach2])  #NEED this order for now
 
       # 7 nuissance parameter emulated
       LSST_DZ_S1 = params_values['LSST_DZ_S1']
@@ -128,19 +139,33 @@ class lsst_emu_cs_lcdm(Likelihood):
 
 
       theta = np.append(theta, [LSST_DZ_S1, LSST_DZ_S2, LSST_DZ_S3, LSST_DZ_S4, LSST_DZ_S5, LSST_A1_1, LSST_A1_2])  #NEED this order for now
+      
+      if self.probe=='3x2pt':
+        LSST_DZ_L1 = params_values['LSST_DZ_L1']
+        LSST_DZ_L2 = params_values['LSST_DZ_L2']
+        LSST_DZ_L3 = params_values['LSST_DZ_L3']
+        LSST_DZ_L4 = params_values['LSST_DZ_L4']
+        LSST_DZ_L5 = params_values['LSST_DZ_L5']
+        theta = np.append(theta, [LSST_DZ_L1, LSST_DZ_L2, LSST_DZ_L3, LSST_DZ_L4, LSST_DZ_L5])  #NEED this order for now
 
-      # 5 fast parameters don't emulate, no baryons for now
-      LSST_M1 = params_values['LSST_M1']
-      LSST_M2 = params_values['LSST_M2']
-      LSST_M3 = params_values['LSST_M3']
-      LSST_M4 = params_values['LSST_M4']
-      LSST_M5 = params_values['LSST_M5']
+        LSST_B1_1  = params_values['LSST_B1_1']
+        LSST_B1_2  = params_values['LSST_B1_2']
+        LSST_B1_3  = params_values['LSST_B1_3']
+        LSST_B1_4  = params_values['LSST_B1_4']
+        LSST_B1_5  = params_values['LSST_B1_5']
+        
+        theta = np.append(theta, [LSST_B1_1, LSST_B1_2, LSST_B1_3, LSST_B1_4, LSST_B1_5])  #NEED this order for now
+      
+        # 5 fast parameters don't emulate, no baryons for now. But it still enter theta here, will be cut at "get_data_vector_emu"
+        LSST_M1 = params_values['LSST_M1']
+        LSST_M2 = params_values['LSST_M2']
+        LSST_M3 = params_values['LSST_M3']
+        LSST_M4 = params_values['LSST_M4']
+        LSST_M5 = params_values['LSST_M5']
 
-      theta = np.append(theta, [LSST_M1, LSST_M2, LSST_M3, LSST_M4, LSST_M5])  #NEED this order for now
+        theta = np.append(theta, [LSST_M1, LSST_M2, LSST_M3, LSST_M4, LSST_M5])  #NEED this order for now
 
-      if self.probe!='cosmic_shear':
-        print("should not use this likelihood class")
-        quit()
+
 
       if self.n_pcas_baryon ==4:
         LSST_BARYON_Q1 = params_values['LSST_BARYON_Q1']
@@ -149,12 +174,12 @@ class lsst_emu_cs_lcdm(Likelihood):
         LSST_BARYON_Q4 = params_values['LSST_BARYON_Q4']
 
         theta = np.append(theta, [LSST_BARYON_Q1, LSST_BARYON_Q2, LSST_BARYON_Q3, LSST_BARYON_Q4])  #NEED this order for now
-
-      if self.n_pcas_baryon ==2:
+      elif self.n_pcas_baryon ==2:
         LSST_BARYON_Q1 = params_values['LSST_BARYON_Q1']
         LSST_BARYON_Q2 = params_values['LSST_BARYON_Q2']
 
         theta = np.append(theta, [LSST_BARYON_Q1, LSST_BARYON_Q2])  #NEED this order for now
+
 
       # #for 2D check
       # theta = np.array([logAs, ns])
@@ -203,7 +228,8 @@ class lsst_emu_cs_lcdm(Likelihood):
 
     def add_bias(self, bias_theta, datavector):
         for i in range(self.lens_ntomo):
-            factor = (bias_theta[i] / self.bias_fid[i])**self.galaxy_bias_mask[i]
+            # factor = (bias_theta[i] / self.bias_fid[i])**self.galaxy_bias_mask[i]
+            factor = (bias_theta[i])**self.galaxy_bias_mask[i] ##KZ question Oct25: why do you need bias_fid here? Do we need that if we just get bias from yaml/cobaya?
             datavector = factor * datavector
         return datavector
 
@@ -215,7 +241,6 @@ class lsst_emu_cs_lcdm(Likelihood):
     def add_shear_calib(self, m, datavector):
         for i in range(self.source_ntomo):
             factor = (1 + m[i])**self.shear_calib_mask[i]
-            factor = factor[0:780] #for cosmic shear
             datavector = factor * datavector
         return datavector
 
@@ -223,15 +248,15 @@ class lsst_emu_cs_lcdm(Likelihood):
     def logp(self, **params_values):
         theta = self.get_theta(**params_values)
         model_datavector = self.get_data_vector_emu(theta)
-        #print("theta = ",theta)
+        print("theta = ",theta)
         #print("dv_obs(used for evaluation) = ", self.dv_obs, 'with shape', np.shape(self.dv_obs), self.dv_obs[-10:])
-        #print("emulated_dv = ", model_datavector)
+        print("emulated_dv = ", model_datavector)
 
-        delta_dv = (model_datavector - self.dv_obs[0:780])[self.mask[0:780]]
+        delta_dv = (model_datavector - self.dv_obs)[self.mask]
         
         #print("delta_dv / dv_fid = ", delta_dv/self.dv_obs[0:780][self.mask[0:780]], "lendth is ", len(delta_dv))
         #print("testing.....", self.dv_obs[self.mask] @self.masked_inv_cov @ self.dv_obs[self.mask])
-        logp = -0.5 * delta_dv @ self.masked_inv_cov[0:780, 0:780] @ delta_dv  
+        logp = -0.5 * delta_dv @ self.masked_inv_cov @ delta_dv  
         return logp
 
 class Affine(nn.Module):

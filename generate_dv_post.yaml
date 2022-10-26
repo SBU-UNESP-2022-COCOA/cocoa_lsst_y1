@@ -12,13 +12,13 @@ likelihood:
 params:
   logA:
     prior:
-      min: 2.84
-      max: 3.21
+      min: 1.61
+      max: 3.91
     ref:
       dist: norm
-      loc: 3.045
-      scale: 0.05
-    proposal: 0.05
+      loc: 3.0675
+      scale: 0.005
+    proposal: 0.005
     latex: \log(10^{10} A_\mathrm{s})
     drop: true
   As:
@@ -26,67 +26,62 @@ params:
     latex: A_\mathrm{s}
   ns:
     prior:
-      min: 0.92
-      max: 1.00
+      min: 0.87
+      max: 1.07
     ref:
       dist: norm
-      loc: 0.9649
-      scale: 0.01
-    proposal: 0.01
+      loc: 0.97
+      scale: 0.003
+    proposal: 0.003
     latex: n_\mathrm{s}
   H0:
     prior:
-      min: 61
-      max: 73
+      min: 55
+      max: 91
     ref:
       dist: norm
-      loc: 67.32
-      scale: 3
-    proposal: 3
+      loc: 69.0
+      scale: 0.3
+    proposal: 0.3
     latex: H_0
-  omegab:
+  omegabh2:
     prior:
-      min: 0.04
-      max: 0.06
+      min: 0.01
+      max: 0.04
     ref:
       dist: norm
-      loc: 0.0493382322
-      scale: 0.003
-    proposal: 0.003
-    latex: \Omega_\mathrm{b}
-    drop: true
-  omegam:
+      loc: 0.0228528
+      scale: 0.001
+    proposal: 0.001
+    latex: \Omega_\mathrm{b} h^2
+  omegach2:
     prior:
-      min: 0.24
-      max: 0.4
+      min: 0.001
+      max: 0.99
     ref:
       dist: norm
-      loc: 0.3166
-      scale: 0.02
-    proposal: 0.02
-    latex: \Omega_\mathrm{m}
-    drop: true
+      loc: 0.1199772
+      scale: 0.001
+    proposal: 0.001
+    latex: \Omega_\mathrm{c} h^2
   mnu:
     value: 0.06
   tau:
-    value: 0.05
+    value: 0.0543
     latex: \tau_\mathrm{reio}
   omegal:
     latex: \Omega_\Lambda
+  omegam:
+    latex: \Omega_\mathrm{m}
   omegamh2:
     derived: 'lambda omegam, H0: omegam*(H0/100)**2'
     latex: \Omega_\mathrm{m} h^2
-  omegabh2:
-    value: 'lambda omegab, H0: omegab*(H0/100)**2'
-    latex: \Omega_\mathrm{b} h^2
-  omegach2:
-    value: 'lambda omegam, omegab, mnu, H0: (omegam-omegab)*(H0/100)**2-(mnu*(3.046/3)**0.75)/94.0708'
-    latex: \Omega_\mathrm{c} h^2
-  omegan2:
-    latex: \Omega_\mathrm{\\nu} h^2
-  omegan:
-    derived: 'lambda omegan2, H0: omegan2/((H0/100)**2)'
-    latex: \Omega_\mathrm{\\nu}
+  omegab:
+    derived: 'lambda omegabh2, H0: omegabh2/((H0/100)**2)'
+    latex: \Omega_\mathrm{b}
+  omegac:
+    derived: 'lambda omegach2, H0: omegach2/((H0/100)**2)'
+    latex: \Omega_\mathrm{c}
   sigma8:
     latex: \sigma_8
   s8h5:
@@ -98,17 +93,56 @@ params:
   s8omegamp25:
     derived: 'lambda sigma8, omegam: sigma8*omegam**0.25'
     latex: \sigma_8 \Omega_\mathrm{m}^{0.25}
-  sigma8:
-    latex: \sigma_8
-  LSST_BARYON_Q1:
+  A:
+    derived: 'lambda As: 1e9*As'
+    latex: 10^9 A_\mathrm{s}
+  age:
+    latex: '{\rm{Age}}/\mathrm{Gyr}'
+  rdrag:
+    latex: r_\mathrm{drag}
+  yheused:
+    latex: Y_P^\mathrm{BBN}
+  omegan2:
+    latex: \Omega_\mathrm{\\nu} h^2
+  omegan:
+    derived: 'lambda omegan2, H0: omegan2/((H0/100)**2)'
+    latex: \Omega_\mathrm{\\nu}
+  zstar:
+    latex: z_*
+  rstar:
+    latex: r_*
+  thetastar:
+    latex: 100\theta_*
+  DAstar:
+    latex: D_\mathrm{A}/\mathrm{Gpc}
+  zdrag:
+    latex: z_\mathrm{drag}
+  kd:
+    latex: k_\mathrm{D}
+  thetad:
+    latex: 100\theta_\mathrm{D}
+  zeq:
+    latex: z_\mathrm{eq}
+  keq:
+    latex: k_\mathrm{eq}
+  thetaeq:
+    latex: 100\theta_\mathrm{eq}
+  thetarseq:
+    latex: 100\theta_\mathrm{s,eq}
+  DHBBN:
+    derived: "lambda DH: 10**5*DH"
+    latex: 10^5 \mathrm{D}/\mathrm{H}
+  zrei:
+    latex: z_\mathrm{re}
+  nrun:
     value: 0.0
-    latex: Q1_\mathrm{LSST}^1
-  LSST_BARYON_Q2:
+    latex: n_\mathrm{run}
+  nrunrun:
     value: 0.0
-    latex: Q2_\mathrm{LSST}^2
-  w:
-    value: -1
-    latex: w0
+    latex: n_\mathrm{run,run}
+  omegak:
+    value: 0.0
+    latex: \Omega_k
   #Galaxy bias, shear calibration, baryons do not enter emulation
   LSST_DZ_S1:
     prior:
@@ -287,7 +321,7 @@ theory:
 
 emulator:
   io:
-      savedir: ./projects/lsst_y1/emulator_output/emu_validation   
+      savedir: ./projects/lsst_y1/emulator_output/post   
       save_train_data: true             
       save_intermediate_model: true
   training:
@@ -299,8 +333,8 @@ emulator:
       #n_lhs: 30000
       n_resample: 9600
       #n_resample: 96 #KZ debug
-      emu_type: gp
-      batch_size: 30
+      emu_type: nn
+      batch_size: 32
       n_epochs: 100
   shear_calib:
       mask: ./projects/lsst_y1/data/emu_files/shear_calib_mask.npy
@@ -323,4 +357,4 @@ emulator:
   probe: 'cosmic_shear'
 
 
-output: ./projects/lsst_y1/chains/emulator_validation
+output: ./projects/lsst_y1/chains/generate_dv_emu_1

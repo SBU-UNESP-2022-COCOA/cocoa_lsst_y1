@@ -293,14 +293,14 @@ emulator:
   training:
       dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory_no_scale_cut.modelvector
       chi_sq_cut: 8e+4
-      n_train_iter: 10
+      n_train_iter: 1
       n_lhs: 400000
       #n_lhs: 48 #KZ debug
       #n_lhs: 30000
       n_resample: 9600
       #n_resample: 96 #KZ debug
       emu_type: nn
-      batch_size: 32
+      batch_size: 1000
       n_epochs: 100
   shear_calib:
       mask: ./projects/lsst_y1/data/emu_files/shear_calib_mask.npy

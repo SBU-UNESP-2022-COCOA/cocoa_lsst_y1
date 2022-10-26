@@ -7,7 +7,7 @@ likelihood:
     path: ./external_modules/data/lsst_y1
     data_file: LSST_Y1_no_scale_cut.dataset
     print_datavector: True
-    print_datavector_file: "./projects/lsst_y1/chains/dv2_lsst_y1_theory.modelvector"
+    print_datavector_file: "./projects/lsst_y1/chains/dv6_lsst_y1_theory.modelvector"
 
 params:
   logA:
@@ -162,12 +162,12 @@ sampler:
   evaluate:
     N: 3
     override:
-      # plus 4sigma omegam
-      logA: 3.065240119721949874
-      ns: 0.97
-      H0: 69.0
-      omegabh2: 0.0228528
-      omegach2: 0.1201938093974471156
+      # plus 4 sigma PCA1
+      logA: 2.981412515189386436
+      ns: 1.024904498941666020
+      H0: 70.22987353694853141
+      omegabh2: 0.02359648389896129919
+      omegach2: 0.1243937661962488950
       LSST_DZ_S1: 0.0
       LSST_DZ_S2: 0.0
       LSST_DZ_S3: 0.0
@@ -181,4 +181,4 @@ sampler:
       LSST_M4: 0.0
       LSST_M5: 0.0
 
-output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE2
+output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE6

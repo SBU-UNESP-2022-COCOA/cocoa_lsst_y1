@@ -3,11 +3,13 @@ debug: True
 stop_at_error: True
 
 likelihood:
-  lsst_y1.lsst_cosmic_shear:
-    path: ./external_modules/data/lsst_y1
-    data_file: LSST_Y1_no_scale_cut.dataset
-    print_datavector: True
-    print_datavector_file: "./projects/lsst_y1/chains/dv2_lsst_y1_theory.modelvector"
+  lsst_y1.lsst_emu_3x2pt_lcdm:
+    data_vector_file: "./projects/lsst_y1/data/dv1_lsst_y1_theory.modelvector"
+    emu_file: "./projects/lsst_y1/emulator_output/supranta_emu/model"
+    mask_file: "./projects/lsst_y1/data/lsst_3x2_cs_only.mask" # effectively block out 2x2pt terms
+    data_vector_used_for_training: "./projects/lsst_y1/data/dv1_lsst_y1_theory.modelvector" #This only exist for the way supranta trains the emulator
+    n_pcas_baryon: 2
+
 
 params:
   logA:
@@ -162,12 +164,12 @@ sampler:
   evaluate:
     N: 3
     override:
-      # plus 4sigma omegam
-      logA: 3.065240119721949874
+      # fiducial
+      logA: 3.0675
       ns: 0.97
       H0: 69.0
       omegabh2: 0.0228528
-      omegach2: 0.1201938093974471156
+      omegach2: 0.1199772
       LSST_DZ_S1: 0.0
       LSST_DZ_S2: 0.0
       LSST_DZ_S3: 0.0
@@ -180,5 +182,16 @@ sampler:
       LSST_M3: 0.0
       LSST_M4: 0.0
       LSST_M5: 0.0
+      #lens params
+      LSST_DZ_L1: 0.0
+      LSST_DZ_L2: 0.0
+      LSST_DZ_L3: 0.0
+      LSST_DZ_L4: 0.0
+      LSST_DZ_L5: 0.0
+      LSST_B1_1: 1.239999999999999991
+      LSST_B1_2: 1.360000000000000098
+      LSST_B1_3: 1.469999999999999973
+      LSST_B1_4: 1.600000000000000089
+      LSST_B1_5: 1.760000000000000009
 
-output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE2
+output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE_TEST
