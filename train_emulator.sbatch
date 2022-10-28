@@ -5,7 +5,7 @@
 #SBATCH -e lsst_train-%A_%a.out.err
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=24
+#SBATCH --cpus-per-task=1
 #SBATCH --partition=long-24core
 #SBATCH -t 48:00:00
 
@@ -22,7 +22,7 @@ module purge > /dev/null 2>&1
 
 source /gpfs/home/kuzhong/.conda/etc/profile.d/conda.sh
 module load slurm
-conda activate cocoaemu
+conda activate cocoa
 source start_cocoa
 
 module load gcc/10.2.0  

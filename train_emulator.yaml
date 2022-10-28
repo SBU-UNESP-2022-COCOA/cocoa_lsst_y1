@@ -110,19 +110,6 @@ params:
   w:
     value: -1
     latex: w0
-  w_growth:
-    value: -1
-    latex: w_\mathrm{growth}
-  omegam_growth:
-    prior:
-      min: 0.26 #0.24
-      max: 0.38 #0.4
-    ref:
-      dist: norm
-      loc: 0.3
-      scale: 0.01
-    proposal: 0.01
-    latex: \Omega_\mathrm{m}^\mathrm{growth}
   #Galaxy bias, shear calibration, baryons do not enter emulation
   LSST_DZ_S1:
     prior:
@@ -305,8 +292,8 @@ emulator:
       save_train_data: true             
       save_intermediate_model: true
   training:
-      dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory_no_scale_cut.modelvector
-      chi_sq_cut: 8e+4
+      dv_fid: ./projects/lsst_y1/data/dv1_lsst_y1_theory.modelvector
+      chi_sq_cut: 1e+5
       n_train_iter: 1
       #n_lhs: 4800
       #n_lhs: 48 #KZ debug
@@ -314,8 +301,8 @@ emulator:
       #n_resample: 9600
       n_resample: 96 #KZ debug
       emu_type: nn
-      batch_size: 1000
-      n_epochs: 200 
+      batch_size: 100
+      n_epochs: 400 
   shear_calib:
       mask: ./projects/lsst_y1/data/emu_files/shear_calib_mask.npy
       prior_std: 0.005, 0.005, 0.005, 0.005, 0.005
