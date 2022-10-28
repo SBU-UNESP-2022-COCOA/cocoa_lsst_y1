@@ -1,10 +1,10 @@
 #!/bin/bash
 
-#SBATCH --job-name=lsst_emu1
-#SBATCH --output=lsst_emu1-%A_%a.out
-#SBATCH -e lsst_emu1-%A_%a.out.err
+#SBATCH --job-name=lsst_train
+#SBATCH --output=lsst_train-%A_%a.out
+#SBATCH -e lsst_train-%A_%a.out.err
 #SBATCH --nodes=1
-#SBATCH --ntasks=24
+#SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --partition=long-24core
 #SBATCH -t 48:00:00
@@ -22,7 +22,7 @@ module purge > /dev/null 2>&1
 
 source /gpfs/home/kuzhong/.conda/etc/profile.d/conda.sh
 module load slurm
-conda activate cocoaemu
+conda activate cocoa
 source start_cocoa
 
 module load gcc/10.2.0  
@@ -34,4 +34,4 @@ else
   export OMP_NUM_THREADS=1
 fi
 
-$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 train_emulator.py ./projects/lsst_y1/train_emulator1.yaml -f
+python3 train_emulator.py ./projects/lsst_y1/train_emulator.yaml ./projects/lsst_y1/emulator_output/dvs_for_training_30k/train_30k_EEprior ./projects/lsst_y1/emulator_output/post/train_post

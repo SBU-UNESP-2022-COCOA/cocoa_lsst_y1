@@ -5,21 +5,20 @@ stop_at_error: False
 likelihood:
   lsst_y1.lsst_cosmic_shear:
     path: ./external_modules/data/lsst_y1
-    data_file: LSST_Y1.dataset #NOT "no_scale_cut", that is used for train the emulator
+    data_file: LSST_Y1_no_scale_cut.dataset
     print_datavector: False
-    non_linear_emul: 1
     kmax_boltzmann: 5.0
 
 params:
   logA:
     prior:
-      min: 2.959 #2.84
-      max: 3.087 #3.21
+      min: 2.84
+      max: 3.21
     ref:
       dist: norm
-      loc: 3.0448
-      scale: 0.15
-    proposal: 0.15
+      loc: 3.045
+      scale: 0.05
+    proposal: 0.05
     latex: \log(10^{10} A_\mathrm{s})
     drop: true
   As:
@@ -27,42 +26,42 @@ params:
     latex: A_\mathrm{s}
   ns:
     prior:
-      min: 0.927 #0.92
-      max: 0.997 #1.00
+      min: 0.92
+      max: 1.00
     ref:
       dist: norm
-      loc: 0.96605
+      loc: 0.9649
       scale: 0.01
     proposal: 0.01
     latex: n_\mathrm{s}
   H0:
     prior:
-      min: 66.27 #61
-      max: 68.89 #73
+      min: 61
+      max: 73
     ref:
       dist: norm
       loc: 67.32
-      scale: 5
+      scale: 3
     proposal: 3
     latex: H_0
   omegab:
     prior:
-      min: 0.0475 #0.04
-      max: 0.0500 #0.06
+      min: 0.04
+      max: 0.06
     ref:
       dist: norm
-      loc: 0.0495
-      scale: 0.004
-    proposal: 0.004
+      loc: 0.0493382322
+      scale: 0.003
+    proposal: 0.003
     latex: \Omega_\mathrm{b}
     drop: true
   omegam:
     prior:
-      min: 0.1
-      max: 0.5
+      min: 0.24
+      max: 0.4
     ref:
       dist: norm
-      loc: 0.316
+      loc: 0.3166
       scale: 0.02
     proposal: 0.02
     latex: \Omega_\mathrm{m}
@@ -110,25 +109,12 @@ params:
   w:
     value: -1
     latex: w0
-  w_growth:
-    value: -1
-    latex: w_\mathrm{growth}
-  omegam_growth:
-    prior:
-      min: 0.244 #0.24
-      max: 0.273 #0.4
-    ref:
-      dist: norm
-      loc: 0.3
-      scale: 0.01
-    proposal: 0.01
-    latex: \Omega_\mathrm{m}^\mathrm{growth}
   #Galaxy bias, shear calibration, baryons do not enter emulation
   LSST_DZ_S1:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.005
     ref:
       dist: norm
       loc: 0.0
@@ -161,7 +147,7 @@ params:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.003
     ref:
       dist: norm
       loc: 0.0
@@ -180,40 +166,40 @@ params:
     proposal: 0.002
     latex: \Delta z_\mathrm{s,LSST}^5
   LSST_A1_1:
-    # prior:
-    #   min: -5
-    #   max:  5
-    # ref:
-    #   dist: norm
-    #   loc: 0.5
-    #   scale: 0.1
-    # proposal: 0.5
     prior:
-      min: 0
-      max:  1
+      min: -5
+      max:  5
     ref:
       dist: norm
       loc: 0.5
       scale: 0.1
     proposal: 0.5
-    latex: A_\mathrm{1-IA,LSST}^1
-  LSST_A1_2:
     # prior:
-    #   min: -5
-    #   max:  5
+    #   min: 0
+    #   max:  1
     # ref:
     #   dist: norm
-    #   loc: 0.
+    #   loc: 0.5
     #   scale: 0.1
     # proposal: 0.5
+    latex: A_\mathrm{1-IA,LSST}^1
+  LSST_A1_2:
     prior:
-      min: -2.0
-      max:  2.0
+      min: -5
+      max:  5
     ref:
       dist: norm
       loc: 0.
       scale: 0.1
     proposal: 0.5
+    # prior:
+    #   min: -2.0
+    #   max:  2.0
+    # ref:
+    #   dist: norm
+    #   loc: 0.
+    #   scale: 0.1
+    # proposal: 0.5
     latex: A_\mathrm{1-IA,LSST}^2
   LSST_A1_3:
     value: 0
@@ -301,20 +287,20 @@ theory:
 
 emulator:
   io:
-      savedir: ./projects/lsst_y1/emulator_output/emu_sample_2   
+      savedir: ./projects/lsst_y1/emulator_output/emu_validation   
       save_train_data: true             
       save_intermediate_model: true
   training:
-      dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector
+      dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory_no_scale_cut.modelvector
       chi_sq_cut: 8e+4
-      n_train_iter: 1 #NO iter or resampling
-      #n_lhs: 4800
-      n_lhs: 60000 #KZ: just LHS, no iteration
+      n_train_iter: 1
+      n_lhs: 30000
       #n_lhs: 48 #KZ debug
+      #n_lhs: 30000
       n_resample: 9600
       #n_resample: 96 #KZ debug
-      emu_type: nn
-      batch_size: 32
+      emu_type: gp
+      batch_size: 30
       n_epochs: 100
   shear_calib:
       mask: ./projects/lsst_y1/data/emu_files/shear_calib_mask.npy
@@ -324,12 +310,17 @@ emulator:
       prior_Q1: -3., 12.
   sampling:
       scalecut_mask: ./projects/lsst_y1/data/lsst_3x2.mask
+      #sampling here doesn't matter if n_train_iter=1, but still save here for comparison
       n_mcmc: 10000
+      #n_mcmc: 10 #KZ debug
       n_emcee_walkers: 120
       n_burn_in: 5000
-      n_thin: 2
-      temper0: 0.05
+      #n_burn_in: 0 #KZ debug
+      n_thin: 5
+      #n_thin: 1 #KZ debug
+      temper0: 0.05 #THIS has full control now, no increment, no minimum
       temper_increment: 0.1
   probe: 'cosmic_shear'
 
-output: ./projects/lsst_y1/chains/sample_emu1
+
+output: ./projects/lsst_y1/chains/emulator_validation

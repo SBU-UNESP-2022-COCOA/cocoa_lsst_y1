@@ -1,10 +1,10 @@
 #!/bin/bash
 
-#SBATCH --job-name=lsst_emu5
-#SBATCH --output=lsst_emu5-%A_%a.out
-#SBATCH -e lsst_emu5-%A_%a.out.err
-#SBATCH --nodes=1
-#SBATCH --ntasks=28
+#SBATCH --job-name=lsst_emu
+#SBATCH --output=lsst_emu-%A_%a.out
+#SBATCH -e lsst_emu-%A_%a.out.err
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=27
 #SBATCH --cpus-per-task=1
 #SBATCH --partition=long-28core
 #SBATCH -t 48:00:00
@@ -34,4 +34,4 @@ else
   export OMP_NUM_THREADS=1
 fi
 
-$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 train_emulator5.py ./projects/lsst_y1/train_emulator5.yaml -f
+$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 get_dv_from_posterior.py ./projects/lsst_y1/generate_dv_post.yaml ./projects/lsst_y1/emulator_output/post/samples_from_posterior.npy -f
