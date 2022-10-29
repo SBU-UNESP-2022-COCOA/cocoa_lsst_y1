@@ -3,8 +3,8 @@
 #SBATCH --job-name=lsst_emu
 #SBATCH --output=lsst_emu-%A_%a.out
 #SBATCH -e lsst_emu-%A_%a.out.err
-#SBATCH --nodes=2
-#SBATCH --ntasks-per-node=27
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=28
 #SBATCH --cpus-per-task=1
 #SBATCH --partition=long-28core
 #SBATCH -t 48:00:00
