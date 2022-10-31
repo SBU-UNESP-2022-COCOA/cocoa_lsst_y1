@@ -34,4 +34,4 @@ else
   export OMP_NUM_THREADS=1
 fi
 
-python3 train_emulator.py ./projects/lsst_y1/train_emulator.yaml ./projects/lsst_y1/emulator_output/dvs_for_training_30k/train_30k_EEprior ./projects/lsst_y1/emulator_output/post/train_post
+python3 train_emulator.py ./projects/lsst_y1/train_emulator.yaml ./projects/lsst_y1/emulator_output/dvs_for_training_30k/train_30k ./projects/lsst_y1/emulator_output/post/train_post
