@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#SBATCH --job-name=lsst_emu
-#SBATCH --output=lsst_emu-%A_%a.out
-#SBATCH -e lsst_emu-%A_%a.out.err
-#SBATCH --nodes=2
-#SBATCH --ntasks-per-node=27
+#SBATCH --job-name=lsst_empost
+#SBATCH --output=lsst_empost-%A_%a.out
+#SBATCH -e lsst_empost-%A_%a.out.err
+#SBATCH --nodes=20
+#SBATCH --ntasks-per-node=38
 #SBATCH --cpus-per-task=1
-#SBATCH --partition=long-28core
-#SBATCH -t 48:00:00
+#SBATCH --partition=large-40core
+#SBATCH -t 8:00:00
 
 echo Running on host `hostname`
 echo Time is `date`

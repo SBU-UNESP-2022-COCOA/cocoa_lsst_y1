@@ -9,16 +9,17 @@ likelihood:
     print_datavector: False
     kmax_boltzmann: 5.0
 
+#Be careful with the ref point, it's not the fiducial value now.
 params:
   logA:
     prior:
-      min: 2.84
-      max: 3.21
+      min: 1.61
+      max: 3.91
     ref:
       dist: norm
-      loc: 3.045
-      scale: 0.05
-    proposal: 0.05
+      loc: 3.0675
+      scale: 0.005
+    proposal: 0.005
     latex: \log(10^{10} A_\mathrm{s})
     drop: true
   As:
@@ -26,28 +27,28 @@ params:
     latex: A_\mathrm{s}
   ns:
     prior:
-      min: 0.92
-      max: 1.00
+      min: 0.87
+      max: 1.07
     ref:
       dist: norm
-      loc: 0.9649
-      scale: 0.01
-    proposal: 0.01
+      loc: 0.97
+      scale: 0.003
+    proposal: 0.003
     latex: n_\mathrm{s}
   H0:
     prior:
-      min: 61
-      max: 73
+      min: 55
+      max: 91
     ref:
       dist: norm
-      loc: 67.32
-      scale: 3
-    proposal: 3
+      loc: 69.0
+      scale: 0.3
+    proposal: 0.3
     latex: H_0
   omegab:
     prior:
-      min: 0.04
-      max: 0.06
+      min: 0.03
+      max: 0.07
     ref:
       dist: norm
       loc: 0.0493382322
@@ -57,8 +58,8 @@ params:
     drop: true
   omegam:
     prior:
-      min: 0.24
-      max: 0.4
+      min: 0.1
+      max: 0.9
     ref:
       dist: norm
       loc: 0.3166
@@ -174,14 +175,6 @@ params:
       loc: 0.5
       scale: 0.1
     proposal: 0.5
-    # prior:
-    #   min: 0
-    #   max:  1
-    # ref:
-    #   dist: norm
-    #   loc: 0.5
-    #   scale: 0.1
-    # proposal: 0.5
     latex: A_\mathrm{1-IA,LSST}^1
   LSST_A1_2:
     prior:
@@ -192,14 +185,6 @@ params:
       loc: 0.
       scale: 0.1
     proposal: 0.5
-    # prior:
-    #   min: -2.0
-    #   max:  2.0
-    # ref:
-    #   dist: norm
-    #   loc: 0.
-    #   scale: 0.1
-    # proposal: 0.5
     latex: A_\mathrm{1-IA,LSST}^2
   LSST_A1_3:
     value: 0
@@ -285,13 +270,15 @@ theory:
       accurate_massive_neutrino_transfers: false
       k_per_logint: 20
 
+#The only parameter matters in generate_dv.py is n_lhs: 100000, which controls how many samples/dv calculated
+#The others are just keep config.py happy. training the emulator is done with another sciprt.
 emulator:
   io:
       savedir: ./projects/lsst_y1/emulator_output/dvs_for_training_400k    
       save_train_data: true             
       save_intermediate_model: true
   training:
-      dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory_no_scale_cut.modelvector
+      dv_fid: ./projects/lsst_y1/data/dv1_lsst_y1_theory.modelvector
       chi_sq_cut: 8e+4
       n_train_iter: 1
       n_lhs: 400000

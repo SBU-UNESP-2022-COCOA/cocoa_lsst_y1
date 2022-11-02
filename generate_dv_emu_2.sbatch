@@ -3,11 +3,11 @@
 #SBATCH --job-name=lsst_emu
 #SBATCH --output=lsst_emu-%A_%a.out
 #SBATCH -e lsst_emu-%A_%a.out.err
-#SBATCH --nodes=1
-#SBATCH --ntasks=28
+#SBATCH --nodes=75
+#SBATCH --ntasks-per-node=27
 #SBATCH --cpus-per-task=1
-#SBATCH --partition=extended-28core
-#SBATCH -t 7-00:00:00
+#SBATCH --partition=large-28core
+#SBATCH -t 8:00:00
 
 echo Running on host `hostname`
 echo Time is `date`
@@ -22,7 +22,7 @@ module purge > /dev/null 2>&1
 
 source /gpfs/home/kuzhong/.conda/etc/profile.d/conda.sh
 module load slurm
-conda activate cocoa
+conda activate cocoaemu
 source start_cocoa
 
 module load gcc/10.2.0  

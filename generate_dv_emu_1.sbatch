@@ -20,9 +20,9 @@ echo Number of cpus per task is $$SLURM_CPUS_PER_TASK
 cd $SLURM_SUBMIT_DIR
 module purge > /dev/null 2>&1
 
-source ~/.bashrc
+source /gpfs/home/kuzhong/.conda/etc/profile.d/conda.sh
 module load slurm
-conda activate cocoa
+conda activate cocoaemu
 source start_cocoa
 
 module load gcc/10.2.0  
