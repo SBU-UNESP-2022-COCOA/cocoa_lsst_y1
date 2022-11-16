@@ -1,1 +1,1 @@
-# cocoa_lsst_y1
+# Cocoa + Cola
