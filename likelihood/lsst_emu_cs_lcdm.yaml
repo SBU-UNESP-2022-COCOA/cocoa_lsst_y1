@@ -2,10 +2,11 @@ probe: 'cosmic_shear'
 
 
 data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
-data_vector_used_for_training: "./projects/lsst_y1/data/example3_lsst_y1_theory_no_scale_cut.modelvector"
+data_vector_used_for_training: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
 n_dim: 13 #Total parameter number used FOR EMULATION
-
-emu_file: "./projects/lsst_y1/emulator_output/baseline_cosmic_shear/model_0"
+dv_len: 780
+BIN_SIZE: 780
+emu_file: "./projects/lsst_y1/emulator_output/models/model"
 
 
 n_pcas_baryon: 0

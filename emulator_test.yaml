@@ -7,6 +7,7 @@ likelihood:
     path: ./external_modules/data/lsst_y1
     data_file: LSST_Y1_no_scale_cut.dataset
     print_datavector: False
+    non_linear_emul: 1
     kmax_boltzmann: 5.0
 
 params:
@@ -109,6 +110,19 @@ params:
   w:
     value: -1
     latex: w0
+  w_growth:
+    value: -1
+    latex: w_\mathrm{growth}
+  omegam_growth:
+    prior:
+      min: 0.24
+      max: 0.4
+    ref:
+      dist: norm
+      loc: 0.3166
+      scale: 0.02
+    proposal: 0.02
+    latex: \Omega_\mathrm{m}^\mathrm{growth}
   #Galaxy bias, shear calibration, baryons do not enter emulation
   LSST_DZ_S1:
     prior:
@@ -291,7 +305,7 @@ emulator:
       save_train_data: true             
       save_intermediate_model: true
   training:
-      dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory_no_scale_cut.modelvector
+      dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector
       chi_sq_cut: 8e+4
       n_train_iter: 1
       n_lhs: 10000

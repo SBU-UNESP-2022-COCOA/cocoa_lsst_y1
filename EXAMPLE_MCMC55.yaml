@@ -3,16 +3,7 @@ debug: False
 stop_at_error: False
 
 likelihood:
-  sn.pantheon:
-    path: ./external_modules/data/sn_data
-  bao.sixdf_2011_bao:
-    path: ./external_modules/data/
-  bao.sdss_dr7_mgs:
-    path: ./external_modules/data/
-  bao.sdss_dr12_consensus_bao:
-    path: ./external_modules/data/
-
-  lsst_y1.lsst_cosmic_shear_T4:
+  lsst_y1.lsst_cosmic_shear_T2:
     path: ./external_modules/data/lsst_y1
     data_file: LSST_Y1.dataset
     print_datavector: False
@@ -26,9 +17,9 @@ params:
       max: 3.21
     ref:
       dist: norm
-      loc: 3.045
-      scale: 0.05
-    proposal: 0.05
+      loc: 3.0448
+      scale: 0.15
+    proposal: 0.15
     latex: \log(10^{10} A_\mathrm{s})
     drop: true
   As:
@@ -40,7 +31,7 @@ params:
       max: 1.00
     ref:
       dist: norm
-      loc: 0.9649
+      loc: 0.96605
       scale: 0.01
     proposal: 0.01
     latex: n_\mathrm{s}
@@ -51,7 +42,7 @@ params:
     ref:
       dist: norm
       loc: 67.32
-      scale: 3
+      scale: 5
     proposal: 3
     latex: H_0
   omegab:
@@ -60,9 +51,9 @@ params:
       max: 0.06
     ref:
       dist: norm
-      loc: 0.0493382322
-      scale: 0.003
-    proposal: 0.003
+      loc: 0.0495
+      scale: 0.004
+    proposal: 0.004
     latex: \Omega_\mathrm{b}
     drop: true
   omegam:
@@ -71,7 +62,7 @@ params:
       max: 0.4
     ref:
       dist: norm
-      loc: 0.3166
+      loc: 0.316
       scale: 0.02
     proposal: 0.02
     latex: \Omega_\mathrm{m}
@@ -128,9 +119,9 @@ params:
       max: 0.4
     ref:
       dist: norm
-      loc: 0.3166
-      scale: 0.02
-    proposal: 0.02
+      loc: 0.3
+      scale: 0.01
+    proposal: 0.01
     latex: \Omega_\mathrm{m}^\mathrm{growth}
 
 theory:
@@ -218,4 +209,4 @@ sampler:
     # ---------------------------------------------------------------------
     Rminus1_single_split: 4
 
-output: ./projects/lsst_y1/chains/EXAMPLE_MCMC52
+output: ./projects/lsst_y1/chains/EXAMPLE_MCMC55

@@ -4,8 +4,8 @@ stop_at_error: True
 
 likelihood:
   lsst_y1.lsst_emu_cs_lcdm:
-    emu_file: "./projects/lsst_y1/emulator_output/LHS/model_direct"
-    data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
+    emu_file: "./projects/lsst_y1/emulator_output/models/model"
+    data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory_no_scale_cut.modelvector"
     n_dim: 13 
 
 params:

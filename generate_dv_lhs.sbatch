@@ -3,11 +3,11 @@
 #SBATCH --job-name=lsst_emu
 #SBATCH --output=lsst_emu-%A_%a.out
 #SBATCH -e lsst_emu-%A_%a.out.err
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=24
+#SBATCH --nodes=50
+#SBATCH --ntasks-per-node=38
 #SBATCH --cpus-per-task=1
-#SBATCH --partition=long-24core
-#SBATCH -t 48:00:00
+#SBATCH --partition=large-40core
+#SBATCH -t 8:00:00
 
 echo Running on host `hostname`
 echo Time is `date`
@@ -20,9 +20,9 @@ echo Number of cpus per task is $$SLURM_CPUS_PER_TASK
 cd $SLURM_SUBMIT_DIR
 module purge > /dev/null 2>&1
 
-source ~/.bashrc
+source /gpfs/home/kuzhong/.conda/etc/profile.d/conda.sh
 module load slurm
-conda activate cocoa
+conda activate cocoaemu
 source start_cocoa
 
 module load gcc/10.2.0  
@@ -34,4 +34,4 @@ else
   export OMP_NUM_THREADS=1
 fi
 
-$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 generate_dv_emu.py ./projects/lsst_y1/generate_dv_emu_1.yaml -f
+$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 generate_dv_lhs.py ./projects/lsst_y1/generate_dv_lhs.yaml -f

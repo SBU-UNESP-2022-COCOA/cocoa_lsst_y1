@@ -3,11 +3,11 @@
 #SBATCH --job-name=emu_test
 #SBATCH --output=emu_test-%A_%a.out
 #SBATCH -e emu_test-%A_%a.out.err
-#SBATCH --nodes=1
-#SBATCH --ntasks=24
+#SBATCH --nodes=8
+#SBATCH --ntasks-per-node=40
 #SBATCH --cpus-per-task=1
-#SBATCH --partition=long-24core
-#SBATCH -t 48:00:00
+#SBATCH --partition=short-40core
+#SBATCH -t 4:00:00
 
 echo Running on host `hostname`
 echo Time is `date`
@@ -34,4 +34,4 @@ else
   export OMP_NUM_THREADS=1
 fi
 
-$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 generate_dv_emu.py ./projects/lsst_y1/emulator_test.yaml -f
+$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 get_dv_from_posterior.py ./projects/lsst_y1/emulator_validation.yaml ./projects/lsst_y1/emulator_validation/train_validation_samples.npy -f

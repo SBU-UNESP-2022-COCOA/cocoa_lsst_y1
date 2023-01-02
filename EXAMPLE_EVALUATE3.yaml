@@ -5,7 +5,7 @@ stop_at_error: True
 likelihood:
   lsst_y1.lsst_3x2pt:
     path: ./external_modules/data/lsst_y1
-    data_file: LSST_Y1.dataset
+    data_file: LSST_Y1_no_scale_cut.dataset
     print_datavector: True
     print_datavector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
     non_linear_emul: 1
@@ -149,28 +149,28 @@ sampler:
       omegab: 0.0493382322
       omegam: 0.3166
       mnu: 0.06
-      LSST_DZ_S1: 0.0414632
-      LSST_DZ_S2: 0.00147332
-      LSST_DZ_S3: 0.0237035
-      LSST_DZ_S4: -0.0773436
-      LSST_DZ_S5: -8.67127e-05
-      LSST_A1_1: 0.606102
-      LSST_A1_2: -1.51541
-      LSST_DZ_L1: 0.00457604
-      LSST_DZ_L2: 0.000309875
-      LSST_DZ_L3: 0.00855907
-      LSST_DZ_L4: -0.00316269
-      LSST_DZ_L5: -0.0146753
+      LSST_DZ_S1: 0.0 #DES synthetic chains has non-zero dz, but for LSST we set them to 0
+      LSST_DZ_S2: 0.0
+      LSST_DZ_S3: 0.0
+      LSST_DZ_S4: 0.0
+      LSST_DZ_S5: 0.0
+      LSST_A1_1: 0.5
+      LSST_A1_2: 0.0
+      LSST_DZ_L1: 0.0
+      LSST_DZ_L2: 0.0
+      LSST_DZ_L3: 0.0
+      LSST_DZ_L4: 0.0
+      LSST_DZ_L5: 0.0
       LSST_B1_1: 1.72716
       LSST_B1_2: 1.65168
       LSST_B1_3: 1.61423
       LSST_B1_4: 1.92886
       LSST_B1_5: 2.11633
-      LSST_M1: 0.0191832
-      LSST_M2: -0.0431752
-      LSST_M3: -0.034961
-      LSST_M4: -0.0158096
-      LSST_M5: -0.0158096
+      LSST_M1: 0.0
+      LSST_M2: 0.0
+      LSST_M3: 0.0
+      LSST_M4: 0.0
+      LSST_M5: 0.0
 
 output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE3
 

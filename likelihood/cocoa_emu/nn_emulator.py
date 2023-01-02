@@ -146,7 +146,7 @@ class NNEmulator:
             X_norm = (X - X_mean) / X_std
             y_pred = self.model.eval()(X_norm).cpu()
             
-        y_pred = y_pred * self.dv_fid
+        y_pred = y_pred * self.dv_max
 
         return y_pred.numpy()
 

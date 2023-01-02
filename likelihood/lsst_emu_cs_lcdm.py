@@ -25,22 +25,23 @@ class lsst_emu_cs_lcdm(Likelihood):
         self.baryon_pcas       = np.loadtxt(self.baryon_pca_file)
         self.emu_type          = self.emu_type
         self.dv_obs            = np.loadtxt(self.data_vector_file)[:,1]
-        self.output_dims            = len(self.dv_obs)
+        self.output_dims       = len(self.dv_obs)
+        self.dv_len            = self.dv_len
         
         self.mask              = np.loadtxt(self.mask_file)[:,1].astype(bool)
         self.cov               = self.get_full_cov(self.cov_file)
 
         self.masked_inv_cov    = np.linalg.inv(self.cov[self.mask][:,self.mask])
 
-        print("full cov = ", self.cov)
-        print("mask = ", self.mask)
-        print("diag of cov with mask = ",self.masked_inv_cov)
+        #print("full cov = ", self.cov)
+        #print("mask = ", self.mask)
+        #print("diag of cov with mask = ",self.masked_inv_cov)
 
         self.dv_fid            = np.loadtxt(self.data_vector_used_for_training)[:,1]
         self.dv_std            = np.sqrt(np.diagonal(self.cov))
 
-        self.emu               = NNEmulator(self.n_dim, self.output_dims, self.dv_fid, self.dv_std)
-        self.emu.load(self.emu_file)
+        self.emu               = NNEmulator(self.n_dim, self.BIN_SIZE, self.dv_fid, self.dv_std, self.masked_inv_cov, self.dv_fid, 'cpu') #should privde dv_max instead of dv_fid, but emu.load will make it correct
+        self.emu.load(self.emu_file, map_location=torch.device('cpu'))
 
         self.shear_calib_mask  = np.load(self.shear_calib_mask) #mask that gives 2 for cosmic shear, and 1 for gg-lensing
 
@@ -177,7 +178,7 @@ class lsst_emu_cs_lcdm(Likelihood):
             theta = torch.Tensor(theta)
         elif(self.emu_type=='gp'):
             theta = theta[np.newaxis]
-
+        
         datavector = self.emu.predict(theta)[0]
 
 
@@ -209,7 +210,7 @@ class lsst_emu_cs_lcdm(Likelihood):
             baryon_q   = theta[-self.n_pcas_baryon:]
             datavector = self.add_baryon_q(baryon_q, datavector)
 
-        print("dv emulated = ", datavector)
+        #print("dv emulated = ", datavector, 'with shape', np.shape(datavector))
         return datavector
 
 
@@ -227,6 +228,7 @@ class lsst_emu_cs_lcdm(Likelihood):
     def add_shear_calib(self, m, datavector):
         for i in range(self.source_ntomo):
             factor = (1 + m[i])**self.shear_calib_mask[i]
+            factor = factor[0:self.dv_len] # for cosmic shear
             datavector = factor * datavector
         return datavector
 
@@ -234,14 +236,20 @@ class lsst_emu_cs_lcdm(Likelihood):
     def logp(self, **params_values):
         theta = self.get_theta(**params_values)
         model_datavector = self.get_data_vector_emu(theta)
-        #print("theta = ",theta)
-        #print("dv_obs(used for evaluation) = ", self.dv_obs, 'with shape', np.shape(self.dv_obs), self.dv_obs[-10:])
-        print("emulated_dv = ", model_datavector, "with shape", np.shape(model_datavector), model_datavector[-10:])
+        delta_dv = (model_datavector - self.dv_obs[0:self.dv_len])[self.mask[0:self.dv_len]]
 
-        delta_dv = (model_datavector - self.dv_obs)[self.mask]
+        # ###DEBUGING
+        # #print("dv_obs(used for evaluation) = ", self.dv_obs, 'with shape', np.shape(self.dv_obs), self.dv_obs[-10:])
+        # #print("emulated_dv = ", model_datavector, "with shape", np.shape(model_datavector), model_datavector[-10:])
+        # #print(delta_dv, 'shape: ', np.shape(delta_dv))
+        # print("delta_dv / dv_fid = ", delta_dv / self.dv_obs[0:self.dv_len][self.mask[0:self.dv_len]], "lendth is ", len(delta_dv) )
+        # ##testing
+        # print("testing, saving to test_dv.txt")
+        # np.savetxt('test_dv.txt',[self.dv_obs[0:self.dv_len], model_datavector])
+        # ###
+        # #print("testing.....", self.dv_obs[self.mask] @self.masked_inv_cov @ self.dv_obs[self.mask])
+        # ##DEBUG END
         
-        print("delta_dv / dv_fid = ", ((model_datavector - self.dv_obs)/self.dv_fid)[self.mask], "lendth is ", len(((model_datavector - self.dv_obs)/self.dv_fid)[self.mask]))
-        #print("testing.....", self.dv_obs[self.mask] @self.masked_inv_cov @ self.dv_obs[self.mask])
         logp = -0.5 * delta_dv @ self.masked_inv_cov @ delta_dv  
         return logp
 

@@ -304,7 +304,7 @@ emulator:
       save_train_data: true             
       save_intermediate_model: true
   training:
-      dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory_no_scale_cut.modelvector
+      dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector
       chi_sq_cut: 8e+4
       n_train_iter: 1
       n_lhs: 30000

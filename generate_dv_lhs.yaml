@@ -128,7 +128,7 @@ params:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.005
+      scale: 0.002
     ref:
       dist: norm
       loc: 0.0
@@ -161,7 +161,7 @@ params:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.003
+      scale: 0.002
     ref:
       dist: norm
       loc: 0.0
@@ -188,14 +188,6 @@ params:
       loc: 0.5
       scale: 0.1
     proposal: 0.5
-    # prior:
-    #   min: 0
-    #   max:  1
-    # ref:
-    #   dist: norm
-    #   loc: 0.5
-    #   scale: 0.1
-    # proposal: 0.5
     latex: A_\mathrm{1-IA,LSST}^1
   LSST_A1_2:
     prior:
@@ -206,14 +198,6 @@ params:
       loc: 0.
       scale: 0.1
     proposal: 0.5
-    # prior:
-    #   min: -2.0
-    #   max:  2.0
-    # ref:
-    #   dist: norm
-    #   loc: 0.
-    #   scale: 0.1
-    # proposal: 0.5
     latex: A_\mathrm{1-IA,LSST}^2
   LSST_A1_3:
     value: 0
@@ -301,16 +285,14 @@ theory:
 
 emulator:
   io:
-      savedir: ./projects/lsst_y1/emulator_output/100k    
+      savedir: ./projects/lsst_y1/emulator_output/lhs/dvs_for_training_1500k    
       save_train_data: true             
       save_intermediate_model: true
   training:
-      dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory_no_scale_cut.modelvector
+      dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector
       chi_sq_cut: 8e+4
-      n_train_iter: 10
-      n_lhs: 100000
-      #n_lhs: 48 #KZ debug
-      #n_lhs: 30000
+      n_train_iter: 1
+      n_lhs: 1500000 
       n_resample: 9600
       #n_resample: 96 #KZ debug
       emu_type: nn

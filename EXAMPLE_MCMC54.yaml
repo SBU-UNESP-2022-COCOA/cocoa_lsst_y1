@@ -3,15 +3,11 @@ debug: False
 stop_at_error: False
 
 likelihood:
-  sn.pantheon:
-    path: ./external_modules/data/sn_data
-  bao.sixdf_2011_bao:
-    path: ./external_modules/data/
-  bao.sdss_dr7_mgs:
-    path: ./external_modules/data/
-  bao.sdss_dr12_consensus_bao:
-    path: ./external_modules/data/
-
+  planck_2018_highl_plik.TTTEEE:
+    path: ./external_modules/
+    clik_file: plc_3.0/hi_l/plik/plik_rd12_HM_v22b_TTTEEE_33_396.clik
+  planck_2018_lowl.EE:
+    path: ./external_modules/
   lsst_y1.lsst_cosmic_shear_T4:
     path: ./external_modules/data/lsst_y1
     data_file: LSST_Y1.dataset
@@ -22,11 +18,11 @@ likelihood:
 params:
   logA:
     prior:
-      min: 2.84
-      max: 3.21
+      min: 1.61
+      max: 3.91
     ref:
       dist: norm
-      loc: 3.045
+      loc: 3.0448
       scale: 0.05
     proposal: 0.05
     latex: \log(10^{10} A_\mathrm{s})
@@ -36,62 +32,81 @@ params:
     latex: A_\mathrm{s}
   ns:
     prior:
-      min: 0.92
-      max: 1.00
+      min: 0.87
+      max: 1.07
     ref:
       dist: norm
-      loc: 0.9649
+      loc: 0.96605
       scale: 0.01
     proposal: 0.01
     latex: n_\mathrm{s}
+  theta_MC_100:
+    prior:
+      min: 0.5
+      max: 10
+    ref:
+      dist: norm
+      loc: 1.04109
+      scale: 0.001
+    proposal: 0.001
+    latex: 100\theta_\mathrm{MC}
+    drop: true
+    renames: theta
+  cosmomc_theta:
+    value: 'lambda theta_MC_100: 1.e-2*theta_MC_100'
+    derived: false
   H0:
-    prior:
-      min: 61
-      max: 73
-    ref:
-      dist: norm
-      loc: 67.32
-      scale: 3
-    proposal: 3
     latex: H_0
-  omegab:
+    min: 20
+    max: 100
+  omegabh2:
     prior:
-      min: 0.04
-      max: 0.06
+      min: 0.01
+      max: 0.04
     ref:
       dist: norm
-      loc: 0.0493382322
-      scale: 0.003
-    proposal: 0.003
-    latex: \Omega_\mathrm{b}
-    drop: true
-  omegam:
+      loc: 0.022383
+      scale: 0.005
+    proposal: 0.005
+    latex: \Omega_\mathrm{b} h^2
+  omegach2:
     prior:
-      min: 0.24
-      max: 0.4
+      min: 0.06
+      max: 0.2
     ref:
       dist: norm
-      loc: 0.3166
-      scale: 0.02
-    proposal: 0.02
-    latex: \Omega_\mathrm{m}
-    drop: true
+      loc: 0.12011
+      scale: 0.03
+    proposal: 0.03
+    latex: \Omega_\mathrm{c} h^2
   mnu:
     value: 0.06
   tau:
-    value: 0.05
+    prior:
+      min: 0.01
+      max: 0.2
+    ref:
+      dist: norm
+      loc: 0.055
+      scale: 0.006
+    proposal: 0.003
     latex: \tau_\mathrm{reio}
   omegal:
     latex: \Omega_\Lambda
+  As_1e9:
+    derived: 'lambda As: 1e9*As'
+    latex: 10^9 A_\mathrm{s}
+  omegam:
+    latex: \Omega_\mathrm{m}
   omegamh2:
     derived: 'lambda omegam, H0: omegam*(H0/100)**2'
     latex: \Omega_\mathrm{m} h^2
-  omegabh2:
-    value: 'lambda omegab, H0: omegab*(H0/100)**2'
-    latex: \Omega_\mathrm{b} h^2
-  omegach2:
-    value: 'lambda omegam, omegab, mnu, H0: (omegam-omegab)*(H0/100)**2-(mnu*(3.046/3)**0.75)/94.0708'
-    latex: \Omega_\mathrm{c} h^2
+  omegab:
+    derived: 'lambda omegabh2, H0: omegabh2/((H0/100)**2)'
+    latex: \Omega_\mathrm{b}
+  omegac:
+    derived: 'lambda omegach2, H0: omegach2/((H0/100)**2)'
+    latex: \Omega_\mathrm{c}
   omegan2:
     latex: \Omega_\mathrm{\\nu} h^2
   omegan:
@@ -108,8 +123,9 @@ params:
   s8omegamp25:
     derived: 'lambda sigma8, omegam: sigma8*omegam**0.25'
     latex: \sigma_8 \Omega_\mathrm{m}^{0.25}
-  sigma8:
-    latex: \sigma_8
+  s8:
+    derived: 'lambda sigma8, omegam: sigma8*(omegam/0.3)**0.5'
+    latex: \sigma_8 \Omega_\mathrm{m/0.3}^{0.5}
   LSST_BARYON_Q1:
     value: 0.0
     latex: Q1_\mathrm{LSST}^1
@@ -128,9 +144,9 @@ params:
       max: 0.4
     ref:
       dist: norm
-      loc: 0.3166
-      scale: 0.02
-    proposal: 0.02
+      loc: 0.3
+      scale: 0.01
+    proposal: 0.01
     latex: \Omega_\mathrm{m}^\mathrm{growth}
 
 theory:
@@ -154,7 +170,7 @@ sampler:
     # File (w/ path) or matrix defining a covariance matrix for the proposal:
     # - null (default): will be generated from params info (prior and proposal)
     # - matrix: remember to set `covmat_params` to the parameters in the matrix
-    covmat: "./projects/lsst_y1/EXAMPLE_MCMC3.covmat"
+    covmat: "./projects/lsst_y1/EXAMPLE_MCMC1.covmat"
     covmat_params:
     # --------------------------------------
     # --------------------------------------
@@ -190,7 +206,7 @@ sampler:
     blocking:
       - [1,
           [
-            logA, ns, H0, omegab, omegam
+            logA, ns, theta_MC_100, omegabh2, omegach2, tau 
           ]
         ]
       - [2,
@@ -202,6 +218,15 @@ sampler:
       - [25,
           [
             LSST_M1, LSST_M2, LSST_M3, LSST_M4, LSST_M5
+          ]
+        ]
+      - [50,
+          [
+            A_cib_217, gal545_A_217, calib_217T, galf_TE_A_217, ps_A_100_100,
+            galf_TE_A_100_143, ps_A_217_217, ksz_norm, A_planck, calib_100T,
+            ps_A_143_217, ps_A_143_143, gal545_A_100, galf_TE_A_143_217,
+            gal545_A_143_217, galf_TE_A_100_217, galf_TE_A_143, gal545_A_143,
+            xi_sz_cib, galf_TE_A_100, A_sz
           ]
         ]
     # --------------------------------------
@@ -218,4 +243,4 @@ sampler:
     # ---------------------------------------------------------------------
     Rminus1_single_split: 4
 
-output: ./projects/lsst_y1/chains/EXAMPLE_MCMC52
+output: ./projects/lsst_y1/chains/EXAMPLE_MCMC54
