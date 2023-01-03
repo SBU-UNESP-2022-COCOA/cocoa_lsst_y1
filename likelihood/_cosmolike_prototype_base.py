@@ -111,6 +111,10 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     self.force_cache_false = False
 
+    # COLA begins
+    self.non_linear_emul = 4
+    # COLA ends
+
     # ------------------------------------------------------------------------
     self.z_interp_1D = np.linspace(0,2.0,1000)
     self.z_interp_1D = np.concatenate((self.z_interp_1D,
