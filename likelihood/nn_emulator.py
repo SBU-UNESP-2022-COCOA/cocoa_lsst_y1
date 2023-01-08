@@ -238,8 +238,6 @@ class NNEmulator:
         if not self.trained:
             self.X_mean = torch.Tensor(X.mean(axis=0, keepdims=True)).float()
             self.X_std  = torch.Tensor(X.std(axis=0, keepdims=True)).float()
-            self.y_mean = self.dv_fid
-            self.y_std  = self.dv_std
     
         epoch_range = tqdm(range(n_epochs))
 
@@ -331,8 +329,6 @@ class NNEmulator:
         with h5.File(filename + '.h5', 'w') as f:
             f['X_mean'] = self.X_mean
             f['X_std']  = self.X_std
-            f['Y_mean'] = self.y_mean
-            f['Y_std']  = self.y_std
             f['dv_fid'] = self.dv_fid
             f['dv_std'] = self.dv_std
             f['dv_max'] = self.dv_max
@@ -343,8 +339,6 @@ class NNEmulator:
         with h5.File(filename + '.h5', 'r') as f:
             self.X_mean = torch.Tensor(f['X_mean'][:]).float()
             self.X_std  = torch.Tensor(f['X_std'][:]).float()
-            self.y_mean = torch.Tensor(f['Y_mean'][:]).float()
-            self.y_std  = torch.Tensor(f['Y_std'][:]).float()
             self.dv_fid = torch.Tensor(f['dv_fid'][:]).float()
             self.dv_std = torch.Tensor(f['dv_std'][:]).float()
             self.dv_max = torch.Tensor(f['dv_max'][:]).float()

@@ -357,19 +357,54 @@
   # ------------------------------------------------------------------------
   # Point Mass parameters
   LSST_PM1:
-    value: 0.0
+    prior:
+      min: -5
+      max: 5
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.5
+    proposal: 0.5
     latex: PM_\mathrm{LSST}^1
   LSST_PM2:
-    value: 0.0
+    prior:
+      min: -5
+      max: 5
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.5
+    proposal: 0.5
     latex: PM_\mathrm{LSST}^2
   LSST_PM3:
-    value: 0.0
+    prior:
+      min: -5
+      max: 5
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.5
+    proposal: 0.5
     latex: PM_\mathrm{LSST}^3
   LSST_PM4:
-    value: 0.0
+    prior:
+      min: -5
+      max: 5
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.5
+    proposal: 0.5
     latex: PM_\mathrm{LSST}^4
   LSST_PM5:
-    value: 0.0
+    prior:
+      min: -5
+      max: 5
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.5
+    proposal: 0.5
     latex: PM_\mathrm{LSST}^5
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------

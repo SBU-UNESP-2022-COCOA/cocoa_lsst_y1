@@ -3,11 +3,11 @@
 #SBATCH --job-name=lsst_emu
 #SBATCH --output=lsst_emu-%A_%a.out
 #SBATCH -e lsst_emu-%A_%a.out.err
-#SBATCH --nodes=16
-#SBATCH --ntasks-per-node=40
-#SBATCH --cpus-per-task=1
-#SBATCH --partition=medium-40core
-#SBATCH -t 12:00:00
+#SBATCH --nodes=38
+#SBATCH --ntasks-per-node=16
+#SBATCH --cpus-per-task=5
+#SBATCH --partition=large-96core
+#SBATCH -t 8:00:00
 
 echo Running on host `hostname`
 echo Time is `date`
@@ -27,11 +27,12 @@ source start_cocoa
 
 module load gcc/10.2.0  
 
-#export OMP_PROC_BIND=close
+export OMP_PROC_BIND=close
 if [ -n "$SLURM_CPUS_PER_TASK" ]; then
   export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 else
   export OMP_NUM_THREADS=1
 fi
 
-$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 get_dv_from_file.py ./projects/lsst_y1/generate_dv_post.yaml ./projects/lsst_y1/emulator_output/post/samples_from_posterior.npy -f
+#$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 get_dv_from_file.py ./projects/lsst_y1/generate_dv_lhs_3x2.yaml ./projects/lsst_y1/emulator_output_3x2/lhs/dvs_for_training_800k/train_2_samples.npy -f
+$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 generate_dv_lhs_3x2.py ./projects/lsst_y1/generate_dv_lhs_3x2_wcdm.yaml -f
