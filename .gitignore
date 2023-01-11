@@ -7,6 +7,7 @@ chains/
 emulator_output/
 emulator_output_3x2/
 emulator_output_wcdm/
+emulator_output_3x2_wcdm/
 emulator_validation/
 EXAMPLE_EVALUATE1.yaml
 EXAMPLE_EVALUATE2.yaml

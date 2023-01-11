@@ -317,12 +317,13 @@ class NNEmulator:
         assert self.trained, "The emulator needs to be trained first before predicting"
 
         with torch.no_grad():
-            X_mean = self.X_mean.clone().detach().to(self.device).float()
-            X_std  = self.X_std.clone().detach().to(self.device).float()
+            X_mean = self.X_mean.clone().detach().to(self.device).double()
+            X_std  = self.X_std.clone().detach().to(self.device).double()
 
-            y_pred = self.model.eval()((X.to(self.device) - X_mean) / X_std).float().cpu() * self.dv_max
-            
-        return y_pred.float().numpy()
+            y_pred = self.model.eval()((X.to(self.device) - X_mean) / X_std).double().cpu() * self.dv_std #normalization
+        
+        y_pred = y_pred @ torch.Tensor(np.transpose(self.evecs)) + self.dv_fid #change of basis
+        return y_pred.double().numpy()
 
     def save(self, filename):
         torch.save(self.model, filename)
@@ -337,10 +338,13 @@ class NNEmulator:
         self.trained = True
         self.model = torch.load(filename, map_location)
         with h5.File(filename + '.h5', 'r') as f:
-            self.X_mean = torch.Tensor(f['X_mean'][:]).float()
-            self.X_std  = torch.Tensor(f['X_std'][:]).float()
-            self.dv_fid = torch.Tensor(f['dv_fid'][:]).float()
-            self.dv_std = torch.Tensor(f['dv_std'][:]).float()
-            self.dv_max = torch.Tensor(f['dv_max'][:]).float()
+            self.X_mean = torch.Tensor(f['X_mean'][:]).double()
+            self.X_std  = torch.Tensor(f['X_std'][:]).double()
+            self.dv_fid = torch.Tensor(f['dv_fid'][:]).double()
+            self.dv_std = torch.Tensor(f['dv_std'][:]).double()
+            self.dv_max = torch.Tensor(f['dv_max'][:]).double()
+            self.cov    = torch.Tensor(f['cov'][:]).double()
+            self.evecs  = torch.Tensor(f['evecs'][:]).double()
+            self.evecs_inv  = torch.Tensor(f['evecs_inv'][:]).double()
 
 
