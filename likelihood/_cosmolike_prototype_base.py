@@ -3,7 +3,8 @@ from __future__ import absolute_import, division, print_function
 import os
 import numpy as np
 import scipy
-from scipy.interpolate import UnivariateSpline
+#from scipy.interpolate import UnivariateSpline
+from scipy.interpolate import CubicSpline, interp1d
 import sys
 import time
 import os.path
@@ -124,8 +125,8 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.z_interp_1D[0] = 0
 
     # COLA begins
-    self.z_interp_2D = np.linspace(0,2.0,100)
-    self.z_interp_2D = np.concatenate((self.z_interp_2D, np.linspace(2.0,10.0,50)),axis=0)
+    self.z_interp_2D = np.linspace(0,2.0,95)
+    self.z_interp_2D = np.concatenate((self.z_interp_2D, np.linspace(2.0,10.0,5)),axis=0)
     self.z_interp_2D[0] = 0
     # COLA ends
 
@@ -293,6 +294,11 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     tmp1 = PKNL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
     tmp2 = PKL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
 
+    #JONATHAN BEGINS
+    log10k_interp_2D = self.log10k_interp_2D - np.log10(h)
+    #JONATHAN ENDS
+
+
     # COLA begins
     params = {
         'Omm'  : self.provider.get_param("omegam"),
@@ -332,9 +338,10 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     #  lnPL[i::self.len_z_interp_2D] = tmp2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
     # COLA ends
 
+    #JONATHAN BEGINS
     # Cosmolike wants k in h/Mpc
-    log10k_interp_2D = self.log10k_interp_2D - np.log10(h)
-    
+    #log10k_interp_2D = self.log10k_interp_2D - np.log10(h)
+    #JONATHAN ENDS
 
 
     # Compute chi(z) - convert to Mpc/h
