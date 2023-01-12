@@ -8,18 +8,23 @@ from scipy.interpolate import CubicSpline, interp1d
 import sys
 import time
 import os.path
-
 # Local
 from cobaya.likelihoods.base_classes import DataSetLikelihood
 from cobaya.log import LoggedError
 from getdist import IniFile
-
 # COLA begins
 import euclidemu2
 # sys.path.append('') - include the Emulators folder in sys path
 # COLA ends
 
 import cosmolike_lsst_y1_interface as ci
+
+#JONATHAN begins
+emu_path = './projects/lsst_y1/Emulators/halofit_emulator/'
+sys.path.insert(0,emu_path)
+import halofit_emulator
+print('IMPORTED EMULATOR!!!!')
+#JONATHAN ends
 
 # default is best fit LCDM - just need to be an ok Cosmology
 default_omega_matter = 0.315
@@ -113,7 +118,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.force_cache_false = False
 
     # COLA begins
-    self.non_linear_emul = 4
+    self.non_linear_emul = 5
     # COLA ends
 
     # ------------------------------------------------------------------------
@@ -216,6 +221,38 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     elif self.non_linear_emul == 4:
       self.emulator = ee2 = euclidemu2.PyEuclidEmulator()
+
+    elif self.non_linear_emul == 5:
+      print('hi')
+      lhs_path = emu_path + 'lhs.txt'
+      Om_lhs = np.loadtxt(lhs_path, usecols = 0)
+      Ob_lhs = np.loadtxt(lhs_path, usecols = 1)
+      ns_lhs = np.loadtxt(lhs_path, usecols = 2)
+      As_lhs = np.loadtxt(lhs_path, usecols = 3)
+      h_lhs = np.loadtxt(lhs_path, usecols = 4)
+
+      norm_Om_lhs = [halofit_emulator.normalize_param(halofit_emulator.param_mins[0], halofit_emulator.param_maxs[0], Om_) for Om_ in Om_lhs]
+      norm_Ob_lhs = [halofit_emulator.normalize_param(halofit_emulator.param_mins[1], halofit_emulator.param_maxs[1], Ob_) for Ob_ in Ob_lhs]
+      norm_ns_lhs = [halofit_emulator.normalize_param(halofit_emulator.param_mins[2], halofit_emulator.param_maxs[2], ns_) for ns_ in ns_lhs]
+      norm_As_lhs = [halofit_emulator.normalize_param(halofit_emulator.param_mins[3], halofit_emulator.param_maxs[3], As_) for As_ in As_lhs]
+      norm_h_lhs = [halofit_emulator.normalize_param(halofit_emulator.param_mins[4], halofit_emulator.param_maxs[4], h_) for h_ in h_lhs]
+
+      lhs = [[norm_Om_lhs[i], norm_Ob_lhs[i], norm_ns_lhs[i], norm_As_lhs[i], norm_h_lhs[i]] for i in range(halofit_emulator.num_points)]
+
+      qs_reduced2 = []
+      pcas2 = []
+      means2 = []
+      for j in range(len(halofit_emulator.redshifts_ee2)):
+          mean_file_path = emu_path + '/means/z' + "{:.3f}".format(halofit_emulator.redshifts_ee2[j]) + '.txt'
+          pc_file_path = emu_path + '/PCs/z' + "{:.3f}".format(halofit_emulator.redshifts_ee2[j]) + '.txt'
+          data_file_path = emu_path + '/data/z' + "{:.3f}".format(halofit_emulator.redshifts_ee2[j]) + '.txt'
+    
+          means2.append(np.loadtxt(mean_file_path))
+          pcas2.append(np.loadtxt(pc_file_path))
+          qs_reduced2.append(np.loadtxt(data_file_path))
+      emulator3 = halofit_emulator.initialize_emulator(qs_reduced2,lhs)
+      #self.emulator = halofit_emulator
+      #hi
 
     else:
       raise LoggedError(self.log, "non_linear_emul = %d is an invalid option", non_linear_emul)
