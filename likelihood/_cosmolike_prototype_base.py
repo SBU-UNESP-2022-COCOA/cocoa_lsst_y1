@@ -20,10 +20,12 @@ import euclidemu2
 import cosmolike_lsst_y1_interface as ci
 
 #JONATHAN begins
+import matplotlib
+import matplotlib.pyplot as plt
+
 emu_path = './projects/lsst_y1/Emulators/halofit_emulator/'
 sys.path.insert(0,emu_path)
 import halofit_emulator
-print('IMPORTED EMULATOR!!!!')
 #JONATHAN ends
 
 # default is best fit LCDM - just need to be an ok Cosmology
@@ -118,7 +120,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.force_cache_false = False
 
     # COLA begins
-    self.non_linear_emul = 5
+    self.non_linear_emul = 1
     # COLA ends
 
     # ------------------------------------------------------------------------
@@ -210,20 +212,27 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     # ------------------------------------------------------------------------
     # COLA begins
-    if self.non_linear_emul == 1:
-      self.emulator = pce_emu # This is a reference to the module
 
+    
+    if self.non_linear_emul == 1:
+      #EE2
+      self.emulator = ee2 = euclidemu2.PyEuclidEmulator()
+    
     elif self.non_linear_emul == 2:
+      #Halofit
+      #DO NOTHING
+      pass
+    elif self.non_linear_emul == 3:
       self.emulator = gp_emu
 
-    elif self.non_linear_emul == 3:
-      self.emulator = nn_emu
-
     elif self.non_linear_emul == 4:
-      self.emulator = ee2 = euclidemu2.PyEuclidEmulator()
-
+      self.emulator = nn_emu
+    
     elif self.non_linear_emul == 5:
-      print('hi')
+      self.emulator = pce_emu # This is a reference to the module
+    
+    elif self.non_linear_emul == 6:
+      #Halofit Emulator
       lhs_path = emu_path + 'lhs.txt'
       Om_lhs = np.loadtxt(lhs_path, usecols = 0)
       Ob_lhs = np.loadtxt(lhs_path, usecols = 1)
@@ -238,19 +247,19 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       norm_h_lhs = [halofit_emulator.normalize_param(halofit_emulator.param_mins[4], halofit_emulator.param_maxs[4], h_) for h_ in h_lhs]
 
       lhs = [[norm_Om_lhs[i], norm_Ob_lhs[i], norm_ns_lhs[i], norm_As_lhs[i], norm_h_lhs[i]] for i in range(halofit_emulator.num_points)]
-
-      qs_reduced2 = []
-      pcas2 = []
-      means2 = []
+      self.ks_emu = np.loadtxt(emu_path + '/ks.txt')
+      self.qs_reduced2 = []
+      self.pcas2 = []
+      self.means2 = []
       for j in range(len(halofit_emulator.redshifts_ee2)):
           mean_file_path = emu_path + '/means/z' + "{:.3f}".format(halofit_emulator.redshifts_ee2[j]) + '.txt'
           pc_file_path = emu_path + '/PCs/z' + "{:.3f}".format(halofit_emulator.redshifts_ee2[j]) + '.txt'
           data_file_path = emu_path + '/data/z' + "{:.3f}".format(halofit_emulator.redshifts_ee2[j]) + '.txt'
     
-          means2.append(np.loadtxt(mean_file_path))
-          pcas2.append(np.loadtxt(pc_file_path))
-          qs_reduced2.append(np.loadtxt(data_file_path))
-      emulator3 = halofit_emulator.initialize_emulator(qs_reduced2,lhs)
+          self.means2.append(np.loadtxt(mean_file_path))
+          self.pcas2.append(np.loadtxt(pc_file_path))
+          self.qs_reduced2.append(np.loadtxt(data_file_path))
+      self.emulator = halofit_emulator.initialize_emulator(self.qs_reduced2,lhs)
       #self.emulator = halofit_emulator
       #hi
 
@@ -265,6 +274,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     return {
       "H0": None,
       "omegam": None,
+      "omegab": None,
       "Pk_interpolator": {
         "z": self.z_interp_2D,
         "k_max": self.kmax_boltzmann * self.accuracyboost,
@@ -325,61 +335,83 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     lnPL = np.empty(self.len_pkz_interp_2D)
     lnPNL = np.empty(self.len_pkz_interp_2D)
-    #for i in range(self.len_k_interp_2D) :
-    #  lnPNL[i*self.len_z_interp_2D:(i+1)*self.len_z_interp_2D] = PKNL.logP(self.z_interp_2D, self.k_interp_2D[i])[0:self.len_z_interp_2D]
-    #  lnPL[i*self.len_z_interp_2D:(i+1)*self.len_z_interp_2D] = PKL.logP(self.z_interp_2D, self.k_interp_2D[i])[0:self.len_z_interp_2D]
     tmp1 = PKNL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
     tmp2 = PKL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
 
-    #JONATHAN BEGINS
+    #This is converting ks from 1/Mpc to h/Mpc
     log10k_interp_2D = self.log10k_interp_2D - np.log10(h)
-    #JONATHAN ENDS
-
-
-    # COLA begins
-    params = {
-        'Omm'  : self.provider.get_param("omegam"),
-        'As'   : self.provider.get_param("As"),
-        'Omb'  : self.provider.get_param("omegab"),
-        'ns'   : self.provider.get_param("ns"),
-        'h'    : self.provider.get_param("H0")/100.0,
-        'mnu'  : self.provider.get_param("mnu"), 
-        'w'    : -1,
-        'wa'   : 0.0
-      }
-    kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D)) # Need to return these ks in emulator
-    kbt, tmp_bt = self.emulator.get_boost(params, self.z_interp_2D, kbt)
-    logkbt = np.log10(kbt)
 
     for i in range(self.len_z_interp_2D):
       lnPL[i::self.len_z_interp_2D]  = tmp2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
     lnPL += np.log((h**3)) 
 
-    for i in range(self.len_z_interp_2D):    
-      interp = interp1d(logkbt, 
-          np.log(tmp_bt[i]), 
-          kind = 'linear', 
-          fill_value = 'extrapolate', 
-          assume_sorted = True
-        )
+    # COLA begins
 
-      lnbt = interp(log10k_interp_2D)
-      lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
-  
-      lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnbt
+    if self.non_linear_emul == 2:
+      #Halofit
+      for i in range(self.len_z_interp_2D):
+        lnPNL[i::self.len_z_interp_2D] = tmp1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]   
+      lnPNL += np.log((h**3))  
+
+    else:
+      #Emul begins
+      params = {
+          'Omm'  : self.provider.get_param("omegam"),
+          'As'   : self.provider.get_param("As"),
+          'Omb'  : self.provider.get_param("omegab"),
+          'ns'   : self.provider.get_param("ns"),
+          'h'    : self.provider.get_param("H0")/100.0,
+          'mnu'  : self.provider.get_param("mnu"), 
+          'w'    : -1,
+          'wa'   : 0.0
+        }
+
+      #These kbt are in units of h/Mpc .
+      kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D)) # Need to return these ks in emulator
+
+      if self.non_linear_emul == 1:
+        #EE2
+        kbt, tmp_bt = self.emulator.get_boost(params, self.z_interp_2D, kbt)
+        logkbt = np.log10(kbt)
+        for i in range(self.len_z_interp_2D):    
+          interp = interp1d(logkbt, 
+              np.log(tmp_bt[i]), 
+              kind = 'linear', 
+              fill_value = 'extrapolate', 
+              assume_sorted = True
+            )
+          lnbt = interp(log10k_interp_2D)
+          lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
+          lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnbt
+        plt.semilogx(self.k_interp_2D, tmp1[0:1200] + np.log((h**3)), label = 'halofit')
+        #plt.semilogx(10**(log10k_interp_2D + np.log10(h)), lnPNL[0::self.len_z_interp_2D], label = 'EE2')
+        plt.semilogx(self.k_interp_2D, lnPNL[0::self.len_z_interp_2D], label = 'EE2')
+        plt.legend(loc='best')
+        plt.savefig('/gpfs/projects/MirandaGroup/jonathan/cocoa2/Cocoa/ee2_vs_hf_pk.pdf')
+
+      
+      elif self.non_linear_emul == 6:
+        #Halofit Emulator
+        param_names = ['Omm','Omb', 'ns', 'As', 'h']
+        params_ = [halofit_emulator.normalize_param(halofit_emulator.param_mins[i], halofit_emulator.param_maxs[i], params[param_names[i]]) for i in range(len(param_names))]
+        kbt_cut = [entry for entry in kbt if entry <= 3.0] 
+        tmp_qk, emu_uncert = halofit_emulator.emulate_all_zs(params_, self.emulator, self.qs_reduced2, self.pcas2, self.means2, self.ks_emu, kbt_cut, halofit_emulator.redshifts_ee2, self.z_interp_2D)
+        logkbt_cut = np.log10(kbt_cut)
+        for i in range(self.len_z_interp_2D):    
+          interp = interp1d(logkbt_cut, 
+              tmp_qk[i], 
+              kind = 'linear', 
+              fill_value = 'extrapolate', 
+              assume_sorted = True
+            )
+          qk = interp(log10k_interp_2D)
+          pk_l = np.exp(lnPL[i::self.len_z_interp_2D])
+          pk_nw = halofit_emulator.smooth_bao(kbt, pk_l)
+          pk_smeared = halofit_emulator.smear_bao(kbt, pk_l, pk_nw)
+          qk[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
+          lnPNL[i::self.len_z_interp_2D] = np.log(pk_smeared) + qk
+          
     # COLA ends
-
-    # COLA begins - we don't need these lines
-    #for i in range(self.len_z_interp_2D):
-    #  lnPNL[i::self.len_z_interp_2D] = tmp1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
-    #  lnPL[i::self.len_z_interp_2D] = tmp2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
-    # COLA ends
-
-    #JONATHAN BEGINS
-    # Cosmolike wants k in h/Mpc
-    #log10k_interp_2D = self.log10k_interp_2D - np.log10(h)
-    #JONATHAN ENDS
-
 
     # Compute chi(z) - convert to Mpc/h
     chi = self.provider.get_comoving_radial_distance(self.z_interp_1D) * h
