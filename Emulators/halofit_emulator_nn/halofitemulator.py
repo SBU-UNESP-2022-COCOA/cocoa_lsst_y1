@@ -65,7 +65,11 @@ def get_boost(cosmo_params, ks = np.logspace(-3,2,1200), z = emu.redshifts):
         emulated_log_boost = emulated_norm_log_boost * (maxs[i] - mins[i]) + mins[i] # Rescaling log boost
         boost_in_cola_ks_zs[i] = np.exp(emulated_log_boost)
     
-    #if np.array_equal(ks, emu.ks_default_precision) and np.array_equal(z, emu.redshifts):
-    boost_in_desired_ks_zs = boost_in_cola_ks_zs
+    if np.array_equal(ks, emu.ks) and np.array_equal(z, emu.redshifts):
+        boost_in_desired_ks_zs = boost_in_cola_ks_zs
+    else:
+        # To match the input k and z, we interpolate
+        boost_interpolator = interp2d(emu.ks, emu.redshifts, boost_in_cola_ks_zs)
+        boost_in_desired_ks_zs = boost_interpolator(ks, z)
     
     return ks, boost_in_desired_ks_zs    
