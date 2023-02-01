@@ -218,7 +218,7 @@ def inv_pc(pcs_,mean_,vec):
     for pc_index in range(len(pcs_)):
         expanded_q += vec[pc_index]*pcs_[pc_index]
     return expanded_q
-def emulate_all_zs(params_, all_gps, qs_reduced, all_pcs_, all_means_, ks_out, zs_out):
+def emulate_all_zs(params_, all_gps, qs_reduced, all_pcs_, all_means_, ks_cola, zs_cola, ks_out, zs_out):
     emulated_qs_ = []
     emulation_uncertainties = []
     for z_index in range(len(redshifts_ee2)):
@@ -236,9 +236,9 @@ def emulate_all_zs(params_, all_gps, qs_reduced, all_pcs_, all_means_, ks_out, z
         emulated_qs_.append(emulated_q)
         emulation_uncertainty = math.sqrt(emulation_uncertainty2)
         emulation_uncertainties.append(emulation_uncertainty)
-    emulated_qs_interp = interp2d(ks,redshifts_ee2,emulated_qs_)
-    emulated_qs = emulated_qs_interp(ks_out, zs_out)
-    return emulated_qs, emulation_uncertainties
+    #emulated_qs_interp = interp2d(ks_cola,zs_cola,emulated_qs_)
+    #emulated_qs = emulated_qs_interp(ks_out, zs_out)
+    return emulated_qs_, emulation_uncertainties
 def reduce_kbins(ks_in, ks_out, cola_vec_full):
     interpolated_vec = CubicSpline(ks_in, cola_vec_full)
     cola_vec_reduced = interpolated_vec(ks_out)

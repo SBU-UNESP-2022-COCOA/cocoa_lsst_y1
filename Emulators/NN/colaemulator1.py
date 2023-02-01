@@ -5,6 +5,9 @@ import numpy as np
 import emulator_funcs as emu
 from scipy.interpolate import interp2d
 from tensorflow import keras
+import os
+cwd = os.getcwd()
+emulator_path=cwd+'/projects/lsst_y1/Emulators/NN'
 
 num_of_points = 400 # How many simulations
 simulation_precision = 'default' # 'default' or 'high'
@@ -12,21 +15,21 @@ simulation_precision = 'default' # 'default' or 'high'
 ###### First of all: load the NN models
 nn_models = []
 for i in range(len(emu.redshifts)):
-    nn_models.append(keras.models.load_model(f'./NN_MODELS_Q/COLA_EMU_1_NHID=2_NEURONS=1024_z={emu.redshifts[i]:.3f}'))
+    nn_models.append(keras.models.load_model(emulator_path+f'/NN_MODELS_Q/COLA_EMU_1_NHID=2_NEURONS=1024_z={emu.redshifts[i]:.3f}'))
         
 ###### Loading mins and maxs for rescaling normalized log boosts and PC components
-mins, maxs = np.loadtxt('./Data/mins_maxs.txt', unpack=True)
-mins_pcs, maxs_pcs = np.loadtxt('./Data/mins_maxs_pcs.txt', unpack=True)
+mins, maxs = np.loadtxt(emulator_path+'/Data/mins_maxs.txt', unpack=True)
+mins_pcs, maxs_pcs = np.loadtxt(emulator_path+'/Data/mins_maxs_pcs.txt', unpack=True)
 
 ###### Loading average log boosts for the manual PCA reconstruction
 averages = np.zeros((len(emu.redshifts), len(emu.ks_default_precision)))
 for i in range(len(emu.redshifts)):
-    averages[i] = np.loadtxt('./Data/Averages/average_{:.2f}.txt'.format(emu.redshifts[i]))
+    averages[i] = np.loadtxt(emulator_path+'/Data/Averages/average_{:.2f}.txt'.format(emu.redshifts[i]))
 
 ###### Loading PC bases for all redshifts
 principal_components = np.zeros((len(emu.redshifts), 6, len(emu.ks_default_precision)))
 for i in range(len(emu.redshifts)):
-    principal_components[i,:,:] = np.loadtxt('./Data/PC_Basis/components_{:.2f}.txt'.format(emu.redshifts[i]))
+    principal_components[i,:,:] = np.loadtxt(emulator_path+'/Data/PC_Basis/components_{:.2f}.txt'.format(emu.redshifts[i]))
 
 ##### MAIN FUNCTION: get_boost
 def get_boost(cosmo_params, ks = emu.ks_default_precision, z = emu.redshifts):
