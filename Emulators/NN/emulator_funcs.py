@@ -10,6 +10,9 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from tensorflow import keras
 from tensorflow.keras import layers
+import os
+cwd = os.getcwd()
+emu_path = cwd + '/projects/lsst_y1/Emulators/NN/'
 #------------------------------------------------------------------------------------------------------------
 # Parameter space
 params = ['h', 'Omegab', 'Omegam', 'As10to9', 'ns']
@@ -41,8 +44,8 @@ ref['ns'] = 0.96
 # Define k, z bins
 redshifts = np.array([9.182, 7.690, 6.579, 5.720, 5.036, 4.478, 4.015, 3.624, 3.289, 3.000, 2.750, 2.529, 2.333, 2.158, 2.000, 1.824, 1.667, 1.526, 1.400, 1.286, 1.182, 1.087, 1.000, 0.929, 0.862, 0.800, 0.742, 0.688, 0.636, 0.588, 0.543, 0.500, 0.457, 0.417, 0.378, 0.342, 0.308, 0.275, 0.244, 0.214, 0.186, 0.159, 0.133, 0.109, 0.085, 0.062, 0.041, 0.020, 0.000])
 redshifts = np.flip(redshifts)
-ks = np.genfromtxt('./Data/Reference_Cosmology_COLA/output/pofk_ref_total_z0.000.txt', unpack=True, usecols=(0))
-ks_high_precision = np.genfromtxt('./Data/Reference_Cosmology_COLA/pofk_ref_highprecision_total_z0.000.txt', unpack=True, usecols=(0))
+ks = np.genfromtxt(emu_path+'./Data/Reference_Cosmology_COLA/output/pofk_ref_total_z0.000.txt', unpack=True, usecols=(0))
+ks_high_precision = np.genfromtxt(emu_path+'./Data/Reference_Cosmology_COLA/pofk_ref_highprecision_total_z0.000.txt', unpack=True, usecols=(0))
 ks_default_precision = ks[:251] # We are only going to k=1.54
 ks_high_precision = ks_high_precision[:256] # only going to k=3.14
 #------------------------------------------------------------------------------------------------------------

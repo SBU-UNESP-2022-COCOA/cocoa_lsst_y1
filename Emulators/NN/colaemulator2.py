@@ -11,7 +11,7 @@ emulator_path=cwd+'/projects/lsst_y1/Emulators/NN'
 
 num_of_points = 400 # How many simulations
 simulation_precision = 'high' # 'default' or 'high'
-
+ks_high_precision = emu.ks_high_precision
 ###### First of all: load the NN models
 nn_models = []
 for i in range(len(emu.redshifts)):

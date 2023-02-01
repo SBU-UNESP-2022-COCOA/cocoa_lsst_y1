@@ -2,7 +2,7 @@
 ####### Author: João Victor S. Rebouças, October 2022
 ####### To use: clone Github repo, import this python script in your work.
 import numpy as np
-import emulator_funcs as emu
+import emulator_funcs_halofit as emu
 from scipy.interpolate import interp2d
 from tensorflow import keras
 import os
