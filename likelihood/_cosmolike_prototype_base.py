@@ -408,9 +408,6 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       for i in range(self.len_z_interp_2D):
         lnPNL[i::self.len_z_interp_2D] = tmp1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]   
       lnPNL += np.log((h**3))  
-
-    else:
-      #Emul begins
       
        
     elif self.non_linear_emul == 4:
