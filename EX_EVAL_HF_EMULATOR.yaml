@@ -6,7 +6,7 @@ likelihood:
   lsst_y1.lsst_cosmic_shear:
     path: ./external_modules/data/lsst_y1
     print_datavector: False
-    print_datavector_file: "./projects/lsst_y1/chains/example1_lsst_y1_theory.modelvector"
+    print_datavector_file: "./projects/lsst_y1/data/ex_eval_hf_mead.modelvector"
 
 params:
   As_1e9:
@@ -142,7 +142,7 @@ theory:
     stop_at_error: False
     use_renames: True
     extra_args:
-      halofit_version: takahashi
+      halofit_version: mead
       AccuracyBoost: 1.15
       lens_potential_accuracy: 1.0
       num_massive_neutrinos: 1
