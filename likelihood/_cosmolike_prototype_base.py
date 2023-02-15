@@ -18,24 +18,24 @@ import euclidemu2
 import matplotlib.pyplot as plt # To check if P(k) is being correctly generated
 #from scipy.signal import savgol_filter
 
-# # Importing NN Halofit Emulator
+# Importing NN Halofit Emulator
 # nn_hf_path = './projects/lsst_y1/Emulators/halofit_emulator_nn'
 # sys.path.append(nn_hf_path)
 # import halofitemulator
 
-# # Importing high-precision COLA NN Emulator
-# nn_cola2_path = './projects/lsst_y1/Emulators/NN'
-# sys.path.append(nn_cola2_path)
-# import colaemulator2
+# Importing high-precision COLA NN Emulator
+nn_cola2_path = './external_modules/code/COLA_Emulators/NN'
+sys.path.append(nn_cola2_path)
+import colaemulator2
 
 # Importing GP Halofit Emulator
 #gp_hf_path = './projects/lsst_y1/Emulators'
 #sys.path.append(gp_hf_path)
 #from halofit_emulator import halofit_emulator
 
-gp_cola_path = './projects/lsst_y1/Emulators/GP'
-sys.path.append(gp_cola_path)
-from cola_emulator2 import cola_emulator
+#gp_cola_path = './projects/lsst_y1/Emulators/GP'
+#sys.path.append(gp_cola_path)
+#from cola_emulator2 import cola_emulator
 # COLA ends
 
 
@@ -133,7 +133,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.force_cache_false = False
 
     # COLA begins
-    self.non_linear_emul = 3  # Set which emulator to use
+    self.non_linear_emul = 4  # Set which emulator to use
                               # 0: linear PK
                               # 1: EE2
                               # 2: Halofit
@@ -238,10 +238,10 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       self.emulator = ee2 = euclidemu2.PyEuclidEmulator()
     
     elif self.non_linear_emul == 2:
-      #Halofit
+      # Halofit
       print('Using regular Halofit')
     elif self.non_linear_emul == 3:
-      #GP COLA
+      # GP COLA
       emu_path = gp_cola_path + '/cola_emulator2/'
       lhs_path = emu_path + 'lhs_norm.txt'
       lhs = np.loadtxt(lhs_path)
@@ -263,13 +263,13 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     elif self.non_linear_emul == 4:
       self.emulator = colaemulator2
-      print('Using high-precision COLA NN emulator')
+      print('[nonlinear] Using high-precision COLA NN emulator')
     
     elif self.non_linear_emul == 5:
       self.emulator = pce_emu
     
     elif self.non_linear_emul == 6:
-      #Halofit Emulator
+      # Halofit Emulator
       emu_path = gp_hf_path + '/halofit_emulator/'
       lhs_path = emu_path + 'lhs_norm.txt'
       lhs = np.loadtxt(lhs_path)
@@ -289,7 +289,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     elif self.non_linear_emul == 7:
       # NN Halofit Emulator
-      print('Using NN Halofit (mead) Emulator')
+      print('Using NN Halofit (Takahashi) Emulator')
       self.emulator = halofitemulator
 
     elif self.non_linear_emul == 0:
