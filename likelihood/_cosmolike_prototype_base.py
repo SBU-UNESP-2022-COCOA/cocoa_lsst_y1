@@ -16,7 +16,7 @@ from getdist import IniFile
 # COLA begins
 import euclidemu2
 import matplotlib.pyplot as plt # To check if P(k) is being correctly generated
-#from scipy.signal import savgol_filter
+from scipy.signal import savgol_filter
 
 # Importing NN Halofit Emulator
 # nn_hf_path = './projects/lsst_y1/Emulators/halofit_emulator_nn'
@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt # To check if P(k) is being correctly generated
 # Importing high-precision COLA NN Emulator
 nn_cola2_path = './external_modules/code/COLA_Emulators/NN'
 sys.path.append(nn_cola2_path)
-import colaemulator2
+import cola_emulator_nn_high_precision
 
 # Importing GP Halofit Emulator
 #gp_hf_path = './projects/lsst_y1/Emulators'
@@ -235,7 +235,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     # COLA begins
     if self.non_linear_emul == 1:
       # EE2
-      self.emulator = ee2 = euclidemu2.PyEuclidEmulator()
+      self.emulator = ee2 = euclidemu2#.PyEuclidEmulator()
     
     elif self.non_linear_emul == 2:
       # Halofit
@@ -262,7 +262,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       self.emulator = cola_emulator.initialize_emulator(self.qs_reduced2,lhs)
 
     elif self.non_linear_emul == 4:
-      self.emulator = colaemulator2
+      self.emulator = cola_emulator_nn_high_precision
       print('[nonlinear] Using high-precision COLA NN emulator')
     
     elif self.non_linear_emul == 5:
@@ -472,14 +472,18 @@ class _cosmolike_prototype_base(DataSetLikelihood):
                 'w'    : self.provider.get_param("w"),
                 'wa'   : 0.0
                 }
-      kbt = colaemulator2.ks_high_precision # COLA ks, up until k = 3.1416 h/Mpc
+      kbt = self.emulator.cola_ks # COLA ks, up until k = 3.1416 h/Mpc
       kbt, tmp_bt = self.emulator.get_boost(params, ks = kbt, z = self.z_interp_2D[:99])
-      extrapolation_index = 230
-      print('Extrapolating at k = ',kbt[extrapolation_index-1] )
+      
       logkbt = np.log10(kbt)
       for i in range(self.len_z_interp_2D-1): # the last entry in z_interp_2D is bigger than 10.
-        interp = interp1d(logkbt[:extrapolation_index], 
-            np.log(tmp_bt[i][:extrapolation_index]), 
+        # Filtering last 15 points in boost
+        num_of_points_to_filter = 21
+        last_points = tmp_bt[i][-num_of_points_to_filter:]
+        last_points_filtered = savgol_filter(last_points, num_of_points_to_filter, 1)
+        cola_boost_filtered = np.concatenate((tmp_bt[i][:-num_of_points_to_filter], last_points_filtered))
+        interp = interp1d(logkbt, 
+            np.log(cola_boost_filtered), 
             kind = 'linear', 
             fill_value = 'extrapolate', 
             assume_sorted = True
@@ -489,10 +493,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnbt
       # For the last z = 10, I use regular Halofit
       lnPNL[99::self.len_z_interp_2D] = tmp1[99*self.len_k_interp_2D:(99+1)*self.len_k_interp_2D] + np.log(h**3)
-      # Plot to test
-      # plt.semilogx(10**log10k_interp_2D, lnPNL[0::self.len_z_interp_2D])
-      # plt.semilogx(10**log10k_interp_2D, tmp1[0*self.len_k_interp_2D:(0+1)*self.len_k_interp_2D] + np.log(h**3))
-      # plt.savefig('cola_boost_vs_halofit.pdf')
+
 
 
     elif self.non_linear_emul == 6:
