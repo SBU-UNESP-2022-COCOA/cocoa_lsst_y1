@@ -14,7 +14,7 @@ likelihood:
 
   lsst_y1.lsst_cosmic_shear:
     path: ./external_modules/data/lsst_y1
-    data_file: LSST_Y1.dataset
+    data_file: LSST_Y1_Astress.dataset
     print_datavector: False
     non_linear_emul: 1
     kmax_boltzmann: 5.0
@@ -223,4 +223,4 @@ sampler:
     # ---------------------------------------------------------------------
     Rminus1_single_split: 4
 
-output: ./projects/lsst_y1/chains/EXAMPLE_MCMC3
+output: ./projects/lsst_y1/chains/EXAMPLE_MCMC20

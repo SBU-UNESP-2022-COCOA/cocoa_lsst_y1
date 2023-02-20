@@ -171,6 +171,11 @@ sampler:
       LSST_M3: 0.0
       LSST_M4: 0.0
       LSST_M5: 0.0
+      LSST_PM1: 0.0
+      LSST_PM2: 0.0
+      LSST_PM3: 0.0
+      LSST_PM4: 0.0
+      LSST_PM5: 0.0
 
 output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE3
 

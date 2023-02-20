@@ -319,14 +319,13 @@ class NNEmulator:
         with torch.no_grad():
             X_mean = self.X_mean.clone().detach().to(self.device).double()
             X_std  = self.X_std.clone().detach().to(self.device).double()
-
             y_pred = self.model.eval()((X.to(self.device) - X_mean) / X_std).double().cpu() * self.dv_std #normalization
-        
-        y_pred = y_pred @ torch.Tensor(np.transpose(self.evecs)) + self.dv_fid #change of basis
+            y_pred = y_pred @ torch.Tensor(np.transpose(self.evecs)) + self.dv_fid #change of basis
         return y_pred.double().numpy()
 
     def save(self, filename):
         torch.save(self.model, filename)
+        
         with h5.File(filename + '.h5', 'w') as f:
             f['X_mean'] = self.X_mean
             f['X_std']  = self.X_std
@@ -347,4 +346,32 @@ class NNEmulator:
             self.evecs  = torch.Tensor(f['evecs'][:]).double()
             self.evecs_inv  = torch.Tensor(f['evecs_inv'][:]).double()
 
+    # def predict(self, X):
+    #     assert self.trained, "The emulator needs to be trained first before predicting"
 
+    #     with torch.no_grad():
+    #         X_mean = self.X_mean.clone().detach().to(self.device).float()
+    #         X_std  = self.X_std.clone().detach().to(self.device).float()
+
+    #         y_pred = self.model.eval()((X.to(self.device) - X_mean) / X_std).float().cpu() * self.dv_max
+            
+    #     return y_pred.float().numpy()
+
+    # def save(self, filename):
+    #     torch.save(self.model, filename)
+    #     with h5.File(filename + '.h5', 'w') as f:
+    #         f['X_mean'] = self.X_mean
+    #         f['X_std']  = self.X_std
+    #         f['dv_fid'] = self.dv_fid
+    #         f['dv_std'] = self.dv_std
+    #         f['dv_max'] = self.dv_max
+        
+    # def load(self, filename, map_location):
+    #     self.trained = True
+    #     self.model = torch.load(filename, map_location)
+    #     with h5.File(filename + '.h5', 'r') as f:
+    #         self.X_mean = torch.Tensor(f['X_mean'][:]).float()
+    #         self.X_std  = torch.Tensor(f['X_std'][:]).float()
+    #         self.dv_fid = torch.Tensor(f['dv_fid'][:]).float()
+    #         self.dv_std = torch.Tensor(f['dv_std'][:]).float()
+    #         self.dv_max = torch.Tensor(f['dv_max'][:]).float()

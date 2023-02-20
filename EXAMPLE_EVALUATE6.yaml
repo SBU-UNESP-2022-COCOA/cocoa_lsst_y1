@@ -4,8 +4,10 @@ stop_at_error: True
 
 likelihood:
   lsst_y1.lsst_emu_cs_lcdm:
-    emu_file: "./projects/lsst_y1/emulator_output/models/model"
-    data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory_no_scale_cut.modelvector"
+    emu_file: "./projects/lsst_y1/emulator_output/models/800k_lhs_only/model_1"
+    #emu_file: "./projects/lsst_y1/emulator_output/models/800klhs_200kpost/model_1"
+    data_vector_file: "./projects/lsst_y1/data/example4_lsst_y1_theory.modelvector"
+    mask_file: "./projects/lsst_y1/data/lsst_3x2_linear.mask" #dv is also generated with linear mask
     n_dim: 13 
 
 params:
@@ -155,11 +157,11 @@ sampler:
       omegam: 0.3166
       omegam_growth: 0.3166
       mnu: 0.06
-      LSST_DZ_S1: 0.0414632
-      LSST_DZ_S2: 0.00147332
-      LSST_DZ_S3: 0.0237035
-      LSST_DZ_S4: -0.0773436
-      LSST_DZ_S5: -8.67127e-05
+      LSST_DZ_S1: 0.0
+      LSST_DZ_S2: 0.0
+      LSST_DZ_S3: 0.0
+      LSST_DZ_S4: 0.0
+      LSST_DZ_S5: 0.0
 
       ###DEBUGGIN
       # omegab: 0.048
@@ -169,13 +171,13 @@ sampler:
       # LSST_DZ_S4: 0.0
       # LSST_DZ_S5: 0.0
 
-      LSST_A1_1: 0.606102
-      LSST_A1_2: -1.51541
-      LSST_M1: 0.0191832
-      LSST_M2: -0.0431752
-      LSST_M3: -0.034961
-      LSST_M4: -0.0158096
-      LSST_M5: -0.0158096
+      LSST_A1_1: 0.5
+      LSST_A1_2: 0.0
+      LSST_M1: 0.0
+      LSST_M2: 0.0
+      LSST_M3: 0.0
+      LSST_M4: 0.0
+      LSST_M5: 0.0
       # LSST_BARYON_Q1: 0.0 ### set to 0 by default, no need to overwrite
       # LSST_BARYON_Q2: 0.0
 

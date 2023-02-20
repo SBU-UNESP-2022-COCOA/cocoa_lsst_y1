@@ -12,7 +12,7 @@ likelihood:
   bao.sdss_dr12_consensus_bao:
     path: ./external_modules/data/
   lsst_y1.lsst_emu_cs_lcdm:
-    emu_file: "./projects/lsst_y1/emulator_output/models/800klhs_200kpost/model_1"
+    emu_file: "./projects/lsst_y1/emulator_output/models/800k_lhs_only/model_1"
     data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
     n_dim: 13 
 

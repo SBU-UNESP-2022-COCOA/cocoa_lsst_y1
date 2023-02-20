@@ -28,10 +28,10 @@ class lsst_emu_cs_lcdm(Likelihood):
         self.output_dims       = len(self.dv_obs)
         self.dv_len            = self.dv_len
         
-        self.mask              = np.loadtxt(self.mask_file)[:,1].astype(bool)
+        self.mask              = np.loadtxt(self.mask_file)[:,1].astype(bool)[0:self.dv_len]
         self.cov               = self.get_full_cov(self.cov_file)
 
-        self.masked_inv_cov    = np.linalg.inv(self.cov[self.mask][:,self.mask])
+        self.masked_inv_cov    = np.linalg.inv(self.cov[0:self.dv_len, 0:self.dv_len][self.mask][:,self.mask]) #firstly do truncation (e.g. only cosmic shear), secondly do masking, finally do inverse
 
         #print("full cov = ", self.cov)
         #print("mask = ", self.mask)
@@ -40,7 +40,7 @@ class lsst_emu_cs_lcdm(Likelihood):
         self.dv_fid            = np.loadtxt(self.data_vector_used_for_training)[:,1]
         self.dv_std            = np.sqrt(np.diagonal(self.cov))
 
-        self.emu               = NNEmulator(self.n_dim, self.BIN_SIZE, self.dv_fid, self.dv_std, self.masked_inv_cov, self.dv_fid, 'cpu') #should privde dv_max instead of dv_fid, but emu.load will make it correct
+        self.emu               = NNEmulator(self.n_dim, self.BIN_SIZE, self.dv_fid, self.dv_std, self.cov, self.dv_fid, 'cpu') #should privde dv_max instead of dv_fid, but emu.load will make it correct
         self.emu.load(self.emu_file, map_location=torch.device('cpu'))
 
         self.shear_calib_mask  = np.load(self.shear_calib_mask) #mask that gives 2 for cosmic shear, and 1 for gg-lensing
@@ -237,6 +237,8 @@ class lsst_emu_cs_lcdm(Likelihood):
         theta = self.get_theta(**params_values)
         model_datavector = self.get_data_vector_emu(theta)
         delta_dv = (model_datavector - self.dv_obs[0:self.dv_len])[self.mask[0:self.dv_len]]
+
+        #print("testing", len(delta_dv), len(self.mask), np.shape(self.masked_inv_cov))
 
         # ###DEBUGING
         # #print("dv_obs(used for evaluation) = ", self.dv_obs, 'with shape', np.shape(self.dv_obs), self.dv_obs[-10:])
