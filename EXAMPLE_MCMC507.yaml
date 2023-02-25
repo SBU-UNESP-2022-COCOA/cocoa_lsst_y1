@@ -3,29 +3,26 @@ debug: False
 stop_at_error: False
 
 likelihood:
-  sn.pantheon:
-    path: ./external_modules/data/sn_data
-  bao.sixdf_2011_bao:
-    path: ./external_modules/data/
-  bao.sdss_dr7_mgs:
-    path: ./external_modules/data/
-  bao.sdss_dr12_consensus_bao:
-    path: ./external_modules/data/
-  lsst_y1.lsst_emu_cs_lcdm:
-    emu_file: "./projects/lsst_y1/emulator_output/models/model_1"
+  planck_2018_highl_plik.TTTEEE:
+    path: ./external_modules/
+    clik_file: plc_3.0/hi_l/plik/plik_rd12_HM_v22b_TTTEEE_33_396.clik
+  planck_2018_lowl.EE:
+    path: ./external_modules/
+  lsst_y1.lsst_emu_cs_wcdm:
+    emu_file: "./projects/lsst_y1/emulator_output_cs_wcdm/models/model_1"
     data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
-    n_dim: 13 
+    n_dim: 15 
 
 params:
   logA:
     prior:
-      min: 2.83321
-      max: 3.21888
+      min: 1.61
+      max: 3.91
     ref:
       dist: norm
       loc: 3.0448
-      scale: 0.15
-    proposal: 0.15
+      scale: 0.05
+    proposal: 0.05
     latex: \log(10^{10} A_\mathrm{s})
     drop: true
   As:
@@ -33,29 +30,37 @@ params:
     latex: A_\mathrm{s}
   ns:
     prior:
-      min: 0.92
-      max: 1.00
+      min: 0.87
+      max: 1.07
     ref:
       dist: norm
       loc: 0.96605
       scale: 0.01
     proposal: 0.01
     latex: n_\mathrm{s}
-  H0:
+  theta_MC_100:
     prior:
-      min: 61
-      max: 73
+      min: 0.5
+      max: 10
     ref:
       dist: norm
-      loc: 67.32
-      scale: 5
-    proposal: 3
+      loc: 1.04109
+      scale: 0.001
+    proposal: 0.001
+    latex: 100\theta_\mathrm{MC}
+    drop: true
+    renames: theta
+  cosmomc_theta:
+    value: 'lambda theta_MC_100: 1.e-2*theta_MC_100'
+    derived: false
+  H0:
     latex: H_0
+    min: 20
+    max: 100
   omegabh2:
     prior:
-      dist: norm
-      loc: 0.02208 
-      scale: 0.00052
+      min: 0.01
+      max: 0.04
     ref:
       dist: norm
       loc: 0.022383
@@ -65,7 +70,7 @@ params:
   omegach2:
     prior:
       min: 0.06
-      max: 0.45
+      max: 0.2
     ref:
       dist: norm
       loc: 0.12011
@@ -75,7 +80,14 @@ params:
   mnu:
     value: 0.06
   tau:
-    value: 0.05
+    prior:
+      min: 0.01
+      max: 0.2
+    ref:
+      dist: norm
+      loc: 0.055
+      scale: 0.006
+    proposal: 0.003
     latex: \tau_\mathrm{reio}
   omegal:
     latex: \Omega_\Lambda
@@ -119,10 +131,24 @@ params:
     value: 0.0
     latex: Q2_\mathrm{LSST}^2
   w:
-    value: -1
-    latex: w0
+    prior:
+      min: -3
+      max: -0.01
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.05
+    proposal: 0.05
+    latex: w_{0,\mathrm{DE}}
   w_growth:
-    value: -1
+    prior:
+      min: -1.3
+      max: -0.7
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.05
+    proposal: 0.05
     latex: w_\mathrm{growth}
   omegam_growth:
     prior:
@@ -156,7 +182,7 @@ sampler:
     # File (w/ path) or matrix defining a covariance matrix for the proposal:
     # - null (default): will be generated from params info (prior and proposal)
     # - matrix: remember to set `covmat_params` to the parameters in the matrix
-    covmat: "./projects/lsst_y1/EXAMPLE_MCMC3.covmat"
+    covmat: "./projects/lsst_y1/EXAMPLE_MCMC8.covmat"
     covmat_params:
     # --------------------------------------
     # --------------------------------------
@@ -192,18 +218,27 @@ sampler:
     blocking:
       - [1,
           [
-            logA, ns, H0, omegabh2, omegach2
+            logA, ns, theta_MC_100, omegabh2, omegach2, tau, w
           ]
         ]
       - [2,
           [
             LSST_DZ_S1, LSST_DZ_S2, LSST_DZ_S3, LSST_DZ_S4, LSST_DZ_S5, LSST_A1_1, LSST_A1_2, 
-            omegam_growth
+            omegam_growth, w_growth
           ]
         ]
       - [25,
           [
             LSST_M1, LSST_M2, LSST_M3, LSST_M4, LSST_M5
+          ]
+        ]
+      - [50,
+          [
+            A_cib_217, gal545_A_217, calib_217T, galf_TE_A_217, ps_A_100_100,
+            galf_TE_A_100_143, ps_A_217_217, ksz_norm, A_planck, calib_100T,
+            ps_A_143_217, ps_A_143_143, gal545_A_100, galf_TE_A_143_217,
+            gal545_A_143_217, galf_TE_A_100_217, galf_TE_A_143, gal545_A_143,
+            xi_sz_cib, galf_TE_A_100, A_sz
           ]
         ]
     # --------------------------------------
@@ -220,4 +255,4 @@ sampler:
     # ---------------------------------------------------------------------
     Rminus1_single_split: 4
 
-output: ./projects/lsst_y1/chains/EXAMPLE_MCMC503
+output: ./projects/lsst_y1/chains/EXAMPLE_MCMC507

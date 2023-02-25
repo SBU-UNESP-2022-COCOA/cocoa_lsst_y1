@@ -5,7 +5,7 @@
 #SBATCH -e lsst_ggsplit-%A_%a.out.err
 #SBATCH --nodes=1
 #SBATCH --ntasks=4
-#SBATCH --cpus-per-task=7
+#SBATCH --cpus-per-task=6
 #SBATCH --partition=extended-28core
 #SBATCH -t 7-00:00:00
 

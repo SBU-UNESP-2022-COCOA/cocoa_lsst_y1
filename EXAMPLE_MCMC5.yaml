@@ -26,8 +26,8 @@ likelihood:
 params:
   logA:
     prior:
-      min: 1.61
-      max: 3.91
+      min: 2.84
+      max: 3.21
     ref:
       dist: norm
       loc: 3.0448
@@ -40,8 +40,8 @@ params:
     latex: A_\mathrm{s}
   ns:
     prior:
-      min: 0.87
-      max: 1.07
+      min: 0.92
+      max: 1.00
     ref:
       dist: norm
       loc: 0.96605

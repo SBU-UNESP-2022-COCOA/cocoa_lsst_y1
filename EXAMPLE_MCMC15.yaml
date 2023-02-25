@@ -3,18 +3,12 @@ debug: False
 stop_at_error: False
 
 likelihood:
-  sn.pantheon:
-    path: ./external_modules/data/sn_data
-  bao.sixdf_2011_bao:
-    path: ./external_modules/data/
-  bao.sdss_dr7_mgs:
-    path: ./external_modules/data/
-  bao.sdss_dr12_consensus_bao:
-    path: ./external_modules/data/
-  lsst_y1.lsst_emu_cs_lcdm:
-    emu_file: "./projects/lsst_y1/emulator_output/models/model_1"
-    data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
-    n_dim: 13 
+  lsst_y1.lsst_cosmic_shear:
+    path: ./external_modules/data/lsst_y1
+    data_file: LSST_Y1.dataset
+    print_datavector: False
+    non_linear_emul: 1
+    kmax_boltzmann: 5.0
 
 params:
   logA:
@@ -53,9 +47,8 @@ params:
     latex: H_0
   omegabh2:
     prior:
-      dist: norm
-      loc: 0.02208 
-      scale: 0.00052
+      min: 0.01
+      max: 0.04
     ref:
       dist: norm
       loc: 0.022383
@@ -119,10 +112,24 @@ params:
     value: 0.0
     latex: Q2_\mathrm{LSST}^2
   w:
-    value: -1
-    latex: w0
+    prior:
+      min: -3
+      max: -0.01
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.05
+    proposal: 0.05
+    latex: w_{0,\mathrm{DE}}
   w_growth:
-    value: -1
+    prior:
+      min: -1.3
+      max: -0.7
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.05
+    proposal: 0.05
     latex: w_\mathrm{growth}
   omegam_growth:
     prior:
@@ -192,13 +199,13 @@ sampler:
     blocking:
       - [1,
           [
-            logA, ns, H0, omegabh2, omegach2
+            logA, ns, H0, omegabh2, omegach2, w
           ]
         ]
       - [2,
           [
             LSST_DZ_S1, LSST_DZ_S2, LSST_DZ_S3, LSST_DZ_S4, LSST_DZ_S5, LSST_A1_1, LSST_A1_2, 
-            omegam_growth
+            omegam_growth, w_growth
           ]
         ]
       - [25,
@@ -220,4 +227,4 @@ sampler:
     # ---------------------------------------------------------------------
     Rminus1_single_split: 4
 
-output: ./projects/lsst_y1/chains/EXAMPLE_MCMC503
+output: ./projects/lsst_y1/chains/EXAMPLE_MCMC15

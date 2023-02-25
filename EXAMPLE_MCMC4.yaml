@@ -195,7 +195,7 @@ sampler:
     blocking:
       - [1,
           [
-            logA, ns, H0, omegabh2, omegamh2
+            logA, ns, H0, omegabh2, omegach2
           ]
         ]
       - [2,
@@ -208,7 +208,7 @@ sampler:
         ]
       - [25,
           [
-            LSST_M1, LSST_M2, LSST_M3, LSST_M4, LSST_M5
+            LSST_M1, LSST_M2, LSST_M3, LSST_M4, LSST_M5, LSST_PM1, LSST_PM2, LSST_PM3, LSST_PM4, LSST_PM5
           ]
         ]
     # --------------------------------------

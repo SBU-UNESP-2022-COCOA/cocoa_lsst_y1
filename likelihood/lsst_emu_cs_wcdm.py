@@ -13,7 +13,7 @@ import numpy as np
 import h5py as h5
 
 
-class lsst_emu_cs_lcdm(Likelihood):
+class lsst_emu_cs_wcdm(Likelihood):
     def initialize(self):
 
 
@@ -57,8 +57,6 @@ class lsst_emu_cs_lcdm(Likelihood):
         else:
             self.n_sample_dims    = self.n_dim + self.source_ntomo + self.n_pcas_baryon
 
-        #super(lsst_emu_cs_lcdm, self).initialize()
-
     def get_requirements(self):
         return {
           "logA": None,
@@ -67,11 +65,9 @@ class lsst_emu_cs_lcdm(Likelihood):
           "omegab": None,
           "omegam": None,
           "omegam_growth": None,
+          "w": None,
+          "w_growth": None,
         }
-        ### TODO: How to remove calling camb completely?
-        ### return a None doesn't solve the problem, and cause problem of "not finding omegab", 
-        ### which is weird because omegabh2 to omb is trivial..
-        # return {}
 
 
     def get_full_cov(self, cov_file):
@@ -97,21 +93,23 @@ class lsst_emu_cs_lcdm(Likelihood):
         return cov
 
     # Get the parameter vector from cobaya
-    # TODO: check the order is the same as trained emulator
+    #TODO: check the order is the same as trained emulator
 
     def get_theta(self, **params_values):
 
       theta = np.array([])
 
-      # 6 cosmological parameter for LCDM with gg-split
-      logAs = self.provider.get_param("logA")
-      ns = self.provider.get_param("ns")
-      H0 = self.provider.get_param("H0")
-      omegab = self.provider.get_param("omegab")
-      omegam = self.provider.get_param("omegam")
+      # 6 cosmological parameter for wCDM with gg-split
+      logAs         = self.provider.get_param("logA")
+      ns            = self.provider.get_param("ns")
+      H0            = self.provider.get_param("H0")
+      omegab        = self.provider.get_param("omegab")
+      omegam        = self.provider.get_param("omegam")
+      w             = self.provider.get_param("w")
+      w_growth      = self.provider.get_param("w_growth")
       omegam_growth = self.provider.get_param("omegam_growth")
       
-      theta = np.append(theta, [logAs, ns, H0, omegab, omegam, omegam_growth ])  #NEED this order for now
+      theta = np.append(theta, [logAs, ns, H0, omegab, omegam, w, w_growth, omegam_growth ])  #NEED this order for now
 
       # 7 nuissance parameter emulated
       LSST_DZ_S1 = params_values['LSST_DZ_S1']
@@ -160,22 +158,14 @@ class lsst_emu_cs_lcdm(Likelihood):
 
         theta = np.append(theta, [LSST_BARYON_Q1, LSST_BARYON_Q2, LSST_BARYON_Q3, LSST_BARYON_Q4])  #NEED this order for now
 
-
-      # #for 2D check
-      # theta = np.array([logAs, ns])
-      # print(theta)
       return theta
 
     # Get the dv from emulator
     def compute_datavector(self, theta):        
-        if(self.emu_type=='nn'):
-            theta = torch.Tensor(theta)
-        elif(self.emu_type=='gp'):
-            theta = theta[np.newaxis]
-        
+        theta = torch.Tensor(theta)
+        # print("DEBUG", 'theta = ', theta)
+        # quit()
         datavector = self.predict(theta)[0]
-
-
         return datavector
 
     # add the fast parameter part into the dv

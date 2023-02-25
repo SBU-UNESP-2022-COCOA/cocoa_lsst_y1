@@ -315,7 +315,7 @@ theory:
 
 emulator:
   io:
-      savedir: ./projects/lsst_y1/emulator_output_wcdm/models     
+      savedir: ./projects/lsst_y1/emulator_output_cs_wcdm/models     
       save_train_data: true             
       save_intermediate_model: true
   training:
@@ -337,8 +337,8 @@ emulator:
       n_pcas_baryon: 0
       prior_Q1: -3., 12.
   sampling:
-      #scalecut_mask: ./projects/lsst_y1/data/lsst_3x2_cs_only.mask
-      scalecut_mask: ./projects/lsst_y1/data/ones_cs_only.mask
+      scalecut_mask: ./projects/lsst_y1/data/lsst_3x2_cs_only.mask
+      #scalecut_mask: ./projects/lsst_y1/data/ones_cs_only.mask
       #sampling here doesn't matter if n_train_iter=1, but still save here for comparison
       n_mcmc: 1000
       #n_mcmc: 10 #KZ debug

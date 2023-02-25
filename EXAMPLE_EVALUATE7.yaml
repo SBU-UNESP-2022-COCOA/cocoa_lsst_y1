@@ -3,28 +3,27 @@ debug: True
 stop_at_error: True
 
 likelihood:
-  lsst_y1.lsst_cosmic_shear:
-    path: ./external_modules/data/lsst_y1
-    data_file: LSST_Y1.dataset
-    print_datavector: False
-    non_linear_emul: 1
-    kmax_boltzmann: 5.0
+  lsst_y1.lsst_emu_cs_wcdm:
+    emu_file: "./projects/lsst_y1/emulator_output_cs_wcdm/models/model_1"
+    #emu_file: "./projects/lsst_y1/emulator_output/models/800klhs_200kpost/model_1"
+    data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
+    mask_file: "./projects/lsst_y1/data/lsst_3x2_linear.mask" #dv is also generated with linear mask
+    n_dim: 15 
 
 params:
-  As_1e9:
+  logA:
     prior:
-      min: 0.5
-      max: 5
+      min: 2.83321
+      max: 3.21888
     ref:
       dist: norm
-      loc: 2.1
-      scale: 0.65
-    proposal: 0.4
-    latex: 10^9 A_\mathrm{s})
+      loc: 3.0448
+      scale: 0.15
+    proposal: 0.15
+    latex: \log(10^{10} A_\mathrm{s})
     drop: true
-    renames: A
   As:
-    value: 'lambda As_1e9: 1e-9 * As_1e9'
+    value: 'lambda logA: 1e-10*np.exp(logA)'
     latex: A_\mathrm{s}
   ns:
     prior:
@@ -114,13 +113,35 @@ params:
     derived: 'lambda omegan2, H0: omegan2/((H0/100)**2)'
     latex: \Omega_\mathrm{\\nu}
   w:
-    value: -1
-    latex: w0
+    prior:
+      min: -3
+      max: -0.01
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.05
+    proposal: 0.05
+    latex: w_{0,\mathrm{DE}}
   w_growth:
-    value: -1
+    prior:
+      min: -1.3
+      max: -0.7
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.05
+    proposal: 0.05
     latex: w_\mathrm{growth}
   omegam_growth:
-    value: -100
+    prior:
+      min: 0.24
+      max: 0.4
+    ref:
+      dist: norm
+      loc: 0.3
+      scale: 0.01
+    proposal: 0.01
+    latex: \Omega_\mathrm{m}^\mathrm{growth}
     
 theory:
   camb:
@@ -139,29 +160,41 @@ theory:
 
 sampler:
   evaluate:
-    N: 1
+    N: 3
     override:
       # CONPATIBLE WITH PLANCK; Cosmological parameter same as DES-gg-split
-      As_1e9: 2.101
+      #As_1e9: 2.101
+      logA : 3.045 #log(21.01)
       ns: 0.9649
       H0: 67.32
       omegab: 0.0493382322
       omegam: 0.3166
+      w: -1
+      w_growth: -1
+      omegam_growth: 0.3166
       mnu: 0.06
-      LSST_DZ_S1: 0.0414632
-      LSST_DZ_S2: 0.00147332
-      LSST_DZ_S3: 0.0237035
-      LSST_DZ_S4: -0.0773436
-      LSST_DZ_S5: -8.67127e-05
-      LSST_A1_1: 0.606102
-      LSST_A1_2: -1.51541
-      LSST_M1: 0.0191832
-      LSST_M2: -0.0431752
-      LSST_M3: -0.034961
-      LSST_M4: -0.0158096
-      LSST_M5: -0.0158096
-      LSST_BARYON_Q1: 0.0
-      LSST_BARYON_Q2: 0.0
+      LSST_DZ_S1: 0.0
+      LSST_DZ_S2: 0.0
+      LSST_DZ_S3: 0.0
+      LSST_DZ_S4: 0.0
+      LSST_DZ_S5: 0.0
 
-output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE4
+      ###DEBUGGIN
+      # omegab: 0.048
+      # LSST_DZ_S1: 0.0
+      # LSST_DZ_S2: 0.0
+      # LSST_DZ_S3: 0.0
+      # LSST_DZ_S4: 0.0
+      # LSST_DZ_S5: 0.0
 
+      LSST_A1_1: 0.5
+      LSST_A1_2: 0.0
+      LSST_M1: 0.0
+      LSST_M2: 0.0
+      LSST_M3: 0.0
+      LSST_M4: 0.0
+      LSST_M5: 0.0
+      # LSST_BARYON_Q1: 0.0 ### set to 0 by default, no need to overwrite
+      # LSST_BARYON_Q2: 0.0
+
+output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE7

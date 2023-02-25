@@ -8,6 +8,7 @@ emulator_output/
 emulator_output_3x2/
 emulator_output_wcdm/
 emulator_output_3x2_wcdm/
+emulator_output_cs_wcdm/
 emulator_validation/
 EXAMPLE_EVALUATE1.yaml
 EXAMPLE_EVALUATE2.yaml
@@ -20,3 +21,4 @@ EXAMPLE_MCMC1_UOFA.sbatch
 EXAMPLE_MCMC2_UOFA.sbatch
 EXAMPLE_POLY1_UOFA.sbatch
 EXAMPLE_POLY2_UOFA.sbatch
+data/*.modelvector

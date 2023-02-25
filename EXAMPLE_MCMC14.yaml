@@ -3,18 +3,12 @@ debug: False
 stop_at_error: False
 
 likelihood:
-  sn.pantheon:
-    path: ./external_modules/data/sn_data
-  bao.sixdf_2011_bao:
-    path: ./external_modules/data/
-  bao.sdss_dr7_mgs:
-    path: ./external_modules/data/
-  bao.sdss_dr12_consensus_bao:
-    path: ./external_modules/data/
-  lsst_y1.lsst_emu_cs_lcdm:
-    emu_file: "./projects/lsst_y1/emulator_output/models/model_1"
-    data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
-    n_dim: 13 
+  lsst_y1.lsst_cosmic_shear:
+    path: ./external_modules/data/lsst_y1
+    data_file: LSST_Y1.dataset
+    print_datavector: False
+    non_linear_emul: 1
+    kmax_boltzmann: 5.0
 
 params:
   logA:
@@ -53,9 +47,8 @@ params:
     latex: H_0
   omegabh2:
     prior:
-      dist: norm
-      loc: 0.02208 
-      scale: 0.00052
+      min: 0.01
+      max: 0.04
     ref:
       dist: norm
       loc: 0.022383
@@ -220,4 +213,4 @@ sampler:
     # ---------------------------------------------------------------------
     Rminus1_single_split: 4
 
-output: ./projects/lsst_y1/chains/EXAMPLE_MCMC503
+output: ./projects/lsst_y1/chains/EXAMPLE_MCMC14
