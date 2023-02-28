@@ -138,18 +138,31 @@ def smear_bao(ks, pk, pk_nw):
     Gk = np.array([np.exp(-0.5*k_star_inv * (k_**2)) for k_ in ks])
     pk_smeared = pk*Gk + pk_nw*(1.0 - Gk)
     return pk_smeared
-# def PC_project(data, n_pc):
-#     pca = PCA(n_components = n_pc)
-#     pca.fit(data)
-#     transformed_data = pca.fit_transform(data)
-#     return transformed_data, pca
-# def turn_qk_to_b(params_, z_index, qk):
-#     index = lhs_test.index(params_)
-#     pk_l = [pks_l_test[z_index][index]]
-#     pk_nw = smooth_bao(ks, pk_l[0])
-#     pk_smeared = smear_bao(ks, pk_l[0], pk_nw)
-#     b = (pk_smeared * np.exp(qk))/pk_l[0]
-#     return b
+def turn_qk_to_b(ks, pk_l, qk):
+    min_found = False
+    max_found = False
+    for i in range(len(ks)):
+        if ks[i] >= 0.01:
+            kmin_index = i
+            min_found = True
+            break
+    if min_found == False:
+        print('Error: Did not provide any k > 0.01')
+    for i in range(len(ks)):
+        if ks[len(ks) - i] <= 1.0:
+            kmax_index = len(ks) - i
+            max_found = True
+            break
+    if max_found == False:
+        print('Error: Did not provide any k < 1.0')
+    ks_smear = ks[kmin_index:kmax_index]
+    pk_l_ = np.copy(pk_l[kmin_index:kmax_index])
+    qk_ = np.copy(qk[kmin_index:kmax_index])
+    pk_nw_ = smooth_bao(ks_smear, pk_l_)
+    pk_smeared_ = smear_bao(ks_smear, pk_l_, pk_nw_)
+    pk_smeared = np.concatenate([pk_l[0:kmin_index],pk_smeared_,pk_l[kmax_index:len(ks)]])
+    b = (pk_smeared * np.exp(qk))/pk_l
+    return b
 def find_worst_points(uncertainties, frac_to_keep, lhs_iter):
     num_to_keep = int(frac_to_keep*len(uncertainties))
     maxs = []
@@ -171,23 +184,7 @@ def normalize_param(param_min, param_max, param):
     return normalized_param
 def unnormalize_param(param_min, param_max, normalized_param):
     param = (normalized_param * (param_max - param_min)) + param_min
-    #param = normalized_param
     return param
-# def get_qs_and_pcas(pks_l, pks_nl, N_pc, n_iter):
-#     qs_full = []
-#     qs_reduced = []
-#     pcas = []
-#     for j in range(len(redshifts_ee2)):
-#         qs_full.append([])
-#         qs_reduced.append([])
-#         pcas.append([])
-#         for i in range(num_points + int(n_iter*frac_to_keep*lhs_iter_size)):
-#             pk_nw = smooth_bao(ks, pks_l[j][i])
-#             pk_smeared = smear_bao(ks, pks_l[j][i], pk_nw)
-#             q_bacco = np.log(pks_nl[j][i]/pk_smeared)
-#             qs_full[j].append(q_bacco)
-#         qs_reduced[j], pcas[j] = PC_project(qs_full[j], N_pc)
-#     return pcas, qs_reduced, qs_full
 def initialize_emulator(qs_reduced_,lhs):
     all_gps = []
     for z_index in range(len(redshifts_ee2)):
@@ -232,13 +229,24 @@ def emulate_all_zs(params_, all_gps, qs_reduced, all_pcs_, all_means_, ks_in, ks
     emulated_qs_interp = interp2d(ks_in,zs_in,emulated_qs_)
     emulated_qs = emulated_qs_interp(ks_out, zs_out)
     return emulated_qs, emulation_uncertainties
-# def reduce_kbins(ks_in, ks_out, cola_vec_full):
-#     interpolated_vec = CubicSpline(ks_in, cola_vec_full)
-#     cola_vec_reduced = interpolated_vec(ks_out)
-#     return cola_vec_reduced
-# def increase_kbins(ks_in, ks_out, vec_short):
-#     interpolated_vec = CubicSpline(ks_in, vec_short)
-#     vec_long = interpolated_vec(ks_out)
-#     return vec_long
-
-
+def get_boost(params_, all_gps, qs_reduced, all_pcs_, all_means_, pk_l, ks_in, ks_out, zs_in, zs_out):
+    emulated_bs_ = []
+    emulation_uncertainties = []
+    for z_index in range(len(zs_in)):
+        emulated_reduced_q = []
+        emulation_uncertainty2 = 0
+        for pc_index in range(N_pc):
+            params_to_predict = np.array([params_])
+            m = all_gps[z_index][pc_index]
+            pred, pred_var = m.predict(params_to_predict)
+            emulated_reduced_q.append(pred[0][0])
+            emulation_uncertainty2 = emulation_uncertainty2 + pred_var[0]**2
+            the_mean = [entry for entry in all_means_[z_index]]
+        emulated_q = inv_pc(all_pcs_[z_index], the_mean,emulated_reduced_q)
+        emulated_b = turn_qk_to_b(ks_in, pk_l[z_index], emulated_q)
+        emulated_bs_.append(emulated_b)
+        emulation_uncertainty = math.sqrt(emulation_uncertainty2)
+        emulation_uncertainties.append(emulation_uncertainty)
+    emulated_bs_interp = interp2d(ks_in,zs_in,emulated_bs_)
+    emulated_bs = emulated_bs_interp(ks_out, zs_out)
+    return emulated_bs, emulation_uncertainties
