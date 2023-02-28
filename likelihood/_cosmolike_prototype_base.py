@@ -243,7 +243,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     # COLA begins
     if self.non_linear_emul == 1:
       # EE2
-      self.emulator = ee2 = euclidemu2
+      self.emulator = ee2 = euclidemu2.PyEuclidEmulator()
     
     elif self.non_linear_emul == 2:
       # Halofit
@@ -569,7 +569,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
            
                            
                 else:
-                    self.emulator = ee2 =euclidemu2
+                    self.emulator = ee2 =euclidemu2.PyEuclidEmulator()
                     params = {
                       'Omm'  : self.provider.get_param("omegam"),
                       'As'   : self.provider.get_param("As"),

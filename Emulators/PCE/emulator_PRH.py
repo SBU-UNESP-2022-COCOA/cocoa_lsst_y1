@@ -2,7 +2,9 @@ import numpy as np
 import scipy 
 import numpoly
 from scipy.signal import savgol_filter
+import os
 
+current_dir = os.getcwd()
      
 class emu_cons2(object):
     r"""
@@ -31,7 +33,7 @@ class emu_cons2(object):
         """ 
         # attributes
         # attributes
-        self.ks_cola = np.loadtxt('/home/bernardo/cocoa2/Cocoa/projects/lsst_y1/Emulators/PCE/ks_cola_d2.txt')[0:255] 
+        self.ks_cola = np.loadtxt(f'{current_dir}/projects/lsst_y1/Emulators/PCE/ks_cola_d2.txt')[0:255] 
         
         self.redshift_default_ =[ 0.   ,  0.02 ,  0.041,  0.062,  0.085,  0.109,  0.133,  0.159,
         0.186,  0.214,  0.244,  0.275,  0.308,  0.342,  0.378,  0.417,
@@ -40,10 +42,10 @@ class emu_cons2(object):
         1.667,  1.824,  2.   ,  2.158,  2.333,  2.529,  2.75 ,  3.  ] #([0    , 0.020, 0.041, 0.062, 0.085, 0.109, 0.133, 0.159, 0.186, 0.214, 0.244, 0.275, 0.308, 0.342, 0.378, 0.417, 0.457,
                                   #0.500, 0.543, 0.588, 0.636, 0.688, 0.742, 0.800, 0.862, 0.929,   1.0, 1.087, 1.182, 1.286, 1.400, 1.526, 1.667, 1.824, 
                                    # 2.0, 2.158,2.333,2.529,2.750,3.0])
-        self.lhs_ = np.loadtxt("/home/bernardo/cocoa2/Cocoa/projects/lsst_y1/Emulators/PCE/lhs.txt")    
+        self.lhs_ = np.loadtxt(f"{current_dir}/projects/lsst_y1/Emulators/PCE/lhs.txt")    
         self.polys={}
         for i in self.redshift_default_:
-            self.polys[i] = numpoly.loadtxt("/home/bernardo/cocoa2/Cocoa/projects/lsst_y1/Emulators/PCE/emu_z" + str(i) +"_colapc15_nsmear_all_1.0%.txt")[0:255]
+            self.polys[i] = numpoly.loadtxt(f"{current_dir}/projects/lsst_y1/Emulators/PCE/emu_z" + str(i) +"_colapc15_nsmear_all_1.0%.txt")[0:255]
             #print(i)#"_colateste.txt")#"_hpr.txt")
     
     
