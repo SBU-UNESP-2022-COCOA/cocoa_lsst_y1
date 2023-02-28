@@ -133,7 +133,9 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.force_cache_false = False
 
     # COLA begins
-    self.non_linear_emul = 3  # Set which emulator to use
+    #default set to EE2
+    #self.non_linear_emul sets which emulator to use
+    #it is set in the yaml file
                               # 0: linear PK
                               # 1: EE2
                               # 2: Halofit
@@ -235,7 +237,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     # COLA begins
     if self.non_linear_emul == 1:
       # EE2
-      self.emulator = ee2 = euclidemu2#.PyEuclidEmulator()
+      self.emulator = ee2 = euclidemu2.PyEuclidEmulator()
     
     elif self.non_linear_emul == 2:
       # Halofit
