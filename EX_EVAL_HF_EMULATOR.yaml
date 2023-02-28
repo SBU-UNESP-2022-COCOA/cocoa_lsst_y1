@@ -6,7 +6,8 @@ likelihood:
   lsst_y1.lsst_cosmic_shear:
     path: ./external_modules/data/lsst_y1
     print_datavector: False
-    print_datavector_file: "./projects/lsst_y1/data/ex_eval_hf_mead.modelvector"
+    print_datavector_file: "./projects/lsst_y1/data/ex_eval_ee2.modelvector"
+    non_linear_emul: 1
 
 params:
   As_1e9:
