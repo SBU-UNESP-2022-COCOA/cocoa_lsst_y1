@@ -4,7 +4,7 @@ import os
 import numpy as np
 import scipy
 #from scipy.interpolate import UnivariateSpline
-from scipy.interpolate import CubicSpline, interp1d
+from scipy.interpolate import CubicSpline, interp1d,interp2d
 import sys
 import time
 import os.path
@@ -17,6 +17,12 @@ from getdist import IniFile
 import euclidemu2
 import matplotlib.pyplot as plt # To check if P(k) is being correctly generated
 from scipy.signal import savgol_filter
+
+emu_path = './projects/lsst_y1/Emulators/'
+sys.path.insert(0,emu_path)
+#from halofit_pce import emu_halo
+from PCE import emu_high
+
 
 # Importing NN Halofit Emulator
 # nn_hf_path = './projects/lsst_y1/Emulators/halofit_emulator_nn'
@@ -33,9 +39,9 @@ from scipy.signal import savgol_filter
 #sys.path.append(gp_hf_path)
 #from halofit_emulator import halofit_emulator
 
-gp_cola_path = './projects/lsst_y1/Emulators/GP'
-sys.path.append(gp_cola_path)
-from cola_emulator2 import cola_emulator
+#gp_cola_path = './projects/lsst_y1/Emulators/GP'
+#sys.path.append(gp_cola_path)
+#from cola_emulator2 import cola_emulator
 # COLA ends
 
 
@@ -237,7 +243,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     # COLA begins
     if self.non_linear_emul == 1:
       # EE2
-      self.emulator = ee2 = euclidemu2.PyEuclidEmulator()
+      self.emulator = ee2 = euclidemu2
     
     elif self.non_linear_emul == 2:
       # Halofit
@@ -264,7 +270,8 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       print('[nonlinear] Using high-precision COLA NN emulator')
     
     elif self.non_linear_emul == 5:
-      self.emulator = pce_emu
+      self.emulator = pce_emu= emu_high
+      print('[nonlinear] Using high-precision COLA PCE emulator')
     
     elif self.non_linear_emul == 6:
       # Halofit Emulator
@@ -501,6 +508,95 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       # For the last z = 10, I use regular Halofit
       lnPNL[99::self.len_z_interp_2D] = tmp1[99*self.len_k_interp_2D:(99+1)*self.len_k_interp_2D] + np.log(h**3)
 
+    elif self.non_linear_emul == 5:
+        params_ = {
+          'Omm'  : self.provider.get_param("omegam"),
+          'Omb'  : self.provider.get_param("omegab"),
+          'ns'   : self.provider.get_param("ns"),
+          'As'   : self.provider.get_param("As"),
+          'h'    : self.provider.get_param("H0")/100.0
+        }  
+      #  print(self.provider.get_param("As"))    
+        boost_xtra = 'lol'
+        if boost_xtra == 'mine':
+            kbt, tmp_bt = self.emulator.get_boost(params_,  redshifts =self.z_interp_2D[0:96], custom_kvec=10**log10k_interp_2D) #np.power(10.0, np.linspace(-1.7951916029615123, 0.973, 1200)))
+            logkbt = np.log10(kbt)
+            for i in range(self.len_z_interp_2D):    
+                if i < 96:
+                    #print('aqui')
+                    # interp = interp1d(logkbt, 
+                     # np.log(tmp_bt[self.z_interp_2D[0:96][i]]), 
+                     # kind = 'linear', 
+                     # fill_value = 'extrapolate', 
+                    #  assume_sorted = True
+                    #)
+                    lnbt =   np.log(tmp_bt[self.z_interp_2D[0:96][i]]) #interp(log10k_interp_2D) #
+                    lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0       
+                    lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D]   + lnbt #np.log(self.emulator.smoothpk( kbt, np.exp(lnPL[i::self.len_z_interp_2D]), 0.5))   + lnbt #
+                    plt.semilogx(10**log10k_interp_2D, lnPNL[i::self.len_z_interp_2D] )                    
+                else:
+                    lnPNL[i::self.len_z_interp_2D] = tmp1[i]   #   
+                    lnPNL[i::self.len_z_interp_2D] += np.log((h**3))       
+        
+        else:
+            zsarray= np.array([0.   , 0.02 , 0.041, 0.062, 0.085, 0.109, 0.133, 0.159, 0.186,
+               0.214, 0.244, 0.275, 0.308, 0.342, 0.378, 0.417, 0.457, 0.5  ,
+               0.543, 0.588, 0.636, 0.688, 0.742, 0.8  , 0.862, 0.929, 1.   ,
+               1.087, 1.182, 1.286, 1.4  , 1.526, 1.667, 1.824, 2.   , 2.158,
+               2.333, 2.529, 2.75 , 3. ])
+            ks_2, boost_2= emu_high.get_boost(params_, redshifts=zsarray)
+            boost_2_array=  np.stack([boost_2[k] for k in boost_2])
+            boost_interpolator = interp2d(ks_2, zsarray, boost_2_array)
+            boost_in_desired_ks_zs = boost_interpolator(ks_2, self.z_interp_2D[0:96])  
+            for i in range(self.len_z_interp_2D):                      
+                if i <=95:
+                    self.emulator = pce_emu= emu_high
+
+                    kbt =  ks_2
+                    tmp_bt = boost_in_desired_ks_zs[i]   
+             
+                    logkbt = np.log10(kbt)
+                   # print('aqui')
+                    interp = interp1d(logkbt, 
+                      np.concatenate((np.log(tmp_bt[0:255-25]), savgol_filter(np.log(tmp_bt), 23, 1)[255-25: ] )), #np.log(tmp_bt[self.z_interp_2D[0:96][i]]), 
+                      kind = 'linear', 
+                      fill_value = 'extrapolate', 
+                      assume_sorted = True)
+
+                    lnbt =  interp(log10k_interp_2D) # np.log(tmp_bt[self.z_interp_2D[0:96][i]]) #interp(log10k_interp_2D) #
+                    lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0       
+                    lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D]   + lnbt #np.log(self.emulator.smoothpk( kbt, np.exp(lnPL[i::self.len_z_interp_2D]), 0.5))   + lnbt #
+           
+                           
+                else:
+                    self.emulator = ee2 =euclidemu2
+                    params = {
+                      'Omm'  : self.provider.get_param("omegam"),
+                      'As'   : self.provider.get_param("As"),
+                      'Omb'  : self.provider.get_param("omegab"),
+                      'ns'   : self.provider.get_param("ns"),
+                      'h'    : self.provider.get_param("H0")/100.0,
+                      'mnu'  : self.provider.get_param("mnu"), 
+                      'w'    : -1,
+                      'wa'   : 0.0
+                    }
+                  # print(self.z_interp_2D[i])  
+                    #These kbt are in units of h/Mpc .
+                    kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D)) # Need to return these ks in emulator
+                    kbt, tmp_bt = self.emulator.get_boost(params, self.z_interp_2D[i], kbt)
+                    logkbt = np.log10(kbt)
+
+                    interp = interp1d(logkbt, 
+                      np.log(tmp_bt[0]), 
+                      kind = 'linear', 
+                      fill_value = 'extrapolate', 
+                      assume_sorted = True
+                    )
+                    lnbt = interp(log10k_interp_2D)
+                    lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
+
+                    lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnbt 
+                    
     elif self.non_linear_emul == 6:
       # GP Halofit Emulator
       params =  {
