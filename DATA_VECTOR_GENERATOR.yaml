@@ -1,0 +1,190 @@
+timing: True
+debug: False
+stop_at_error: False
+
+output: ./projects/lsst_y1/DATAVECTOR
+
+likelihood:
+  lsst_y1.lsst_cosmic_shear:
+    path: ./external_modules/data/lsst_y1
+    print_datavector: True
+    print_datavector_file: "./projects/lsst_y1/FIDUCIAL_DATAVECTOR.modelvector"
+    non_linear_emul: 1
+
+params:
+  As_1e9:
+    prior:
+      min: 1.7
+      max: 2.5
+    ref:
+      dist: norm
+      loc: 2.1
+      scale: 0.2
+    proposal: 0.1
+    latex: 10^9 A_\mathrm{s})
+    drop: true
+    renames: A
+  As:
+    value: 'lambda As_1e9: 1e-9 * As_1e9'
+    latex: A_\mathrm{s}
+  ns:
+    prior:
+      min: 0.92
+      max: 1.00
+    ref:
+      dist: norm
+      loc: 0.96
+      scale: 0.01
+    proposal: 0.01
+    latex: n_\mathrm{s}
+  H0:
+    prior:
+      min: 61
+      max: 73
+    ref:
+      dist: norm
+      loc: 67
+      scale: 3
+    proposal: 3
+    latex: H_0
+  omegab:
+    prior:
+      min: 0.04
+      max: 0.06
+    ref:
+      dist: norm
+      loc: 0.049
+      scale: 0.004
+    proposal: 0.004
+    latex: \Omega_\mathrm{b}
+    drop: true
+  omegam:
+    prior:
+      min: 0.24
+      max: 0.4
+    ref:
+      dist: norm
+      loc: 0.319
+      scale: 0.02
+    proposal: 0.02
+    latex: \Omega_\mathrm{m}
+    drop: true
+  mnu:
+    value: 0.058
+  w0pwa:
+    value: -1
+    latex: w_{0,\mathrm{DE}}+w_{a,\mathrm{DE}}
+    drop: true
+  w:
+    value: -1
+    latex: w_{0,\mathrm{DE}}
+  wa:
+    value: 'lambda w0pwa, w: w0pwa - w'
+    latex: w_{a,\mathrm{DE}}
+  omegabh2:
+    value: 'lambda omegab, H0: omegab*(H0/100)**2'
+    latex: \Omega_\mathrm{b} h^2
+  omegach2:
+    value: 'lambda omegam, omegab, mnu, H0: (omegam-omegab)*(H0/100)**2-(mnu*(3.046/3)**0.75)/94.0708'
+    latex: \Omega_\mathrm{c} h^2
+  tau:
+    value: 0.0697186
+    latex: \tau_\mathrm{reio}
+  omegal:
+    latex: \Omega_\Lambda
+  omegamh2:
+    derived: 'lambda omegam, H0: omegam*(H0/100)**2'
+    latex: \Omega_\mathrm{m} h^2
+  sigma8:
+    latex: \sigma_8
+  s8h5:
+    derived: 'lambda sigma8, H0: sigma8*(H0*1e-2)**(-0.5)'
+    latex: \sigma_8/h^{0.5}
+  s8omegamp5:
+    derived: 'lambda sigma8, omegam: sigma8*omegam**0.5'
+    latex: \sigma_8 \Omega_\mathrm{m}^{0.5}
+  s8omegamp25:
+    derived: 'lambda sigma8, omegam: sigma8*omegam**0.25'
+    latex: \sigma_8 \Omega_\mathrm{m}^{0.25}
+  age:
+    latex: '{\rm{Age}}/\mathrm{Gyr}'
+  rdrag:
+    latex: r_\mathrm{drag}
+  yheused:
+    latex: Y_P^\mathrm{BBN}
+  omegan2:
+    latex: \Omega_\mathrm{\\nu} h^2
+  omegan:
+    derived: 'lambda omegan2, H0: omegan2/((H0/100)**2)'
+    latex: \Omega_\mathrm{\\nu}
+  LSST_BARYON_Q1:
+    value: 3
+    latex: Q1_\mathrm{LSST}^1
+  LSST_BARYON_Q2:
+    value: 0.0
+    latex: Q2_\mathrm{LSST}^2
+
+theory:
+  camb:
+    path: ./external_modules/code/CAMB
+    stop_at_error: False
+    use_renames: True
+    extra_args:
+      halofit_version: takahashi
+      AccuracyBoost: 1.15
+      lens_potential_accuracy: 1.0
+      num_massive_neutrinos: 1
+      nnu: 3.046
+      mnu: 0.058
+      dark_energy_model: ppf
+      accurate_massive_neutrino_transfers: false
+      k_per_logint: 20
+
+sampler:
+  evaluate:
+    N: 1
+    override:
+      # EE2 reference cosmology
+      As_1e9: 2.1
+      ns: 0.96
+      H0: 67
+      omegab: 0.049
+      omegam: 0.319
+      # mnu: 0.058
+      # w0pwa: -1.0
+      # w: -1.0
+      # LSST Cosmic Shear Nuisance Params
+      ### Photometric redshift uncertainty in source galaxies
+      LSST_DZ_S1: 0
+      LSST_DZ_S2: 0
+      LSST_DZ_S3: 0
+      LSST_DZ_S4: 0
+      LSST_DZ_S5: 0
+      ### Shear Calibration
+      LSST_M1: 0
+      LSST_M2: 0
+      LSST_M3: 0
+      LSST_M4: 0
+      LSST_M5: 0
+      ### Intrinsic Alignment (NLA)
+      LSST_A1_1: 0.7
+      LSST_A1_2: -1.7
+      #LSST_A1_3: 0
+      #LSST_A1_4: 0
+      #LSST_A1_5: 0
+      #LSST_A2_1: 0
+      #LSST_A2_2: 0
+      #LSST_A2_3: 0
+      #LSST_A2_4: 0
+      #LSST_A2_5: 0
+      #LSST_BTA_1: 0
+      #LSST_BTA_2: 0
+      #LSST_BTA_3: 0
+      #LSST_BTA_4: 0
+      #LSST_BTA_5: 0
+      ### Baryonic PCAs
+      #LSST_BARYON_Q1: 3.0
+      #LSST_BARYON_Q2: 0
+      #LSST_BARYON_Q3: 0
+      #LSST_BARYON_Q4: 0
+
