@@ -7,6 +7,9 @@ from scipy.interpolate import CubicSpline, interp1d
 import sys
 import time
 from scipy.integrate import odeint
+import scipy.integrate as integrate
+from scipy.integrate import quad
+from scipy import optimize
 
 # Local
 from cobaya.likelihoods.base_classes import DataSetLikelihood
@@ -197,7 +200,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.do_cache_cosmo = np.zeros(2)
 
     # ------------------------------------------------------------------------
-    if self.non_linear_emul == 1:
+    if self.non_linear_emul in[1,3,4,5,6,7]:
       self.emulator = ee2=euclidemu2.PyEuclidEmulator()
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -210,7 +213,9 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       "omegam": None,
       "omegam_growth": None,
       "omegan2": None,
+      "w": None,
       "w_growth": None,
+      "zstar":None,
       "Pk_interpolator": {
         "z": self.z_interp_2D,
         "k_max": self.kmax_boltzmann * self.accuracyboost,
@@ -377,6 +382,338 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         lnPNL[i::self.len_z_interp_2D] += t3[i]
       lnPNL += np.log((h**3))
 
+    elif self.non_linear_emul == 3: #Emulator for w0wa; do NOT support geo-growth split      
+      
+      params = {
+        'Omm'  : self.provider.get_param("omegam"),
+        'As'   : self.provider.get_param("As"),
+        'Omb'  : self.provider.get_param("omegab"),
+        'ns'   : self.provider.get_param("ns"),
+        'h'    : h,
+        'mnu'  : self.provider.get_param("mnu"), 
+        'w'    : self.provider.get_param("w"),
+        'wa'   : self.provider.get_param("wa")
+      }
+
+      kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D))
+      kbt, tmp_bt = self.emulator.get_boost(params, self.z_interp_2D, kbt)
+      logkbt = np.log10(kbt)
+
+      for i in range(self.len_z_interp_2D):    
+        interp = interp1d(logkbt, np.log(tmp_bt[i]), kind='linear', 
+          fill_value='extrapolate', assume_sorted=True)
+
+        lnbt = interp(log10k_interp_2D)
+        lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
+
+        lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnbt
+
+    elif self.non_linear_emul == 4: #Emulator for w0wa; use Casarini approx; should NOT use this, just use emul=3 with real N-body sim    
+      params = {
+        'Omm'  : self.provider.get_param("omegam"),
+        'As'   : self.provider.get_param("As"),
+        'Omb'  : self.provider.get_param("omegab"),
+        'ns'   : self.provider.get_param("ns"),
+        'h'    : h,
+        'mnu'  : self.provider.get_param("mnu"), 
+        'w'    : -1.0, # w_eff for casarini prescription; to be calculated later in the for loop
+        'wa'   : 0.0
+      }
+
+      zstar = self.provider.get_param("zstar")
+      kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D))
+
+
+      for i in range(self.len_z_interp_2D):  
+        z_eff = self.z_interp_2D[i]
+
+        ### calculate w_eff as in 1601.07230; Ignored radiation
+        def integrad_w_eff(x, w_eff):
+          Omm = params['Omm']
+          E2 = Omm*(1.0 + x)*(1.0 + x)*(1.0 + x) + (1-Omm)*(1.0 + x)**(3.0*(1.0 + w_eff)) # eq 2.1
+          return 1/np.sqrt(E2)
+        def integrad_w0wa(x):
+          Omm = params['Omm']
+          w0 = self.provider.get_param("w") 
+          wa = self.provider.get_param("wa") 
+          E2 = Omm*(1.0 + x)*(1.0 + x)*(1.0 + x) + (1-Omm)*(1.0 + x)**(3.0*(1.0 + w0+wa)*np.exp(-3*wa*x/(1+x)) ) # eq 2.1
+          return 1/np.sqrt(E2)
+        def eq_chi(w_eff):
+            return quad(integrad_w0wa, z_eff, zstar)[0] - quad(integrad_w_eff, z_eff, zstar,args=(w_eff))[0]
+        w_eff = optimize.root_scalar(eq_chi, bracket=[-3, 3], method='brentq').root
+
+        params['w'] = w_eff #Use wCDM emulator
+        kbt, tmp_bt = self.emulator.get_boost(params, z_eff, kbt)
+        logkbt = np.log10(kbt)  
+        interp = interp1d(logkbt, np.log(tmp_bt[0]), kind='linear', 
+          fill_value='extrapolate', assume_sorted=True)
+        
+
+        lnbt = interp(log10k_interp_2D)
+        lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
+
+        lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnbt
+
+    ### Emul 5 start
+    elif self.non_linear_emul == 5: #Emulator for 4 w-bin    
+      params = {
+        'Omm'  : self.provider.get_param("omegam"),
+        'As'   : self.provider.get_param("As"),
+        'Omb'  : self.provider.get_param("omegab"),
+        'ns'   : self.provider.get_param("ns"),
+        'h'    : h,
+        'mnu'  : self.provider.get_param("mnu"), 
+        'w'    : -1.0, # w_eff for casarini prescription; to be calculated later in the for loop
+        'wa'   : 0.0
+      }
+
+      zstar = self.provider.get_param("zstar")
+      kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D))
+      OML = 1- self.provider.get_param("omegam")
+      w0 = self.provider.get_param("w") 
+      w1 = self.provider.get_param("w1") 
+      w2 = self.provider.get_param("w2") 
+      w3 = self.provider.get_param("w3")
+      z1 = 0.7
+      z2 = 1.4
+      z3 = 2.1
+      z4 = 3.0
+      fac1 = (1+z1)**(3*(1 + w0))
+      fac2 = fac1 * ((1+z2) / (1+z1))**(3*(1 + w1))
+      fac3 = fac2 * ((1+z3) / (1+z2))**(3*(1 + w2))
+      fac4 = fac3 * ((1+z4) / (1+z3))**(3*(1 + w3))
+
+      Omm = params['Omm']
+      Omega_r = 4.18343*10**(-5)/(h**2)
+
+      test = np.zeros(self.len_z_interp_2D)
+      for i in range(self.len_z_interp_2D):  
+        z_eff = self.z_interp_2D[i]
+
+        ### calculate w_eff as in 1601.07230; Ignored radiation
+        def integrad_w_eff(x, w_eff):
+          E2 = Omm*(1.0 + x)*(1.0 + x)*(1.0 + x) + Omega_r*(1.0 + x)**4 + (1-Omm)*(1.0 + x)**(3.0*(1.0 + w_eff)) # eq E^2 = H^2/H0^2
+          return 1/np.sqrt(E2)
+
+        def OML_wbin(x):
+          a = 1/(1+x)
+          if x<=z1:
+            return OML*(1+x)**(3*(1+w0))
+          elif z1<x<=z2:
+            return OML * fac1 * (a * (1+z1))**(-3*(1+w1))
+          elif z2<x<=z3:
+            return OML * fac2 * (a * (1+z2))**(-3*(1+w2))
+          elif z3<x<=z4:
+            return OML * fac3 * (a * (1+z3))**(-3*(1+w3))
+          elif x>z4:
+            return OML * fac4
+
+        def integrad_wbin(x):
+          E2 = Omm*(1.0 + x)*(1.0 + x)*(1.0 + x) + + Omega_r*(1.0 + x)**4 + OML_wbin(x) # eq E^2 = H^2/H0^2
+          return 1/np.sqrt(E2)
+          
+        def eq_chi(w_eff):
+            return quad(integrad_wbin, z_eff, zstar)[0] - quad(integrad_w_eff, z_eff, zstar,args=(w_eff))[0]
+
+        w_eff = optimize.root_scalar(eq_chi, bracket=[-3, 3], method='brentq').root
+
+        if w_eff < -1.3:
+          print("enforcing EE bound")
+          w_eff = -1.3 #Euclid Emulator bound
+        elif w_eff > -0.7:
+          print("enforcing EE bound")
+          w_eff = -0.7
+
+        params['w'] = w_eff #Use wCDM emulator
+        kbt, tmp_bt = self.emulator.get_boost(params, z_eff, kbt)
+        logkbt = np.log10(kbt)  
+        interp = interp1d(logkbt, np.log(tmp_bt[0]), kind='linear', 
+          fill_value='extrapolate', assume_sorted=True)
+        
+
+        lnbt = interp(log10k_interp_2D)
+        lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
+
+        lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnbt
+
+        test[i] = w_eff
+
+      #np.savetxt("test_wbin.txt", test)
+    ### Emul 5 end
+
+    ### Emul 6 Start
+    elif self.non_linear_emul == 6: #Emulator for 2 w-bin (same as 4-bin, with different z; check yaml)   
+      params = {
+        'Omm'  : self.provider.get_param("omegam"),
+        'As'   : self.provider.get_param("As"),
+        'Omb'  : self.provider.get_param("omegab"),
+        'ns'   : self.provider.get_param("ns"),
+        'h'    : h,
+        'mnu'  : self.provider.get_param("mnu"), 
+        'w'    : -1.0, # w_eff for casarini prescription; to be calculated later in the for loop
+        'wa'   : 0.0
+      }
+
+      zstar = self.provider.get_param("zstar")
+      kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D))
+      OML = 1- self.provider.get_param("omegam")
+      w0 = self.provider.get_param("w") 
+      w1 = self.provider.get_param("w1") 
+      w2 = self.provider.get_param("w2") 
+      w3 = self.provider.get_param("w3")
+      z1 = 0.5
+      z2 = 1
+      z3 = 1.5
+      z4 = 3.0
+      fac1 = (1+z1)**(3*(1 + w0))
+      fac2 = fac1 * ((1+z2) / (1+z1))**(3*(1 + w1))
+      fac3 = fac2 * ((1+z3) / (1+z2))**(3*(1 + w2))
+      fac4 = fac3 * ((1+z4) / (1+z3))**(3*(1 + w3))
+
+      Omm = params['Omm']
+      Omega_r = 4.18343*10**(-5)/(h**2)
+
+      test = np.zeros(self.len_z_interp_2D)
+      for i in range(self.len_z_interp_2D):  
+        z_eff = self.z_interp_2D[i]
+
+        ### calculate w_eff as in 1601.07230; Ignored radiation
+        def integrad_w_eff(x, w_eff):
+          E2 = Omm*(1.0 + x)*(1.0 + x)*(1.0 + x) + Omega_r*(1.0 + x)**4 + (1-Omm)*(1.0 + x)**(3.0*(1.0 + w_eff)) # eq E^2 = H^2/H0^2
+          return 1/np.sqrt(E2)
+
+        def OML_wbin(x):
+          a = 1/(1+x)
+          if x<=z1:
+            return OML*(1+x)**(3*(1+w0))
+          elif z1<x<=z2:
+            return OML * fac1 * (a * (1+z1))**(-3*(1+w1))
+          elif z2<x<=z3:
+            return OML * fac2 * (a * (1+z2))**(-3*(1+w2))
+          elif z3<x<=z4:
+            return OML * fac3 * (a * (1+z3))**(-3*(1+w3))
+          elif x>z4:
+            return OML * fac4
+
+        def integrad_wbin(x):
+          E2 = Omm*(1.0 + x)*(1.0 + x)*(1.0 + x) + Omega_r*(1.0 + x)**4 + OML_wbin(x) # eq E^2 = H^2/H0^2
+          return 1/np.sqrt(E2)
+          
+        def eq_chi(w_eff):
+            return quad(integrad_wbin, z_eff, zstar)[0] - quad(integrad_w_eff, z_eff, zstar,args=(w_eff))[0]
+
+        w_eff = optimize.root_scalar(eq_chi, bracket=[-3, 3], method='brentq').root
+
+        if w_eff < -1.3:
+          print("enforcing EE bound")
+          w_eff = -1.3 #Euclid Emulator bound
+        elif w_eff > -0.7:
+          print("enforcing EE bound")
+          w_eff = -0.7
+
+        params['w'] = w_eff #Use wCDM emulator
+        kbt, tmp_bt = self.emulator.get_boost(params, z_eff, kbt)
+        logkbt = np.log10(kbt)  
+        interp = interp1d(logkbt, np.log(tmp_bt[0]), kind='linear', 
+          fill_value='extrapolate', assume_sorted=True)
+        
+
+        lnbt = interp(log10k_interp_2D)
+        lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
+
+        lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnbt
+
+        test[i] = w_eff
+
+      #np.savetxt("test_wbin.txt", test)
+    ### Emul 6 end
+
+    ### Emul 7 Start
+    elif self.non_linear_emul == 7: #Emulator for 2 w-bin; fix w_eff to that at z=0 (same as 4-bin, with different z; check yaml)   
+      params = {
+        'Omm'  : self.provider.get_param("omegam"),
+        'As'   : self.provider.get_param("As"),
+        'Omb'  : self.provider.get_param("omegab"),
+        'ns'   : self.provider.get_param("ns"),
+        'h'    : h,
+        'mnu'  : self.provider.get_param("mnu"), 
+        'w'    : -1.0, # w_eff for casarini prescription; to be calculated later in the for loop
+        'wa'   : 0.0
+      }
+
+      zstar = self.provider.get_param("zstar")
+      kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D))
+      OML = 1- self.provider.get_param("omegam")
+      w0 = self.provider.get_param("w") 
+      w1 = self.provider.get_param("w1") 
+      w2 = self.provider.get_param("w2") 
+      w3 = self.provider.get_param("w3")
+      z1 = 0.5
+      z2 = 1
+      z3 = 1.5
+      z4 = 3.0
+      fac1 = (1+z1)**(3*(1 + w0))
+      fac2 = fac1 * ((1+z2) / (1+z1))**(3*(1 + w1))
+      fac3 = fac2 * ((1+z3) / (1+z2))**(3*(1 + w2))
+      fac4 = fac3 * ((1+z4) / (1+z3))**(3*(1 + w3))
+
+      Omm = params['Omm']
+      Omega_r = 4.18343*10**(-5)/(h**2)
+
+      test = np.zeros(self.len_z_interp_2D)
+      for i in range(self.len_z_interp_2D):  
+        z_eff = self.z_interp_2D[0]
+
+        ### calculate w_eff as in 1601.07230; Ignored radiation
+        def integrad_w_eff(x, w_eff):
+          E2 = Omm*(1.0 + x)*(1.0 + x)*(1.0 + x) + Omega_r*(1.0 + x)**4 + (1-Omm)*(1.0 + x)**(3.0*(1.0 + w_eff)) # eq E^2 = H^2/H0^2
+          return 1/np.sqrt(E2)
+
+        def OML_wbin(x):
+          a = 1/(1+x)
+          if x<=z1:
+            return OML*(1+x)**(3*(1+w0))
+          elif z1<x<=z2:
+            return OML * fac1 * (a * (1+z1))**(-3*(1+w1))
+          elif z2<x<=z3:
+            return OML * fac2 * (a * (1+z2))**(-3*(1+w2))
+          elif z3<x<=z4:
+            return OML * fac3 * (a * (1+z3))**(-3*(1+w3))
+          elif x>z4:
+            return OML * fac4
+
+        def integrad_wbin(x):
+          E2 = Omm*(1.0 + x)*(1.0 + x)*(1.0 + x) + Omega_r*(1.0 + x)**4 + OML_wbin(x) # eq E^2 = H^2/H0^2
+          return 1/np.sqrt(E2)
+          
+        def eq_chi(w_eff):
+            return quad(integrad_wbin, z_eff, zstar)[0] - quad(integrad_w_eff, z_eff, zstar,args=(w_eff))[0]
+
+        w_eff = optimize.root_scalar(eq_chi, bracket=[-3, 3], method='brentq').root
+
+        if w_eff < -1.3:
+          print("enforcing EE bound")
+          w_eff = -1.3 #Euclid Emulator bound
+        elif w_eff > -0.7:
+          print("enforcing EE bound")
+          w_eff = -0.7
+
+        params['w'] = w_eff #Use wCDM emulator
+        kbt, tmp_bt = self.emulator.get_boost(params, z_eff, kbt)
+        logkbt = np.log10(kbt)  
+        interp = interp1d(logkbt, np.log(tmp_bt[0]), kind='linear', 
+          fill_value='extrapolate', assume_sorted=True)
+        
+
+        lnbt = interp(log10k_interp_2D)
+        lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
+
+        lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnbt
+
+        test[i] = w_eff
+
+      #np.savetxt("test_wbin.txt", test)
+    ### Emul 7 end
 
     elif self.non_linear_emul == 100: #Using only linear power spectrum, for determining scale cuts
       lnPNL = lnPL  

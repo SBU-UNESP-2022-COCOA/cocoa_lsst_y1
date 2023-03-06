@@ -12,7 +12,7 @@ likelihood:
   bao.sdss_dr12_consensus_bao:
     path: ./external_modules/data/
   lsst_y1.lsst_emu_cs_lcdm:
-    emu_file: "./projects/lsst_y1/emulator_output/models/model_1"
+    emu_file: "./projects/lsst_y1/emulator_output/models/FINAL/model_1"
     data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
     n_dim: 13 
 
@@ -27,10 +27,11 @@ params:
       scale: 0.15
     proposal: 0.15
     latex: \log(10^{10} A_\mathrm{s})
-    drop: true
-  As:
-    value: 'lambda logA: 1e-10*np.exp(logA)'
-    latex: A_\mathrm{s}
+    # drop: true
+  # As:
+  #   value: 'lambda logA: 1e-10*np.exp(logA)'
+  #   latex: A_\mathrm{s}
+  #   drop: true
   ns:
     prior:
       min: 0.92
@@ -79,9 +80,9 @@ params:
     latex: \tau_\mathrm{reio}
   omegal:
     latex: \Omega_\Lambda
-  As_1e9:
-    derived: 'lambda As: 1e9*As'
-    latex: 10^9 A_\mathrm{s}
+  # As_1e9:
+  #   derived: 'lambda As: 1e9*As'
+  #   latex: 10^9 A_\mathrm{s}
   omegam:
     latex: \Omega_\mathrm{m}
   omegamh2:

@@ -59,6 +59,7 @@ class lsst_emu_cs_wcdm(Likelihood):
 
     def get_requirements(self):
         return {
+          ### The following requirement may need yaml files changes on Drop: True or not. Please test before submit chains
           "logA": None,
           "H0": None,
           "ns": None,

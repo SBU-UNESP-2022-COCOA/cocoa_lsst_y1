@@ -1,16 +1,15 @@
+#TEST casarini with EE
 timing: True
 debug: True
 stop_at_error: True
 
-
-### generate dv as the fiducial dv for this work.
 likelihood:
   lsst_y1.lsst_3x2pt:
     path: ./external_modules/data/lsst_y1
-    data_file: LSST_Y1_no_scale_cut.dataset
+    data_file: LSST_Y1_w0wa.dataset
     print_datavector: False
-    print_datavector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
-    non_linear_emul: 1
+    print_datavector_file: "./projects/lsst_y1/data/example9_lsst_y1_theory.modelvector"
+    non_linear_emul: 4
     kmax_boltzmann: 5.0
 
 params:
@@ -117,13 +116,18 @@ params:
     derived: 'lambda omegan2, H0: omegan2/((H0/100)**2)'
     latex: \Omega_\mathrm{\\nu}
   w:
-    value: -1
+    value: -1.1
+    latex: w0
+  wa:
+    value: 0.1
     latex: w0
   w_growth:
-    value: -1
+    value: -100
     latex: w_\mathrm{growth}
   omegam_growth:
     value: -100
+  zstar:
+    latex: z_*
     
 theory:
   camb:
@@ -179,5 +183,5 @@ sampler:
       LSST_PM4: 0.0
       LSST_PM5: 0.0
 
-output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE3
+output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE10
 

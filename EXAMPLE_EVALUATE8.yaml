@@ -2,32 +2,37 @@ timing: True
 debug: True
 stop_at_error: True
 
-
-### generate dv as the fiducial dv for this work.
 likelihood:
-  lsst_y1.lsst_3x2pt:
-    path: ./external_modules/data/lsst_y1
-    data_file: LSST_Y1_no_scale_cut.dataset
-    print_datavector: False
-    print_datavector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
-    non_linear_emul: 1
-    kmax_boltzmann: 5.0
+  planck_2018_lowl.TT:
+    path: ./external_modules/
+  planck_2018_lowl.EE:
+    path: ./external_modules/
+  planck_2018_highl_plik.TTTEEE:
+    path: ./external_modules/
+    clik_file: plc_3.0/hi_l/plik/plik_rd12_HM_v22b_TTTEEE_35_1296.clik
+  bao.sixdf_2011_bao:
+    path: ./external_modules/data/
+  bao.sdss_dr7_mgs:
+    path: ./external_modules/data/
+  bao.sdss_dr12_consensus_bao:
+    path: ./external_modules/data/
+  sn.pantheon:
+    path: ./external_modules/data/sn_data
 
 params:
-  As_1e9:
+  logA:
     prior:
-      min: 0.5
-      max: 5
+      min: 2.83321
+      max: 3.21888
     ref:
       dist: norm
-      loc: 2.1
-      scale: 0.65
-    proposal: 0.4
-    latex: 10^9 A_\mathrm{s})
+      loc: 3.0448
+      scale: 0.15
+    proposal: 0.15
+    latex: \log(10^{10} A_\mathrm{s})
     drop: true
-    renames: A
   As:
-    value: 'lambda As_1e9: 1e-9 * As_1e9'
+    value: 'lambda logA: 1e-10*np.exp(logA)'
     latex: A_\mathrm{s}
   ns:
     prior:
@@ -116,68 +121,78 @@ params:
   omegan:
     derived: 'lambda omegan2, H0: omegan2/((H0/100)**2)'
     latex: \Omega_\mathrm{\\nu}
-  w:
-    value: -1
-    latex: w0
-  w_growth:
-    value: -1
-    latex: w_\mathrm{growth}
-  omegam_growth:
-    value: -100
-    
+  w0:
+    prior:
+      min: -5
+      max: -0.01
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.05
+    proposal: 0.05
+    latex: w_{0,\mathrm{DE}}
+  w1:
+    prior:
+      min: -5
+      max: 1.0
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.15
+    proposal: 0.15
+    latex: w_{1,\mathrm{DE}}
+  w2:
+    prior:
+      min: -5
+      max: 1.0
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.15
+    proposal: 0.15
+    latex: w_{2,\mathrm{DE}}
+  w3:
+    prior:
+      min: -5
+      max: 1.0
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.15
+    proposal: 0.15
+    latex: w_{3,\mathrm{DE}}
 theory:
   camb:
-    path: ./external_modules/code/CAMB
-    stop_at_error: False
-    use_renames: True
+    path: ./external_modules/code/CAMBMultiFluidDE
+    use_renames: true
     extra_args:
       halofit_version: takahashi
-      AccuracyBoost: 1.15
-      lens_potential_accuracy: 1.0
+      AccuracyBoost: 1.05
       num_massive_neutrinos: 1
       nnu: 3.046
       dark_energy_model: ppf
-      accurate_massive_neutrino_transfers: false
-      k_per_logint: 20
 
 sampler:
   evaluate:
-    N: 1
+    N: 3
     override:
       # CONPATIBLE WITH PLANCK; Cosmological parameter same as DES-gg-split
-      As_1e9: 2.101
+      #As_1e9: 2.101
+      logA : 3.045 #log(21.01)
       ns: 0.9649
       H0: 67.32
       omegab: 0.0493382322
       omegam: 0.3166
+      w0: -1
+      w1: -1.1
+      w2: -0.9
+      w3: -2.0
+      omegam_growth: 0.3166
       mnu: 0.06
-      LSST_DZ_S1: 0.0 #DES synthetic chains has non-zero dz, but for LSST we set them to 0
+      LSST_DZ_S1: 0.0
       LSST_DZ_S2: 0.0
       LSST_DZ_S3: 0.0
       LSST_DZ_S4: 0.0
       LSST_DZ_S5: 0.0
-      LSST_A1_1: 0.5
-      LSST_A1_2: 0.0
-      LSST_DZ_L1: 0.0
-      LSST_DZ_L2: 0.0
-      LSST_DZ_L3: 0.0
-      LSST_DZ_L4: 0.0
-      LSST_DZ_L5: 0.0
-      LSST_B1_1: 1.72716
-      LSST_B1_2: 1.65168
-      LSST_B1_3: 1.61423
-      LSST_B1_4: 1.92886
-      LSST_B1_5: 2.11633
-      LSST_M1: 0.0
-      LSST_M2: 0.0
-      LSST_M3: 0.0
-      LSST_M4: 0.0
-      LSST_M5: 0.0
-      LSST_PM1: 0.0
-      LSST_PM2: 0.0
-      LSST_PM3: 0.0
-      LSST_PM4: 0.0
-      LSST_PM5: 0.0
 
-output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE3
-
+output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE8

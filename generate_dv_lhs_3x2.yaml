@@ -340,54 +340,59 @@ params:
     latex: \Delta z_\mathrm{l,LSST}^5
   # Point Mass parameters; use for training for now
   LSST_PM1:
-    prior:
-      min: -5
-      max: 5
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.5
-    proposal: 0.5
+    value: 0.0
+    # prior:
+    #   min: -5
+    #   max: 5
+    # ref:
+    #   dist: norm
+    #   loc: 0.0
+    #   scale: 0.5
+    # proposal: 0.5
     latex: PM_\mathrm{LSST}^1
   LSST_PM2:
-    prior:
-      min: -5
-      max: 5
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.5
-    proposal: 0.5
+    value: 0.0
+    # prior:
+    #   min: -5
+    #   max: 5
+    # ref:
+    #   dist: norm
+    #   loc: 0.0
+    #   scale: 0.5
+    # proposal: 0.5
     latex: PM_\mathrm{LSST}^2
   LSST_PM3:
-    prior:
-      min: -5
-      max: 5
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.5
-    proposal: 0.5
+    value: 0.0
+    # prior:
+    #   min: -5
+    #   max: 5
+    # ref:
+    #   dist: norm
+    #   loc: 0.0
+    #   scale: 0.5
+    # proposal: 0.5
     latex: PM_\mathrm{LSST}^3
   LSST_PM4:
-    prior:
-      min: -5
-      max: 5
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.5
-    proposal: 0.5
+    value: 0.0
+    # prior:
+    #   min: -5
+    #   max: 5
+    # ref:
+    #   dist: norm
+    #   loc: 0.0
+    #   scale: 0.5
+    # proposal: 0.5
     latex: PM_\mathrm{LSST}^4
   LSST_PM5:
-    prior:
-      min: -5
-      max: 5
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.5
-    proposal: 0.5
+    value: 0.0
+    # prior:
+    #   min: -5
+    #   max: 5
+    # ref:
+    #   dist: norm
+    #   loc: 0.0
+    #   scale: 0.5
+    # proposal: 0.5
     latex: PM_\mathrm{LSST}^5
 
 
@@ -409,14 +414,14 @@ theory:
 
 emulator:
   io:
-      savedir: ./projects/lsst_y1/emulator_output_3x2/lhs/dvs_for_training_1200k    
+      savedir: ./projects/lsst_y1/emulator_output_3x2/lhs/dvs_for_training_800k    
       save_train_data: true             
       save_intermediate_model: true
   training:
       dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector
       chi_sq_cut: 8e+4
       n_train_iter: 1
-      n_lhs: 1200000 
+      n_lhs: 800000 
       n_resample: 9600
       #n_resample: 96 #KZ debug
       emu_type: nn

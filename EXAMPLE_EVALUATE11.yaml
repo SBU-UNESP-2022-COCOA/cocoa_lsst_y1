@@ -1,16 +1,14 @@
+#TEST casarini with EE
 timing: True
 debug: True
 stop_at_error: True
 
-
-### generate dv as the fiducial dv for this work.
 likelihood:
   lsst_y1.lsst_3x2pt:
     path: ./external_modules/data/lsst_y1
-    data_file: LSST_Y1_no_scale_cut.dataset
+    data_file: LSST_Y1.dataset
     print_datavector: False
-    print_datavector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
-    non_linear_emul: 1
+    non_linear_emul: 7
     kmax_boltzmann: 5.0
 
 params:
@@ -117,17 +115,28 @@ params:
     derived: 'lambda omegan2, H0: omegan2/((H0/100)**2)'
     latex: \Omega_\mathrm{\\nu}
   w:
-    value: -1
+    value: -1.1
     latex: w0
+  w1:
+    value: -1.1
+    latex: w1
+  w2:
+    value: -1.5
+    latex: w2
+  w3:
+    value: -1.5
+    latex: w3
   w_growth:
-    value: -1
+    value: -100
     latex: w_\mathrm{growth}
   omegam_growth:
     value: -100
+  zstar:
+    latex: z_*
     
 theory:
   camb:
-    path: ./external_modules/code/CAMB
+    path: ./external_modules/code/CAMB_JAMES
     stop_at_error: False
     use_renames: True
     extra_args:
@@ -139,6 +148,10 @@ theory:
       dark_energy_model: ppf
       accurate_massive_neutrino_transfers: false
       k_per_logint: 20
+      a1: 0.66666
+      a2: 0.5
+      a3: 0.4   
+      a_min: 0.25
 
 sampler:
   evaluate:
@@ -179,5 +192,5 @@ sampler:
       LSST_PM4: 0.0
       LSST_PM5: 0.0
 
-output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE3
+output: ./projects/lsst_y1/chains/EXAMPLE_EVALUATE10
 

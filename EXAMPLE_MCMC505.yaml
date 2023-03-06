@@ -17,29 +17,30 @@ likelihood:
   planck_2018_lowl.EE:
     path: ./external_modules/
   lsst_y1.lsst_emu_cs_lcdm:
-    emu_file: "./projects/lsst_y1/emulator_output/models/model_1"
+    emu_file: "./projects/lsst_y1/emulator_output/models/FINAL/model_1"
     data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
     n_dim: 13 
 
 params:
   logA:
     prior:
-      min: 1.61
-      max: 3.91
+      min: 2.83321
+      max: 3.21888
     ref:
       dist: norm
       loc: 3.0448
-      scale: 0.05
-    proposal: 0.05
+      scale: 0.15
+    proposal: 0.15
     latex: \log(10^{10} A_\mathrm{s})
-    drop: true
+    # drop: true
   As:
     value: 'lambda logA: 1e-10*np.exp(logA)'
     latex: A_\mathrm{s}
+  #   drop: true
   ns:
     prior:
-      min: 0.87
-      max: 1.07
+      min: 0.92
+      max: 1.00
     ref:
       dist: norm
       loc: 0.96605
@@ -63,8 +64,8 @@ params:
     derived: false
   H0:
     latex: H_0
-    min: 20
-    max: 100
+    min: 61
+    max: 73
   omegabh2:
     prior:
       dist: norm
@@ -92,6 +93,10 @@ params:
     prior:
       min: 0.01
       max: 0.2
+    ###KZ: test if this solves segfault problem: NO
+    # prior:
+    #   min: 0.02
+    #   max: 0.09
     ref:
       dist: norm
       loc: 0.055
@@ -100,10 +105,13 @@ params:
     latex: \tau_\mathrm{reio}
   omegal:
     latex: \Omega_\Lambda
-  As_1e9:
-    derived: 'lambda As: 1e9*As'
-    latex: 10^9 A_\mathrm{s}
+  # As_1e9:
+  #   derived: 'lambda As: 1e9*As'
+  #   latex: 10^9 A_\mathrm{s}
+  ## Enforcing for emulator
   omegam:
+    min: 0.24
+    max: 0.4
     latex: \Omega_\mathrm{m}
   omegamh2:
     derived: 'lambda omegam, H0: omegam*(H0/100)**2'
@@ -163,7 +171,7 @@ theory:
     use_renames: True
     extra_args:
       halofit_version: takahashi
-      AccuracyBoost: 1.15
+      AccuracyBoost: 1.05
       lens_potential_accuracy: 1.0
       num_massive_neutrinos: 1
       nnu: 3.046
@@ -177,7 +185,7 @@ sampler:
     # File (w/ path) or matrix defining a covariance matrix for the proposal:
     # - null (default): will be generated from params info (prior and proposal)
     # - matrix: remember to set `covmat_params` to the parameters in the matrix
-    covmat: "./projects/lsst_y1/EXAMPLE_MCMC5.covmat"
+    covmat: "./projects/lsst_y1/EXAMPLE_MCMC3.covmat"
     covmat_params:
     # --------------------------------------
     # --------------------------------------

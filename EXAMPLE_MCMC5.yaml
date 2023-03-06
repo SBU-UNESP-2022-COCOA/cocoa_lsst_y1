@@ -26,13 +26,13 @@ likelihood:
 params:
   logA:
     prior:
-      min: 2.84
-      max: 3.21
+      min: 2.83321
+      max: 3.21888
     ref:
       dist: norm
       loc: 3.0448
-      scale: 0.05
-    proposal: 0.05
+      scale: 0.15
+    proposal: 0.15
     latex: \log(10^{10} A_\mathrm{s})
     drop: true
   As:
@@ -65,8 +65,8 @@ params:
     derived: false
   H0:
     latex: H_0
-    min: 20
-    max: 100
+    min: 61
+    max: 73
   omegabh2:
     prior:
       dist: norm
@@ -190,7 +190,7 @@ sampler:
     # Don't learn if convergence better than...
     learn_proposal_Rminus1_min: 0.03
     # (even earlier if a param is not in the given covariance matrix)
-    learn_proposal_Rminus1_max_early: 2000.
+    learn_proposal_Rminus1_max_early: 100.
     # --------------------------------------
     # --------------------------------------
     # Convergence and stopping
