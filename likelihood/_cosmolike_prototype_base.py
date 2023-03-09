@@ -30,18 +30,18 @@ from PCE import emu_high
 # import halofitemulator
 
 # Importing high-precision COLA NN Emulator
-#nn_cola2_path = './external_modules/code/COLA_Emulators/NN'
-#sys.path.append(nn_cola2_path)
-#import cola_emulator_nn_high_precision
+nn_cola2_path = './external_modules/code/COLA_Emulators/NN'
+sys.path.append(nn_cola2_path)
+import cola_emulator_nn_high_precision
 
 # Importing GP Halofit Emulator
 #gp_hf_path = './projects/lsst_y1/Emulators'
 #sys.path.append(gp_hf_path)
 #from halofit_emulator import halofit_emulator
 
-#gp_cola_path = './projects/lsst_y1/Emulators/GP'
-#sys.path.append(gp_cola_path)
-#from cola_emulator2 import cola_emulator
+gp_cola_path = './projects/lsst_y1/Emulators/GP'
+sys.path.append(gp_cola_path)
+from cola_emulator1 import cola_emulator as gp_emulator
 # COLA ends
 
 
@@ -250,10 +250,15 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       print('Using regular Halofit')
     elif self.non_linear_emul == 3:
       # GP COLA
-      emu_path = gp_cola_path + '/cola_emulator2/'
+      if self.cola_precision == 'default':
+        emu_path = gp_cola_path + '/cola_emulator1/'
+      elif self.cola_precision == 'high':
+        emu_path = gp_cola_path + '/cola_emulator2/'
+      else:
+        print('Cola precision not set correctly, should be default or high.')
       self.lhs = np.loadtxt(emu_path + 'lhs_norm.txt')
       self.ks_emu = np.loadtxt(emu_path + '/ks.txt')
-      self.zs_cola = cola_emulator.redshifts_ee2
+      self.zs_cola = gp_emulator.redshifts_ee2
       self.qs_reduced = []
       self.pcas = []
       self.means = []
@@ -262,7 +267,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         self.means.append(np.loadtxt(f'{emu_path}/means/z{z_str}.txt'))
         self.pcas.append(np.loadtxt(f'{emu_path}/PCs/z{z_str}.txt'))
         self.qs_reduced.append(np.loadtxt(f'{emu_path}/data/z{z_str}.txt'))
-      self.emulator = cola_emulator.initialize_emulator(self.qs_reduced,self.lhs) 
+      self.emulator = gp_emulator.initialize_emulator(self.qs_reduced,self.lhs) 
       print('[nonlinear] Using COLA GP emulator')
 
     elif self.non_linear_emul == 4:
@@ -273,7 +278,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       self.emulator = pce_emu= emu_high
       print('[nonlinear] Using high-precision COLA PCE emulator')
     
-    elif self.non_linear_emul == 6:
+    elif self.non_linear_emul == 100:
       # Halofit Emulator
       emu_path = gp_hf_path + '/halofit_emulator/'
       lhs_path = emu_path + 'lhs_norm.txt'
@@ -292,7 +297,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
           self.qs_reduced2.append(np.loadtxt(data_file_path))
       self.emulator = halofit_emulator.initialize_emulator(self.qs_reduced2,lhs)
 
-    elif self.non_linear_emul == 7:
+    elif self.non_linear_emul == 101:
       # NN Halofit Emulator
       print('Using NN Halofit (Takahashi) Emulator')
       self.emulator = halofitemulator
@@ -435,12 +440,12 @@ class _cosmolike_prototype_base(DataSetLikelihood):
                 'wa'   : 0.0
                 }
       param_names = ['Omm','Omb', 'ns', 'As', 'h']
-      params_ = [cola_emulator.normalize_param(cola_emulator.param_mins[i], cola_emulator.param_maxs[i], params[param_names[i]]) for i in range(len(param_names))]
+      params_ = [gp_emulator.normalize_param(gp_emulator.param_mins[i], gp_emulator.param_maxs[i], params[param_names[i]]) for i in range(len(param_names))]
       kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D))
       kmin_emu = np.min(self.ks_emu)
       kmax_emu = np.max(self.ks_emu)
       kbt_cut = [entry for entry in kbt if entry <= kmax_emu] 
-      tmp_qk, emu_uncert = cola_emulator.emulate_all_zs(params_, self.emulator, self.qs_reduced, self.pcas, self.means, self.ks_emu, kbt_cut, self.zs_cola, self.z_interp_2D)
+      tmp_qk, emu_uncert = gp_emulator.emulate_all_zs(params_, self.emulator, self.qs_reduced, self.pcas, self.means, self.ks_emu, kbt_cut, self.zs_cola, self.z_interp_2D)
       logkbt_cut = np.log10(kbt_cut)
       lnpk_total = [] 
       for i in range(self.len_z_interp_2D): 
@@ -455,8 +460,8 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         pk_l = np.exp(lnPL[i::self.len_z_interp_2D])
         pk_l_ = pk_l[425:815]
         ks_smear = k_interp_2D[425:815]
-        pk_nw = cola_emulator.smooth_bao(ks_smear, pk_l_)
-        pk_smeared_ = cola_emulator.smear_bao(ks_smear, pk_l_, pk_nw)
+        pk_nw = gp_emulator.smooth_bao(ks_smear, pk_l_)
+        pk_smeared_ = gp_emulator.smear_bao(ks_smear, pk_l_, pk_nw)
         pk_smeared = np.concatenate([pk_l[0:425],pk_smeared_,pk_l[815:self.len_k_interp_2D]])
         lnpk_total = np.log(pk_smeared) + qk
         for j in range(len(self.k_interp_2D)):
@@ -496,8 +501,8 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         pk_l = np.exp(lnPL[i::self.len_z_interp_2D])
         pk_l_ = pk_l[425:815]
         ks_smear = k_interp_2D[425:815]
-        pk_nw = cola_emulator.smooth_bao(ks_smear, pk_l_)
-        pk_smeared_ = cola_emulator.smear_bao(ks_smear, pk_l_, pk_nw)
+        pk_nw = gp_emulator.smooth_bao(ks_smear, pk_l_)
+        pk_smeared_ = gp_emulator.smear_bao(ks_smear, pk_l_, pk_nw)
         pk_smeared = np.concatenate([pk_l[0:425],pk_smeared_,pk_l[815:self.len_k_interp_2D]])
         lnpk_total = np.log(pk_smeared) + qk
         for j in range(len(self.k_interp_2D)):
