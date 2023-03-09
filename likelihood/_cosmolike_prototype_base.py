@@ -33,6 +33,7 @@ from PCE import emu_high
 nn_cola2_path = './external_modules/code/COLA_Emulators/NN'
 sys.path.append(nn_cola2_path)
 import cola_emulator_nn_high_precision
+import cola_emulator_nn_def_precision
 
 # Importing GP Halofit Emulator
 #gp_hf_path = './projects/lsst_y1/Emulators'
@@ -271,8 +272,13 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       print('[nonlinear] Using COLA GP emulator')
 
     elif self.non_linear_emul == 4:
-      self.emulator = cola_emulator_nn_high_precision
-      print('[nonlinear] Using high-precision COLA NN emulator')
+      if self.cola_precision == 'default':
+        print('[nonlinear] Using low-precision COLA NN emulator')
+        self.emulator = cola_emulator_nn_def_precision
+      elif self.cola_precision == 'high':
+        print('[nonlinear] Using high-precision COLA NN emulator')
+        self.emulator = cola_emulator_nn_high_precision
+      
     
     elif self.non_linear_emul == 5:
       self.emulator = pce_emu= emu_high
