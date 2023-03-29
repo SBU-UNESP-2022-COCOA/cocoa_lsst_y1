@@ -7,7 +7,7 @@ likelihood:
     path: ./external_modules/data/lsst_y1
     print_datavector: False
     print_datavector_file: "./projects/lsst_y1/data/ex_eval_ee2.modelvector"
-    non_linear_emul: 3
+    non_linear_emul: 4
     cola_precision: "default"
 
 params:
