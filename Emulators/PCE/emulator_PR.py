@@ -29,17 +29,18 @@ class emu_cons(object):
         Constructor
         """ 
         # attributes
-        self.ks_cola = np.loadtxt('/home/bernardo/cocoa2/Cocoa/projects/lsst_y1/Emulators/PCE/ks_cola_d.txt') 
+        self.ks_cola = np.loadtxt('/home/bernardo/cocoa2/Cocoa/projects/lsst_y1/Emulators/PCE/ks_cola_default.txt') 
         
-        self.redshift_default_ = ([0    , 0.020, 0.041, 0.062, 0.085, 0.109, 0.133, 0.159, 0.186, 0.214, 0.244, 0.275, 0.308, 0.342, 0.378, 0.417, 0.457,
+        self.redshift_default_ = ([0.    , 0.020, 0.041, 0.062, 0.085, 0.109, 0.133, 0.159, 0.186, 0.214, 0.244, 0.275, 0.308, 0.342, 0.378, 0.417, 0.457,
                                   0.500, 0.543, 0.588, 0.636, 0.688, 0.742, 0.800, 0.862, 0.929,   1.0, 1.087, 1.182, 1.286, 1.400, 1.526, 1.667, 1.824, 
                                     2.0, 2.158,2.333,2.529,2.750,3.0])
         self.lhs_ = np.loadtxt("/home/bernardo/cocoa2/Cocoa/projects/lsst_y1/Emulators/PCE/lhs.txt")    
         self.polys={}
         for i in self.redshift_default_:
-            self.polys[i] = numpoly.loadtxt("/home/bernardo/cocoa2/Cocoa/projects/lsst_y1/Emulators/PCE/ emu_z" + str(i) +"_pr.txt")
+            print(i)
+            self.polys[i] = numpoly.loadtxt("/home/bernardo/cocoa2/Cocoa/projects/lsst_y1/Emulators/PCE/emu_z" + str(i) +"_colapc15_nsmear_all_1.0%_def.txt")
     
-        
+      
 
     def scaler_trans(self, params_):
         X_std = (params_ - self.lhs_.min(axis=0)) / (self.lhs_.max(axis=0) - self.lhs_.min(axis=0))
@@ -158,13 +159,13 @@ class emu_cons(object):
             if any(custom_kvec > max(kvals)):
                 wrn_message = ("Higher k modes constantly extrapolated.")
 
-              #  print(wrn_message)
+               # print(wrn_message)
                 do_extrapolate_above = True
 
             if any(custom_kvec < min(kvals)):
                 wrn_message = ("Lower k modes constantly extrapolated.")
 
-               # print(wrn_message)
+              #  print(wrn_message)
                 do_extrapolate_below = True  
 
         len_kvals = len(kvals)
@@ -184,21 +185,23 @@ class emu_cons(object):
             if do_extrapolate_below:
                 # below the k_min of EuclidEmulator2, we are in the linear regime where
                 # the boost factor is unity by construction
+               # print('do_extrapolate_below')
                 b_extrap = np.ones_like(custom_k_below)
                 bvals[i]= np.concatenate((b_extrap, bvals[i]))
+                
 
             if do_extrapolate_above:
                 # We extrapolate by setting all b(k > k_max) to b(k_max)
+                 
 
 
+#np.concatenate((logboost[:255 -25 ], savgol_filter(logboost, 23, 1  )[255-25: ])), 
+ # np.concatenate((logboost[:255 -25 ], self.smoothpl_boost(np.log10(kvals),logboost, 23, 1   )[255-25: ])),
 
 
-
-
-
-                if ext_ == 'logk-logB':
-                    inter_boost_2__= scipy.interpolate.interp1d(np.log10(kvals),
-                                                                np.concatenate((logboost[:250 -5 ], self.smoothpl_boost(np.log10(kvals),logboost, 5, 1   )[250-5: ])),
+                if ext_ == 'logk-logB':#(logboost[:255 -25 ], self.smoothpl_boost(np.log10(kvals),logboost, 19, 1   )[255-25: ])),
+                    inter_boost_2__= scipy.interpolate.interp1d(np.log10(kvals), #255 -25 5 1 ou 255 -25(pode ser -15) 7 1 ou 255 -25(pode ser -15) 9 1 ou ou 255 -25 13 1 ou 255 -25 19 1
+                                                                np.concatenate((logboost[:255 -25 ], savgol_filter(logboost, 23, 1  )[255-25: ])), 
                                                                 kind='linear',
                                                                 fill_value='extrapolate',
                                                                 assume_sorted=True)
@@ -241,10 +244,13 @@ class emu_cons(object):
 
         else:
             bvals[i] = 10.**tmp.reshape(k_shape)
+                
+                
+                
 
         if not(custom_kvec is None):       # This could probably be done cleaner!
             kvals = custom_kvec
-
+         
         return kvals,bvals
 
 
@@ -281,7 +287,7 @@ class emu_cons(object):
         boost = {}        
         if self.dict_to_ordered_arr_np(cosmo_dict).ndim == 1:
 
-            print(self.dict_to_ordered_arr_np(cosmo_dict).ndim, 'um só')
+            ##print(self.dict_to_ordered_arr_np(cosmo_dict).ndim, 'um só')
             this_cosmo_par_in = self.dict_to_ordered_arr_np(cosmo_dict) 
             cosmo_par_in = self.dict_to_ordered_arr_np(cosmo_dict).reshape(1,-1)
 
@@ -289,7 +295,7 @@ class emu_cons(object):
             for i in range(redshifts.shape[0]):
                 for j in range(len( self.redshift_default_)): 
                     if redshifts[i] == self.redshift_default_[j]: 
-                        print(redshifts[i], self.redshift_default_[j], '==' )
+                        #print(redshifts[i], self.redshift_default_[j], '==' )
                         if not(custom_kvec is None):
                          
                             boost[redshifts[i]] = self.get_boost_custom_(np.exp(self.polys[redshifts[i]](*self.scaler_trans( cosmo_par_in).T)).T[0],
@@ -302,7 +308,7 @@ class emu_cons(object):
                         
                     elif redshifts[i] > self.redshift_default_[j] and redshifts[i] < self.redshift_default_[j+1]:
                         if not(custom_kvec is None):
-                            print(redshifts[i], self.redshift_default_[j], '><')
+                           # print(redshifts[i], self.redshift_default_[j], '><')
                             x_par = np.array([self.redshift_default_[j],self.redshift_default_[j+1]])
                             this_left_ =np.exp(self.polys[x_par[0]](*self.scaler_trans( cosmo_par_in).T)).T   
                             this_right_=  np.exp(self.polys[x_par[1]](*self.scaler_trans( cosmo_par_in).T)).T  
@@ -360,7 +366,7 @@ class emu_cons(object):
                         
                         
                         else:
-                            print(redshifts[i], self.redshift_default_[j], '><')
+                           # print(redshifts[i], self.redshift_default_[j], '><')
                             x_par = np.array([self.redshift_default_[j],self.redshift_default_[j+1]])
                             this_left_ =np.exp(self.polys[x_par[0]](*self.scaler_trans( cosmo_par_in).T)).T   
                             this_right_=  np.exp(self.polys[x_par[1]](*self.scaler_trans( cosmo_par_in).T)).T  
@@ -417,7 +423,7 @@ class emu_cons(object):
             for i in range(redshifts.shape[0]):
                 for j in range(len( self.redshift_default_)): 
                     if redshifts[i] == self.redshift_default_[j]: 
-                        print(redshifts[i], self.redshift_default_[j], '==')
+                      #  print(redshifts[i], self.redshift_default_[j], '==')
                         this_boosts= [ ] 
                         if not(custom_kvec is None):
                            
@@ -440,7 +446,7 @@ class emu_cons(object):
                     
                     
                     elif redshifts[i] > self.redshift_default_[j] and redshifts[i] < self.redshift_default_[j+1]:
-                        print(redshifts[i], self.redshift_default_[j], '><')
+                       # print(redshifts[i], self.redshift_default_[j], '><')
                         x_par = np.array([self.redshift_default_[j],self.redshift_default_[j+1]])
                         this_left_ =np.exp(self.polys[x_par[0]](*self.scaler_trans( cosmo_par_in).T)).T   
                         this_right_=  np.exp(self.polys[x_par[1]](*self.scaler_trans( cosmo_par_in).T)).T  
@@ -569,6 +575,8 @@ class emu_cons(object):
         return self.redshift_default_
         
         
+        
+        
     def smoothpl_boost_(self, xx, yy, window_length, degree   ):
 
         ynew = np.zeros(len(yy))
@@ -668,10 +676,5 @@ class emu_cons(object):
         if p_n_w is None: 
             return pk_smeared 
         else:
-            return pk_smeared ,pnw2   
-
-       
+            return pk_smeared ,pnw2
         
-     
-    
-    
