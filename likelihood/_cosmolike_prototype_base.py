@@ -587,34 +587,9 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
 
                     else:
-                        self.emulator = ee2 =euclidemu2.PyEuclidEmulator()
-                        params = {
-                          'Omm'  : self.provider.get_param("omegam"),
-                          'As'   : self.provider.get_param("As"),
-                          'Omb'  : self.provider.get_param("omegab"),
-                          'ns'   : self.provider.get_param("ns"),
-                          'h'    : self.provider.get_param("H0")/100.0,
-                          'mnu'  : self.provider.get_param("mnu"), 
-                          'w'    : -1,
-                          'wa'   : 0.0
-                        }
-                      # print(self.z_interp_2D[i])  
-                        #These kbt are in units of h/Mpc .
-                        kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D)) # Need to return these ks in emulator
-                        kbt, tmp_bt = self.emulator.get_boost(params, self.z_interp_2D[i], kbt)
-                        logkbt = np.log10(kbt)
+                        lnPNL[i::self.len_z_interp_2D] = tmp1[i]   #   
+                        lnPNL[i::self.len_z_interp_2D] += np.log((h**3))  
 
-                        interp = interp1d(logkbt, 
-                          np.log(tmp_bt[0]), 
-                          kind = 'linear', 
-                          fill_value = 'extrapolate', 
-                          assume_sorted = True
-                        )
-                        lnbt = interp(log10k_interp_2D)
-                        lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
-
-                        lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnbt  
-            
             elif self.cola_precision == 'high':          
 
                 zsarray= np.array([0.   , 0.02 , 0.041, 0.062, 0.085, 0.109, 0.133, 0.159, 0.186,
@@ -647,34 +622,10 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
 
                     else:
-                        self.emulator = ee2 =euclidemu2.PyEuclidEmulator()
-                        params = {
-                          'Omm'  : self.provider.get_param("omegam"),
-                          'As'   : self.provider.get_param("As"),
-                          'Omb'  : self.provider.get_param("omegab"),
-                          'ns'   : self.provider.get_param("ns"),
-                          'h'    : self.provider.get_param("H0")/100.0,
-                          'mnu'  : self.provider.get_param("mnu"), 
-                          'w'    : -1,
-                          'wa'   : 0.0
-                        }
-                      # print(self.z_interp_2D[i])  
-                        #These kbt are in units of h/Mpc .
-                        kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D)) # Need to return these ks in emulator
-                        kbt, tmp_bt = self.emulator.get_boost(params, self.z_interp_2D[i], kbt)
-                        logkbt = np.log10(kbt)
-
-                        interp = interp1d(logkbt, 
-                          np.log(tmp_bt[0]), 
-                          kind = 'linear', 
-                          fill_value = 'extrapolate', 
-                          assume_sorted = True
-                        )
-                        lnbt = interp(log10k_interp_2D)
-                        lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
-
-                        lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnbt 
-                    
+                        lnPNL[i::self.len_z_interp_2D] = tmp1[i]   #   
+                        lnPNL[i::self.len_z_interp_2D] += np.log((h**3))  
+                        
+                        
     elif self.non_linear_emul == 6:
       # GP Halofit Emulator
       params =  {
