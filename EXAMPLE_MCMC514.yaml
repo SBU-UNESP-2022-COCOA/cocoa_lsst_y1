@@ -6,6 +6,7 @@ likelihood:
   lsst_y1.lsst_emu_cs_lcdm:
     emu_file: "./projects/lsst_y1/emulator_output/models/FINAL/model_1"
     data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
+    mask_file: "./projects/lsst_y1/data/lsst_3x2_cs_only.mask"
     n_dim: 13 
 
 params:

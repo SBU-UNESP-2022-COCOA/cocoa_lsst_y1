@@ -163,11 +163,11 @@ sampler:
       LSST_DZ_L3: 0.0
       LSST_DZ_L4: 0.0
       LSST_DZ_L5: 0.0
-      LSST_B1_1: 1.72716
-      LSST_B1_2: 1.65168
-      LSST_B1_3: 1.61423
-      LSST_B1_4: 1.92886
-      LSST_B1_5: 2.11633
+      LSST_B1_1: 1.24
+      LSST_B1_2: 1.36
+      LSST_B1_3: 1.47
+      LSST_B1_4: 1.60
+      LSST_B1_5: 1.76
       LSST_M1: 0.0
       LSST_M2: 0.0
       LSST_M3: 0.0

@@ -24,48 +24,39 @@ likelihood:
 params:
   logA:
     prior:
-      min: 1.61
-      max: 3.91
+      min: 2.83321
+      max: 3.21888
     ref:
       dist: norm
       loc: 3.0448
-      scale: 0.05
-    proposal: 0.05
+      scale: 0.15
+    proposal: 0.15
     latex: \log(10^{10} A_\mathrm{s})
     # drop: true
-  As:
-    value: 'lambda logA: 1e-10*np.exp(logA)'
-    latex: A_\mathrm{s}
+  # As:
+  #   value: 'lambda logA: 1e-10*np.exp(logA)'
+  #   latex: A_\mathrm{s}
   #   drop: true
   ns:
     prior:
-      min: 0.87
-      max: 1.07
+      min: 0.92
+      max: 1.00
     ref:
       dist: norm
       loc: 0.96605
       scale: 0.01
     proposal: 0.01
     latex: n_\mathrm{s}
-  theta_MC_100:
+  H0:
     prior:
-      min: 0.5
-      max: 10
+      min: 61
+      max: 73
     ref:
       dist: norm
-      loc: 1.04109
-      scale: 0.001
-    proposal: 0.001
-    latex: 100\theta_\mathrm{MC}
-    drop: true
-    renames: theta
-  cosmomc_theta:
-    value: 'lambda theta_MC_100: 1.e-2*theta_MC_100'
-    derived: false
-  H0:
+      loc: 67.32
+      scale: 5
+    proposal: 3
     latex: H_0
-    min: 20
-    max: 100
   omegabh2:
     prior:
       dist: norm
@@ -80,7 +71,7 @@ params:
   omegach2:
     prior:
       min: 0.06
-      max: 0.2
+      max: 0.45
     ref:
       dist: norm
       loc: 0.12011
@@ -90,20 +81,13 @@ params:
   mnu:
     value: 0.06
   tau:
-    prior:
-      min: 0.01
-      max: 0.2
-    ref:
-      dist: norm
-      loc: 0.055
-      scale: 0.006
-    proposal: 0.003
+    value: 0.05
     latex: \tau_\mathrm{reio}
   omegal:
     latex: \Omega_\Lambda
-  As_1e9:
-    derived: 'lambda As: 1e9*As'
-    latex: 10^9 A_\mathrm{s}
+  # As_1e9:
+  #   derived: 'lambda As: 1e9*As'
+  #   latex: 10^9 A_\mathrm{s}
   ## Enforcing for emulator
   omegam:
     min: 0.24

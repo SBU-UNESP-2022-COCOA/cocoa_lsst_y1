@@ -10,6 +10,7 @@ from scipy.integrate import odeint
 import scipy.integrate as integrate
 from scipy.integrate import quad
 from scipy import optimize
+import pandas as pd
 
 # Local
 from cobaya.likelihoods.base_classes import DataSetLikelihood
@@ -374,6 +375,10 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
 
         lnPNL[i::self.len_z_interp_2D] = lnPL[i::self.len_z_interp_2D] + lnbt
+
+      # # test pk
+      # df = pd.DataFrame({"lnPNL": lnPNL}) #turn g0=0 and see if differ from valina cocoa; note the z settings are different
+      # df.to_csv("pk_mm_pristine_camb.csv", index=False)
     
     elif self.non_linear_emul == 2:      
       
@@ -381,6 +386,10 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         lnPNL[i::self.len_z_interp_2D]  = t1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]  
         lnPNL[i::self.len_z_interp_2D] += t3[i]
       lnPNL += np.log((h**3))
+
+      # test pk
+      df = pd.DataFrame({"lnPNL": lnPNL}) #turn g0=0 and see if differ from valina cocoa; note the z settings are different
+      df.to_csv("pk_mm_pristine_camb_2.csv", index=False)
 
     elif self.non_linear_emul == 3: #Emulator for w0wa; do NOT support geo-growth split      
       

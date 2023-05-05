@@ -100,7 +100,7 @@ class lsst_emu_cs_wcdm(Likelihood):
 
       theta = np.array([])
 
-      # 6 cosmological parameter for wCDM with gg-split
+      # 8 cosmological parameter for wCDM with gg-split
       logAs         = self.provider.get_param("logA")
       ns            = self.provider.get_param("ns")
       H0            = self.provider.get_param("H0")
@@ -152,12 +152,17 @@ class lsst_emu_cs_wcdm(Likelihood):
         theta = np.append(theta, [LSST_B1_1, LSST_B1_2, LSST_B1_3, LSST_B1_4, LSST_B1_5])  #NEED this order for now
 
       if self.n_pcas_baryon ==4:
-        LSST_BARYON_Q1 = params_values['BARYON_Q1']
-        LSST_BARYON_Q2 = params_values['BARYON_Q2']
-        LSST_BARYON_Q3 = params_values['BARYON_Q3']
-        LSST_BARYON_Q4 = params_values['BARYON_Q4']
+        LSST_BARYON_Q1 = params_values['LSST_BARYON_Q1']
+        LSST_BARYON_Q2 = params_values['LSST_BARYON_Q2']
+        LSST_BARYON_Q3 = params_values['LSST_BARYON_Q3']
+        LSST_BARYON_Q4 = params_values['LSST_BARYON_Q4']
 
         theta = np.append(theta, [LSST_BARYON_Q1, LSST_BARYON_Q2, LSST_BARYON_Q3, LSST_BARYON_Q4])  #NEED this order for now
+      if self.n_pcas_baryon ==2:
+        LSST_BARYON_Q1 = params_values['LSST_BARYON_Q1']
+        LSST_BARYON_Q2 = params_values['LSST_BARYON_Q2']
+
+        theta = np.append(theta, [LSST_BARYON_Q1, LSST_BARYON_Q2])  #NEED this order for now
 
       return theta
 
@@ -199,7 +204,7 @@ class lsst_emu_cs_wcdm(Likelihood):
 
     def add_baryon_q(self, Q, datavector):
         for i in range(self.n_pcas_baryon):
-            datavector = datavector + Q[i] * self.baryon_pcas[:,i]
+            datavector = datavector + Q[i] * self.baryon_pcas[:,i][0:self.dv_len]
         return datavector
 
     def add_shear_calib(self, m, datavector):

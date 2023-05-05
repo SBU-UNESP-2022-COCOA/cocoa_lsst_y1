@@ -5,8 +5,8 @@
 #SBATCH -e lsst_ggsplit-%A_%a.out.err
 #SBATCH --nodes=1
 #SBATCH --ntasks=4
-#SBATCH --cpus-per-task=5
-#SBATCH --partition=extended-24core
+#SBATCH --cpus-per-task=8
+#SBATCH --partition=extended-40core
 #SBATCH -t 7-00:00:00
 
 echo Running on host `hostname`

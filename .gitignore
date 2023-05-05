@@ -10,6 +10,7 @@ emulator_output_wcdm/
 emulator_output_3x2_wcdm/
 emulator_output_cs_wcdm/
 emulator_validation/
+emulator_output_3x2_with_galaxy_bias/
 EXAMPLE_EVALUATE1.yaml
 EXAMPLE_EVALUATE2.yaml
 EXAMPLE_MCMC1.yaml
@@ -22,3 +23,5 @@ EXAMPLE_MCMC2_UOFA.sbatch
 EXAMPLE_POLY1_UOFA.sbatch
 EXAMPLE_POLY2_UOFA.sbatch
 data/*.modelvector
+sampler
+sampler

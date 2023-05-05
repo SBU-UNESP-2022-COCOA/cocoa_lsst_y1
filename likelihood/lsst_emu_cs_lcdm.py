@@ -27,6 +27,7 @@ class lsst_emu_cs_lcdm(Likelihood):
         self.output_dims       = len(self.dv_obs)
         self.dv_len            = self.dv_len
         self.mask              = np.loadtxt(self.mask_file)[:,1].astype(bool)[0:self.dv_len]
+        print("mask loaded from:", self.mask_file)
         self.cov               = self.get_full_cov(self.cov_file)
         self.masked_inv_cov    = np.linalg.inv(self.cov[0:self.dv_len, 0:self.dv_len][self.mask][:,self.mask]) #firstly do truncation (e.g. only cosmic shear), secondly do masking, finally do inverse
         self.dv_fid            = np.loadtxt(self.data_vector_used_for_training)[:,1]
@@ -48,9 +49,8 @@ class lsst_emu_cs_lcdm(Likelihood):
         #self.config_args_baryons = self.config_args_emu['baryons']
         
         if self.probe!='cosmic_shear':
-            self.config_args_bias  = self.config_args_emu['galaxy_bias']
-            self.bias_fid          = split_with_comma(self.config_args_bias['bias_fid'])
-            self.galaxy_bias_mask  = self.galaxy_bias_mask
+            print("WRONG likelihood")
+            quit()
 
         if self.probe!='cosmic_shear':
             self.n_sample_dims    = self.n_dim + self.lens_ntomo + self.source_ntomo + self.n_pcas_baryon
@@ -153,12 +153,18 @@ class lsst_emu_cs_lcdm(Likelihood):
         theta = np.append(theta, [LSST_B1_1, LSST_B1_2, LSST_B1_3, LSST_B1_4, LSST_B1_5])  #NEED this order for now
 
       if self.n_pcas_baryon ==4:
-        LSST_BARYON_Q1 = params_values['BARYON_Q1']
-        LSST_BARYON_Q2 = params_values['BARYON_Q2']
-        LSST_BARYON_Q3 = params_values['BARYON_Q3']
-        LSST_BARYON_Q4 = params_values['BARYON_Q4']
+        LSST_BARYON_Q1 = params_values['LSST_BARYON_Q1']
+        LSST_BARYON_Q2 = params_values['LSST_BARYON_Q2']
+        LSST_BARYON_Q3 = params_values['LSST_BARYON_Q3']
+        LSST_BARYON_Q4 = params_values['LSST_BARYON_Q4']
 
         theta = np.append(theta, [LSST_BARYON_Q1, LSST_BARYON_Q2, LSST_BARYON_Q3, LSST_BARYON_Q4])  #NEED this order for now
+
+      if self.n_pcas_baryon ==2:
+        LSST_BARYON_Q1 = params_values['LSST_BARYON_Q1']
+        LSST_BARYON_Q2 = params_values['LSST_BARYON_Q2']
+
+        theta = np.append(theta, [LSST_BARYON_Q1, LSST_BARYON_Q2])  #NEED this order for now
 
 
       # #for 2D check
@@ -182,19 +188,23 @@ class lsst_emu_cs_lcdm(Likelihood):
     def get_data_vector_emu(self, theta):
         theta_emu     = theta[:-self.n_fast_pars]
 
+        # print("TESTING theta_emu=", theta_emu)
+
         datavector = self.compute_datavector(theta_emu)
 
         if self.probe!='cosmic_shear':
             bias_theta = theta[self.n_sample_dims-(self.n_pcas_baryon + self.source_ntomo + self.lens_ntomo):
                                   self.n_sample_dims-(self.n_pcas_baryon + self.source_ntomo)]
             datavector = self.add_bias(bias_theta, datavector)
+        
         m_shear_theta = theta[self.n_sample_dims-(self.n_pcas_baryon + self.source_ntomo):
                               self.n_sample_dims-self.n_pcas_baryon]
-        #print('dv before m_shear',datavector[0:20])
+        # print('TESTING',theta, m_shear_theta, self.n_sample_dims-(self.n_pcas_baryon + self.source_ntomo), self.n_sample_dims-self.n_pcas_baryon)
         datavector = self.add_shear_calib(m_shear_theta, datavector)
         #print('dv after m_shear',datavector[0:20])
         if(self.n_pcas_baryon > 0):
             baryon_q   = theta[-self.n_pcas_baryon:]
+            #print("TESTING baryon_q=", baryon_q)
             datavector = self.add_baryon_q(baryon_q, datavector)
 
         return datavector
@@ -208,7 +218,7 @@ class lsst_emu_cs_lcdm(Likelihood):
 
     def add_baryon_q(self, Q, datavector):
         for i in range(self.n_pcas_baryon):
-            datavector = datavector + Q[i] * self.baryon_pcas[:,i]
+            datavector = datavector + Q[i] * self.baryon_pcas[:,i][0:self.dv_len]
         return datavector
 
     def add_shear_calib(self, m, datavector):
@@ -234,9 +244,12 @@ class lsst_emu_cs_lcdm(Likelihood):
         # np.savetxt('test_dv.txt',[self.dv_obs[0:self.dv_len], model_datavector])
         # ###
         # #print("testing.....", self.dv_obs[self.mask] @self.masked_inv_cov @ self.dv_obs[self.mask])
+        # print(self.mask[0:3])
+        # print(delta_dv[15:17])
         # ### DEBUG END
         
-        logp = -0.5 * delta_dv @ self.masked_inv_cov @ delta_dv  
+        logp = -0.5 * delta_dv @ self.masked_inv_cov @ delta_dv 
+        # print("testing lop=", logp) 
         return logp
 
     def load(self, filename, map_location):

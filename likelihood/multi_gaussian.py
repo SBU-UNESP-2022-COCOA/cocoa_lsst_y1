@@ -46,7 +46,7 @@ class multi_gaussian(Likelihood):
     #KZ: this functino can probably be simplied. at first I want to output list directly to use what cobaya wrote
     #    but later I realize numpy is easier for rotation
     def read_covs(self, covfile):
-        temp = pd.read_csv(covfile).values
+        temp = pd.read_csv(covfile, header=0).values
         cov  = []
         for i in range(self.covs_dim):
             line = temp[i][0].split()
@@ -132,7 +132,6 @@ class multi_gaussian(Likelihood):
         for i in range(len(self.means)):
             self.covs.append(cov.tolist())
 
-        print("testing",self.covs)
         # Load mean and cov, and check consistency of n_modes and dimensionality
         if self.means is not None and self.covs is not None:
             # Wrap them in the right arrays (n_mode, param) and check consistency
