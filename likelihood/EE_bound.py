@@ -17,7 +17,7 @@ class EE_bound(Likelihood):
         w_min    = -1.3
 
         self.EE_bound = np.array(([[logA_min, logA_max],[ns_min, ns_max],[H0_min, H0_max],[omb_min, omb_max], \
-                    [omm_min, omm_max],[w_min, w_max]]))
+                    [omm_min, omm_max],[w_min, w_max],[w_min, w_max],[w_min, w_max],[w_min, w_max]])) #4wbin
 
     def get_requirements(self):
         return {
@@ -26,7 +26,10 @@ class EE_bound(Likelihood):
           "ns": None,
           "omegab": None,
           "omegam": None,
-          "w": None,
+          "w0": None,
+          "w1": None,
+          "w2": None,
+          "w3": None,
         }
 
     def is_within_bounds(self, params, bounds):
@@ -44,9 +47,12 @@ class EE_bound(Likelihood):
         H0            = self.provider.get_param("H0")
         omegab        = self.provider.get_param("omegab")
         omegam        = self.provider.get_param("omegam")
-        w             = self.provider.get_param("w")
+        w0            = self.provider.get_param("w0")
+        w1            = self.provider.get_param("w1")
+        w2            = self.provider.get_param("w2")
+        w3            = self.provider.get_param("w3")
 
-        param = np.array([logA, ns, H0, omegab, omegam, w])
+        param = np.array([logA, ns, H0, omegab, omegam, w0, w1, w2, w3])
         logp  = np.log(self.is_within_bounds(param, self.EE_bound))
         
         return logp

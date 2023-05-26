@@ -20,12 +20,11 @@ likelihood:
     emu_file_cs:  "./projects/lsst_y1/emulator_output/models/FINAL/model_1"
     emu_file_2x2: "./projects/lsst_y1/emulator_output_3x2/models/model_2x2"
     emu_file_3x2: "./projects/lsst_y1/emulator_output_3x2/models/FINAL/model_3x2"
-    data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
-    # mask_file: "./projects/lsst_y1/data/lsst_3x2.mask" 
     n_dim_cs: 13
     n_dim_2x2: 18 
-    mask_file: "./projects/lsst_y1/data/ones.mask"
+    mask_file: "./projects/lsst_y1/data/lsst_3x2_baryon.mask"
     n_pcas_baryon: 2
+    data_vector_file: "./projects/lsst_y1/data/baryon_contaminated_BT76.modelvector"
 
 
 params:
@@ -40,9 +39,9 @@ params:
     proposal: 0.15
     latex: \log(10^{10} A_\mathrm{s})
     # drop: true
-  # As:
-  #   value: 'lambda logA: 1e-10*np.exp(logA)'
-  #   latex: A_\mathrm{s}
+  As:
+    value: 'lambda logA: 1e-10*np.exp(logA)'
+    latex: A_\mathrm{s}
   #   drop: true
   ns:
     prior:
@@ -187,8 +186,8 @@ params:
     latex: PM_\mathrm{LSST}^5
   LSST_BARYON_Q1:
     prior:
-        min: -3
-        max: 12
+        min: -100
+        max: 100
     ref:
         dist: norm
         loc: 3.
@@ -197,8 +196,8 @@ params:
     latex: Q1_\mathrm{LSST}^1
   LSST_BARYON_Q2:
     prior:
-        min: -2.5
-        max: 2.5
+        min: -100
+        max: 100
     ref:
         dist: norm
         loc: 0.

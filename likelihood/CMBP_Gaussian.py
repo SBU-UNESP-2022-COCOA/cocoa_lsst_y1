@@ -22,10 +22,10 @@ class CMBP_Gaussian(Likelihood):
             cov.append(line[:covs_dim])
         self.cov = np.array(cov)
 
-        self.gaussians = [multivariate_normal(mean=mean, cov=cov)
-                          for mean, cov in zip(self.means, self.cov)]
+        self.gaussians = multivariate_normal(mean=self.mean, cov=cov)
 
-        self.weights = 1 / len(self.gaussians) # renormalize as cobaya
+
+        self.weights = 1
 
     def get_requirements(self):
         return {
@@ -42,8 +42,4 @@ class CMBP_Gaussian(Likelihood):
         x = np.array([params_values[p] for p in self.input_params])
 
         # Compute the likelihood and return
-        if len(self.gaussians) == 1:
-            return self.gaussians[0].logpdf(x)
-        else:
-            return logsumexp([gauss.logpdf(x) for gauss in self.gaussians],
-                             b=self.weights)
+        return self.gaussians.logpdf(x)

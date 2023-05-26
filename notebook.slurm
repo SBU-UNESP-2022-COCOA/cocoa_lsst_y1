@@ -2,7 +2,7 @@
 
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=10
+#SBATCH --cpus-per-task=25
 #SBATCH -p long-28core
 #SBATCH --time 48:00:00
 #SBATCH --job-name jupyter-notebook

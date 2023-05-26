@@ -440,7 +440,7 @@ emulator:
       #n_resample: 9600
       n_resample: 96 #KZ debug
       emu_type: nn
-      batch_size: 4000
+      batch_size: 2000
       n_epochs: 400
   shear_calib:
       mask: ./projects/lsst_y1/data/emu_files/shear_calib_mask.npy

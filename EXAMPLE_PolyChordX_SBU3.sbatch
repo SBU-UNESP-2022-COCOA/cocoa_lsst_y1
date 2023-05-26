@@ -4,7 +4,7 @@
 #SBATCH --output=lsst_PolyChord-%A_%a.out
 #SBATCH -e lsst_PolyChord-%A_%a.out.err
 #SBATCH --nodes=16
-#SBATCH --ntasks-per-node=10
+#SBATCH --ntasks-per-node=9
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=medium-40core
 #SBATCH -t 12:00:00

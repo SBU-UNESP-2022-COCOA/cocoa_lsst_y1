@@ -4,10 +4,10 @@
 #SBATCH --output=lsst_PolyChord-%A_%a.out
 #SBATCH -e lsst_PolyChord-%A_%a.out.err
 #SBATCH --nodes=1
-#SBATCH --ntasks=38
+#SBATCH --ntasks=36
 #SBATCH --cpus-per-task=1
-#SBATCH --partition=extended-40core
-#SBATCH -t 7-00:00:00
+#SBATCH --partition=long-40core
+#SBATCH -t 48:00:00
 
 echo Running on host `hostname`
 echo Time is `date`

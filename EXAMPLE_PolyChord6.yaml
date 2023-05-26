@@ -100,5 +100,6 @@ sampler:
     precision_criterion: 0.05
     boost_posterior: 10
     feedback: 2
+    confidence_for_unbounded: 0.9973 # 3sigma
 
 output: ./projects/lsst_y1/chains/EXAMPLE_PolyChord6

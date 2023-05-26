@@ -428,14 +428,14 @@ theory:
 
 emulator:
   io:
-      savedir: ./projects/lsst_y1/emulator_output_3x2_wcdm/lhs/dvs_for_training_2000k    
+      savedir: ./projects/lsst_y1/emulator_output_3x2_wcdm/lhs/dvs_for_training_5M    
       save_train_data: true             
       save_intermediate_model: true
   training:
       dv_fid: ./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector
       chi_sq_cut: 8e+4
       n_train_iter: 1
-      n_lhs: 2000000 
+      n_lhs: 5000000 
       n_resample: 9600
       #n_resample: 96 #KZ debug
       emu_type: nn
