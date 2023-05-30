@@ -93,8 +93,8 @@ params:
     value: 0.0
     latex: PM_\mathrm{LSST}^5
 #TESTING
-  # LSST_DZ_S1:
-  #   value: 0.0
+  LSST_DZ_S1:
+    value: 0.0
   LSST_DZ_S2:
     value: .0
   LSST_DZ_S3:

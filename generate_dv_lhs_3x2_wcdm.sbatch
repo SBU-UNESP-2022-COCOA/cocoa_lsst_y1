@@ -34,5 +34,5 @@ else
   export OMP_NUM_THREADS=1
 fi
 
-$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 get_dv_from_file.py ./projects/lsst_y1/generate_dv_lhs_3x2_wcdm.yaml ./projects/lsst_y1/emulator_output_3x2_wcdm/lhs/dvs_for_training_5M/train_7_samples.npy -f
+$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 get_dv_from_file.py ./projects/lsst_y1/generate_dv_lhs_3x2_wcdm.yaml ./projects/lsst_y1/emulator_output_3x2_wcdm/lhs/dvs_for_training_5M/train_12_samples.npy -f
 #$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 generate_dv_lhs.py ./projects/lsst_y1/generate_dv_lhs_3x2_wcdm.yaml -f

@@ -3,12 +3,10 @@ debug: False
 stop_at_error: False
 
 likelihood:
-  lsst_y1.lsst_cosmic_shear:
-    path: ./external_modules/data/lsst_y1
-    data_file: LSST_Y1.dataset
-    print_datavector: False
-    non_linear_emul: 1
-    kmax_boltzmann: 5.0
+  lsst_y1.lsst_emu_cs_lcdm:
+    emu_file: "./projects/lsst_y1/emulator_output/models/Transformer/model_1"
+    data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
+    n_dim: 13 
 
 params:
   logA:
@@ -21,10 +19,6 @@ params:
       scale: 0.15
     proposal: 0.15
     latex: \log(10^{10} A_\mathrm{s})
-    drop: true
-  As:
-    value: 'lambda logA: 1e-10*np.exp(logA)'
-    latex: A_\mathrm{s}
   ns:
     prior:
       min: 0.92
@@ -65,12 +59,6 @@ params:
       scale: 0.02
     proposal: 0.02
     latex: \Omega_\mathrm{m}
-  w:
-    value: -1
-    latex: w0
-  w_growth:
-    value: -1
-    latex: w_\mathrm{growth}
   omegam_growth:
     prior:
       min: 0.24
@@ -81,33 +69,11 @@ params:
       scale: 0.01
     proposal: 0.01
     latex: \Omega_\mathrm{m}^\mathrm{growth}
-  mnu:
-    value: 0.06
 
 theory:
-  camb:
-    path: ./external_modules/code/CAMB
-    stop_at_error: False
-    use_renames: True
-    extra_args:
-      halofit_version: takahashi
-      AccuracyBoost: 1.15
-      lens_potential_accuracy: 1.0
-      num_massive_neutrinos: 1
-      nnu: 3.046
-      dark_energy_model: ppf
-      accurate_massive_neutrino_transfers: false
-      k_per_logint: 20
 
 sampler:
-  polychord:
-    path: null
-    nlive: 512
-    num_repeats: 3d
-    do_clustering: false
-    precision_criterion: 0.001
-    boost_posterior: 10
-    feedback: 2
-    confidence_for_unbounded: 0.9973 # 3sigma
+  nautilus:
+    n_live: 4000
 
-output: ./projects/lsst_y1/chains/EXAMPLE_PolyChord19
+output: ./projects/lsst_y1/chains/EXAMPLE_Nautilus4

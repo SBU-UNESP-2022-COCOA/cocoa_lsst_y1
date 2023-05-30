@@ -95,9 +95,9 @@ sampler:
   polychord:
     path: null
     nlive: 1024
-    num_repeats: 3d
+    num_repeats: 5d
     do_clustering: false
-    precision_criterion: 0.05
+    precision_criterion: 0.001
     boost_posterior: 10
     feedback: 2
     confidence_for_unbounded: 0.9973 # 3sigma
