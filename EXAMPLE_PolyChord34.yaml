@@ -114,19 +114,9 @@ sampler:
     blocking:
       - [1,
           [
-            logA, ns, H0, omegab, omegam
-          ]
-        ]
-      - [3,
-          [
-            LSST_DZ_S1, LSST_DZ_S2, LSST_DZ_S3, LSST_DZ_S4, LSST_DZ_S5, LSST_A1_1, LSST_A1_2,
-            omegam_growth
-          ]
-        ]
-      - [10,
-          [
-            LSST_M1, LSST_M2, LSST_M3, LSST_M4, LSST_M5
+            logA, ns, H0, omegab, omegam, LSST_DZ_S1, LSST_DZ_S2, LSST_DZ_S3, LSST_DZ_S4, LSST_DZ_S5, LSST_A1_1, LSST_A1_2,
+            omegam_growth, LSST_M1, LSST_M2, LSST_M3, LSST_M4, LSST_M5
           ]
         ]
 
-output: ./projects/lsst_y1/chains/EXAMPLE_PolyChord19
+output: ./projects/lsst_y1/chains/EXAMPLE_PolyChord34
