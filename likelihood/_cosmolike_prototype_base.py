@@ -198,7 +198,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     self.do_cache_chi = np.zeros(len(self.z_interp_1D))
 
-    self.do_cache_cosmo = np.zeros(2)
+    self.do_cache_cosmo = np.zeros(3)
 
     # ------------------------------------------------------------------------
     if self.non_linear_emul in[1,3,4,5,6,7]:
@@ -754,6 +754,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
       self.do_cache_cosmo = np.array([
         self.provider.get_param("omegam"),
+        self.provider.get_param("omegam_growth"),
         self.provider.get_param("H0")
       ])
 

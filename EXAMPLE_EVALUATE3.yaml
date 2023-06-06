@@ -8,7 +8,7 @@ likelihood:
   lsst_y1.lsst_3x2pt:
     path: ./external_modules/data/lsst_y1
     data_file: LSST_Y1_no_scale_cut.dataset
-    print_datavector: False
+    print_datavector: True
     print_datavector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
     non_linear_emul: 1
     kmax_boltzmann: 5.0

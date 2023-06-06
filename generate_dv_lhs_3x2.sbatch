@@ -3,10 +3,10 @@
 #SBATCH --job-name=lsst_emu
 #SBATCH --output=lsst_emu-%A_%a.out
 #SBATCH -e lsst_emu-%A_%a.out.err
-#SBATCH --nodes=60
+#SBATCH --nodes=40
 #SBATCH --ntasks-per-node=8
-#SBATCH --cpus-per-task=3
-#SBATCH --partition=large-28core
+#SBATCH --cpus-per-task=4
+#SBATCH --partition=large-40core
 #SBATCH -t 8:00:00
 
 echo Running on host `hostname`
