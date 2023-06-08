@@ -3,10 +3,10 @@
 #SBATCH --job-name=lsst_emu
 #SBATCH --output=lsst_emu-%A_%a.out
 #SBATCH -e lsst_emu-%A_%a.out.err
-#SBATCH --nodes=60
+#SBATCH --nodes=1
 #SBATCH --ntasks-per-node=8
 #SBATCH --cpus-per-task=3
-#SBATCH --partition=large-28core
+#SBATCH --partition=long-28core
 #SBATCH -t 8:00:00
 
 echo Running on host `hostname`
@@ -34,5 +34,5 @@ else
   export OMP_NUM_THREADS=1
 fi
 
-$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 get_dv_from_file.py ./projects/lsst_y1/generate_dv_lhs_3x2_wcdm.yaml ./projects/lsst_y1/emulator_output_3x2_wcdm/lhs/dvs_for_training_1M/train_1_samples.npy -f
-#$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 generate_dv_lhs.py ./projects/lsst_y1/generate_dv_lhs_3x2_wcdm.yaml -f
+#$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 get_dv_from_file.py ./projects/lsst_y1/generate_dv_lhs_3x2_wcdm.yaml ./projects/lsst_y1/emulator_output_3x2_wcdm/lhs/dvs_for_training_1M/train_2_samples.npy -f
+$CONDA_PREFIX/bin/mpirun -n ${SLURM_NTASKS} --mca btl tcp,self --bind-to core --map-by numa:pe=${OMP_NUM_THREADS} python3 generate_dv_lhs.py ./projects/lsst_y1/generate_dv_lhs_3x2_wcdm.yaml -f
