@@ -239,26 +239,26 @@ class lsst_emu_cs_wcdm(Likelihood):
         self.trained = True
         self.model = torch.load(filename, map_location)
         with h5.File(filename + '.h5', 'r') as f:
-            self.X_mean  = torch.Tensor(f['X_mean'][:]).double()
-            self.X_std   = torch.Tensor(f['X_std'][:]).double()
-            self.X_max   = torch.Tensor(f['X_max'][:]).double()
-            self.X_min   = torch.Tensor(f['X_min'][:]).double()
-            self.dv_fid  = torch.Tensor(f['dv_fid'][:]).double()
-            self.dv_std  = torch.Tensor(f['dv_std'][:]).double()
-            self.dv_max  = torch.Tensor(f['dv_max'][:]).double()
-            self.dv_mean = torch.Tensor(f['dv_mean'][:]).double()
-            self.cov     = torch.Tensor(f['cov'][:]).double()
-            self.evecs   = torch.Tensor(f['evecs'][:]).double()
-            self.evecs_inv  = torch.Tensor(f['evecs_inv'][:]).double()
+            self.X_mean  = torch.Tensor(f['X_mean'][:]).float()
+            self.X_std   = torch.Tensor(f['X_std'][:]).float()
+            self.X_max   = torch.Tensor(f['X_max'][:]).float()
+            self.X_min   = torch.Tensor(f['X_min'][:]).float()
+            self.dv_fid  = torch.Tensor(f['dv_fid'][:]).float()
+            self.dv_std  = torch.Tensor(f['dv_std'][:]).float()
+            self.dv_max  = torch.Tensor(f['dv_max'][:]).float()
+            self.dv_mean = torch.Tensor(f['dv_mean'][:]).float()
+            self.cov     = torch.Tensor(f['cov'][:]).float()
+            self.evecs   = torch.Tensor(f['evecs'][:]).float()
+            self.evecs_inv  = torch.Tensor(f['evecs_inv'][:]).float()
 
     def predict(self, X):
         assert self.trained, "The emulator needs to be trained first before predicting"
 
         with torch.no_grad():
-            X_mean = self.X_mean.clone().detach().to(self.device).double()
-            X_std  = self.X_std.clone().detach().to(self.device).double()
-            X_max  = self.X_max.clone().detach().to(self.device).double()
-            X_min  = self.X_min.clone().detach().to(self.device).double()
+            X_mean = self.X_mean.clone().detach().to(self.device).float()
+            X_std  = self.X_std.clone().detach().to(self.device).float()
+            X_max  = self.X_max.clone().detach().to(self.device).float()
+            X_min  = self.X_min.clone().detach().to(self.device).float()
 
             ### mean/std normalization
             # X_norm = (X.to(self.device) - X_mean) / X_std
@@ -267,10 +267,10 @@ class lsst_emu_cs_wcdm(Likelihood):
             X_norm = (X.to(self.device) - X_min) / (X_max - X_min)
             X_norm = np.reshape(X_norm, (1, len(X_norm)))
 
-            y_pred = self.model.eval()(X_norm).double().cpu() * self.dv_std #normalization
+            y_pred = self.model.eval()(X_norm).float().cpu() * self.dv_std #normalization
 
         y_pred = y_pred @ torch.Tensor(np.transpose(self.evecs)) + self.dv_mean #change of basis
-        return y_pred.double().numpy()
+        return y_pred.float().numpy()
 
 class Affine(nn.Module):
     def __init__(self):

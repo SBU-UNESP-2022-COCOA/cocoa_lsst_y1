@@ -8,7 +8,7 @@ n_dim_2x2: 18 #Total parameter number used FOR EMULATION
 dv_len: 1560
 emu_file_cs:  "./projects/lsst_y1/emulator_output/models/FINAL/model_1"
 emu_file_2x2: "./projects/lsst_y1/emulator_output_3x2/models/FINAL/model_2x2"
-emu_file_3x2: "./projects/lsst_y1/emulator_output_3x2/models/FINAL/model_3x2"
+emu_file_3x2: Null
 bias_fid: [1.24, 1.36, 1.47, 1.60, 1.76]
 
 

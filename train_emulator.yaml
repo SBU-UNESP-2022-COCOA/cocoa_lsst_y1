@@ -180,17 +180,9 @@ params:
     proposal: 0.002
     latex: \Delta z_\mathrm{s,LSST}^5
   LSST_A1_1:
-    # prior:
-    #   min: -5
-    #   max:  5
-    # ref:
-    #   dist: norm
-    #   loc: 0.5
-    #   scale: 0.1
-    # proposal: 0.5
     prior:
-      min: 0
-      max:  1
+      min: -5
+      max:  5
     ref:
       dist: norm
       loc: 0.5
@@ -198,17 +190,9 @@ params:
     proposal: 0.5
     latex: A_\mathrm{1-IA,LSST}^1
   LSST_A1_2:
-    # prior:
-    #   min: -5
-    #   max:  5
-    # ref:
-    #   dist: norm
-    #   loc: 0.
-    #   scale: 0.1
-    # proposal: 0.5
     prior:
-      min: -2.0
-      max:  2.0
+      min: -5
+      max:  5
     ref:
       dist: norm
       loc: 0.
@@ -314,8 +298,8 @@ emulator:
       #n_resample: 9600
       n_resample: 96 #KZ debug
       emu_type: nn
-      batch_size: 2500
-      n_epochs: 150
+      batch_size: 1500
+      n_epochs: 400
   shear_calib:
       mask: ./projects/lsst_y1/data/emu_files/shear_calib_mask.npy
       prior_std: 0.005, 0.005, 0.005, 0.005, 0.005

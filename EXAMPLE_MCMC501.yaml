@@ -9,9 +9,10 @@ likelihood:
   planck_2018_lowl.EE:
     path: ./external_modules/
   lsst_y1.lsst_emu_cs_lcdm:
-    emu_file: "./projects/lsst_y1/emulator_output/models/FINAL/model_1"
+    emu_file: "./projects/lsst_y1/emulator_output/modelsTransformer/2M/model_CS"
     data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
     n_dim: 13 
+    n_pcas_baryon: 2
 
 params:
   logA:
@@ -150,6 +151,32 @@ params:
       scale: 0.01
     proposal: 0.01
     latex: \Omega_\mathrm{m}^\mathrm{growth}
+  LSST_BARYON_Q1:
+    prior:
+        min: -100
+        max: 100
+    ref:
+        dist: norm
+        loc: 3.
+        scale: 1.
+    proposal: 1.
+    latex: Q1_\mathrm{LSST}^1
+  LSST_BARYON_Q2:
+    prior:
+        min: -100
+        max: 100
+    ref:
+        dist: norm
+        loc: 0.
+        scale: 1.
+    proposal: 1.
+    latex: Q2_\mathrm{LSST}^2
+  LSST_BARYON_Q3:
+    value: 0.0
+    latex: Q3_\mathrm{LSST}^3
+  LSST_BARYON_Q4:
+    value: 0.0
+    latex: Q4_\mathrm{LSST}^4
 
 theory:
   camb:
@@ -219,7 +246,7 @@ sampler:
         ]
       - [25,
           [
-            LSST_M1, LSST_M2, LSST_M3, LSST_M4, LSST_M5
+            LSST_M1, LSST_M2, LSST_M3, LSST_M4, LSST_M5, LSST_BARYON_Q1, LSST_BARYON_Q2
           ]
         ]
       - [50,

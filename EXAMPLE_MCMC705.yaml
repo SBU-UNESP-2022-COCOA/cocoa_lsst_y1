@@ -17,9 +17,9 @@ likelihood:
   planck_2018_lowl.EE:
     path: ./external_modules/
   lsst_y1.lsst_emu_cs_lcdm:
-    emu_file: "./projects/lsst_y1/emulator_output/models/FINAL/model_1"
+    emu_file: "./projects/lsst_y1/emulator_output/modelsTransformer/2M/model_CS"
     n_dim: 13 
-    mask_file: "./projects/lsst_y1/data/lsst_3x2_baryon.mask"
+    mask_file: "./projects/lsst_y1/data/lsst_3x2.mask" #now called "aggressive"
     n_pcas_baryon: 2
     data_vector_file: "./projects/lsst_y1/data/baryon_contaminated_BT76.modelvector"
 

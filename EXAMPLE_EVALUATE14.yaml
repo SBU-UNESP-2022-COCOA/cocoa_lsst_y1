@@ -3,7 +3,7 @@ debug: True
 stop_at_error: True
 
 
-### generate dv as the fiducial dv for this work.
+### generate shifted dv example 5
 likelihood:
   lsst_y1.lsst_3x2pt:
     path: ./external_modules/data/lsst_y1
@@ -144,8 +144,8 @@ sampler:
   evaluate:
     N: 1
     override:
-      # plus 0.03 omegam
-      As_1e9: 2.101
+      # minus 0.03 omegam; and plus 0.1 for logA
+      As_1e9: 2.32197
       ns: 0.9649
       H0: 67.32
       omegab: 0.0493382322

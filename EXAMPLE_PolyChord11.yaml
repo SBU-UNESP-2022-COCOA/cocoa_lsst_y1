@@ -118,7 +118,7 @@ sampler:
   polychord:
     path: null
     nlive: 512
-    num_repeats: 3d
+    num_repeats: 5d
     do_clustering: false
     precision_criterion: 0.001
     boost_posterior: 10

@@ -9,9 +9,9 @@ likelihood:
   planck_2018_lowl.EE:
     path: ./external_modules/
   lsst_y1.lsst_emu_3x2_lcdm:
-    emu_file_cs:  "./projects/lsst_y1/emulator_output/models/FINAL/model_1"
-    emu_file_2x2: "./projects/lsst_y1/emulator_output_3x2/models/model_2x2"
-    emu_file_3x2: "./projects/lsst_y1/emulator_output_3x2/models/FINAL/model_3x2"
+    emu_file_cs:  "./projects/lsst_y1/emulator_output/modelsTransformer/8M/model_CS"
+    emu_file_2x2: "./projects/lsst_y1/emulator_output_3x2/modelsTransformer/model_2x2"
+    emu_file_3x2: Null
     data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
     mask_file: "./projects/lsst_y1/data/lsst_3x2.mask" 
     n_dim_cs: 13

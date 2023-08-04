@@ -4,13 +4,13 @@ stop_at_error: False
 
 likelihood:
   lsst_y1.lsst_emu_3x2_lcdm:
-    emu_file_cs:  "./projects/lsst_y1/emulator_output/models/FINAL/model_1"
-    emu_file_2x2: "./projects/lsst_y1/emulator_output_3x2/models/model_2x2"
+    emu_file_cs:  "./projects/lsst_y1/emulator_output/modelsTransformer/8M/model_CS"
+    emu_file_2x2: "./projects/lsst_y1/emulator_output_3x2/modelsTransformer/model_2x2"
+    emu_file_3x2: Null
     data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
     mask_file: "./projects/lsst_y1/data/lsst_3x2.mask" 
     n_dim_cs: 13
     n_dim_2x2: 18 
-    emu_file_3x2: "./projects/lsst_y1/emulator_output_3x2/models/Transformer/model_3x2"
 
 params:
   logA:
@@ -95,7 +95,7 @@ sampler:
   polychord:
     path: null
     nlive: 512
-    num_repeats: 3d
+    num_repeats: 5d
     do_clustering: false
     precision_criterion: 0.001
     boost_posterior: 10

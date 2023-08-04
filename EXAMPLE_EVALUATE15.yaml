@@ -3,7 +3,7 @@ debug: True
 stop_at_error: True
 
 
-### generate dv as the fiducial dv for this work.
+### generate shifted dv example 6
 likelihood:
   lsst_y1.lsst_3x2pt:
     path: ./external_modules/data/lsst_y1
@@ -144,12 +144,12 @@ sampler:
   evaluate:
     N: 1
     override:
-      # minus 0.03 omegmam
-      As_1e9: 2.101
+      # omegam= 0.25; logA = 3.2
+      As_1e9: 2.45325
       ns: 0.9649
       H0: 67.32
       omegab: 0.0493382322
-      omegam: 0.3466
+      omegam: 0.25
       mnu: 0.06
       LSST_DZ_S1: 0.0 #DES synthetic chains has non-zero dz, but for LSST we set them to 0
       LSST_DZ_S2: 0.0

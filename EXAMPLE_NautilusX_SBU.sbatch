@@ -5,8 +5,8 @@
 #SBATCH -e lsst_nautilus-%A_%a.out.err
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=12
-#SBATCH --partition=long-28core
+#SBATCH --cpus-per-task=20
+#SBATCH --partition=long-40core
 #SBATCH -t 48:00:00
 
 echo Running on host `hostname`

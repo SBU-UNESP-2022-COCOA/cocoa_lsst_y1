@@ -4,13 +4,13 @@ stop_at_error: False
 
 likelihood:
   lsst_y1.lsst_emu_3x2_lcdm:
-    emu_file_cs:  "./projects/lsst_y1/emulator_output/models/FINAL/model_1"
-    emu_file_2x2: "./projects/lsst_y1/emulator_output_3x2/models/model_2x2"
+    emu_file_cs:  "./projects/lsst_y1/emulator_output/modelsTransformer/8M/model_CS"
+    emu_file_2x2: "./projects/lsst_y1/emulator_output_3x2/modelsTransformer/model_2x2"
+    emu_file_3x2: Null
     data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
     mask_file: "./projects/lsst_y1/data/lsst_3x2.mask" 
     n_dim_cs: 13
     n_dim_2x2: 18 
-    emu_file_3x2: "./projects/lsst_y1/emulator_output_3x2/models/Transformer/model_3x2"
 
 params:
   logA:
@@ -99,10 +99,9 @@ sampler:
       kind: multiprocessing #schwimmbad; multiprocessing
       args:
         threads: 20
-    posterior_evidence_ratio: 1.0
-    nlive_init: 1000
-    nlive_batch: 200
-    nlive: 2048
+    posterior_evidence_ratio: 0.0
+    nlive_init: 4000
+    nlive_batch: 800
     confidence_for_unbounded: 0.9973 # 3sigma
 
 

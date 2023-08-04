@@ -3,12 +3,11 @@ debug: True
 stop_at_error: True
 
 likelihood:
-  lsst_y1.lsst_emu_cs_wcdm:
-    emu_file: "./projects/lsst_y1/emulator_output_cs_wcdm/models/model_1"
-    #emu_file: "./projects/lsst_y1/emulator_output/models/800klhs_200kpost/model_1"
+  lsst_y1.lsst_emu_cs_lcdm:
+    emu_file: "./projects/lsst_y1/emulator_output/modelsTransformer/2M/model_CS"
     data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
     mask_file: "./projects/lsst_y1/data/lsst_3x2_linear.mask" #dv is also generated with linear mask
-    n_dim: 15 
+    n_dim: 13 
 
 params:
   logA:
@@ -21,10 +20,10 @@ params:
       scale: 0.15
     proposal: 0.15
     latex: \log(10^{10} A_\mathrm{s})
-    drop: true
-  As:
-    value: 'lambda logA: 1e-10*np.exp(logA)'
-    latex: A_\mathrm{s}
+  #   drop: true
+  # As:
+  #   value: 'lambda logA: 1e-10*np.exp(logA)'
+  #   latex: A_\mathrm{s}
   ns:
     prior:
       min: 0.87

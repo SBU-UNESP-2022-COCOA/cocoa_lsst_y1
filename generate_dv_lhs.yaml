@@ -285,7 +285,8 @@ theory:
 
 emulator:
   io:
-      savedir: ./projects/lsst_y1/emulator_output/lhs/dvs_for_training_1M    
+      savedir: ./projects/lsst_y1/emulator_output/random/dvs_for_training_4M_tmp 
+      #savedir: ./projects/lsst_y1/emulator_output/random/dvs_for_validation_5k    
       save_train_data: true             
       save_intermediate_model: true
   training:
@@ -297,7 +298,7 @@ emulator:
       #n_resample: 96 #KZ debug
       emu_type: nn
       batch_size: 32
-      n_epochs: 100
+      n_epochs: 400
   shear_calib:
       mask: ./projects/lsst_y1/data/emu_files/shear_calib_mask.npy
       prior_std: 0.005, 0.005, 0.005, 0.005, 0.005

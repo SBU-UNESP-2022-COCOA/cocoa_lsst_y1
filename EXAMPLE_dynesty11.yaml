@@ -4,7 +4,7 @@ stop_at_error: False
 
 likelihood:
   lsst_y1.lsst_emu_cs_lcdm:
-    emu_file: "./projects/lsst_y1/emulator_output/models/Transformer/model_1"
+    emu_file: "./projects/lsst_y1/emulator_output/modelsTransformer/2M/model_CS"
     data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
     n_dim: 13 
 

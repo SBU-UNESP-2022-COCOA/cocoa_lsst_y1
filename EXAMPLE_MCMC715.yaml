@@ -1,6 +1,6 @@
 timing: True
 debug: False
-stop_at_error: False
+stop_at_error: True
 
 likelihood:
   sn.pantheon:
@@ -17,10 +17,11 @@ likelihood:
   planck_2018_lowl.EE:
     path: ./external_modules/
   lsst_y1.lsst_emu_cs_lcdm:
-    emu_file: "./projects/lsst_y1/emulator_output/models/FINAL/model_1"
-    data_vector_file: "./projects/lsst_y1/data/example3_lsst_y1_theory.modelvector"
+    emu_file: "./projects/lsst_y1/emulator_output/modelsTransformer/2M/model_CS"
     n_dim: 13 
-    mask_file: "./projects/lsst_y1/data/ones.mask"
+    mask_file: "./projects/lsst_y1/data/lsst_CS_lmax_1500.mask"
+    n_pcas_baryon: 2
+    data_vector_file: "./projects/lsst_y1/data/baryon_contaminated_BT76.modelvector"
 
 params:
   logA:
@@ -164,6 +165,18 @@ params:
       scale: 0.01
     proposal: 0.01
     latex: \Omega_\mathrm{m}^\mathrm{growth}
+  LSST_BARYON_Q1:
+    value: 0.0
+    latex: Q1_\mathrm{LSST}^1
+  LSST_BARYON_Q2:
+    value: 0.0
+    latex: Q2_\mathrm{LSST}^2
+  LSST_BARYON_Q3:
+    value: 0.0
+    latex: Q3_\mathrm{LSST}^3
+  LSST_BARYON_Q4:
+    value: 0.0
+    latex: Q4_\mathrm{LSST}^4
 
 theory:
   camb:
@@ -259,4 +272,4 @@ sampler:
     # ---------------------------------------------------------------------
     Rminus1_single_split: 4
 
-output: ./projects/lsst_y1/chains/EXAMPLE_MCMC605
+output: ./projects/lsst_y1/chains/EXAMPLE_MCMC715

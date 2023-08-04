@@ -1,0 +1,99 @@
+timing: True
+debug: False
+stop_at_error: False
+
+likelihood:
+  lsst_y1.lsst_emu_cs_lcdm:
+    emu_file: "./projects/lsst_y1/emulator_output/modelsMLP/2M/model_CS"
+    data_vector_file: "./projects/lsst_y1/data/example6_lsst_y1_theory.modelvector"
+    n_dim: 13 
+
+params:
+  logA:
+    prior:
+      min: 2.83321
+      max: 3.21888
+    ref:
+      dist: norm
+      loc: 3.0448
+      scale: 0.15
+    proposal: 0.15
+    latex: \log(10^{10} A_\mathrm{s})
+  ns:
+    prior:
+      min: 0.92
+      max: 1.00
+    ref:
+      dist: norm
+      loc: 0.96605
+      scale: 0.01
+    proposal: 0.01
+    latex: n_\mathrm{s}
+  H0:
+    prior:
+      min: 61
+      max: 73
+    ref:
+      dist: norm
+      loc: 67.32
+      scale: 5
+    proposal: 3
+    latex: H_0
+  omegab:
+    prior:
+      min: 0.04
+      max: 0.06
+    ref:
+      dist: norm
+      loc: 0.0495
+      scale: 0.004
+    proposal: 0.004
+    latex: \Omega_\mathrm{b}
+  omegam:
+    prior:
+      min: 0.24
+      max: 0.40
+    ref:
+      dist: norm
+      loc: 0.316
+      scale: 0.02
+    proposal: 0.02
+    latex: \Omega_\mathrm{m}
+  omegam_growth:
+    prior:
+      min: 0.24
+      max: 0.4
+    ref:
+      dist: norm
+      loc: 0.3
+      scale: 0.01
+    proposal: 0.01
+    latex: \Omega_\mathrm{m}^\mathrm{growth}
+
+theory:
+
+sampler:
+  polychord:
+    path: null
+    nlive: 1024
+    num_repeats: 5d
+    do_clustering: false
+    precision_criterion: 0.001
+    boost_posterior: 10
+    feedback: 2
+    confidence_for_unbounded: 0.9973 # 3sigma
+    measure_speeds: False
+    oversample_power: 0.2
+    blocking:
+      - [1,
+          [
+            logA, ns, H0, omegab, omegam, LSST_DZ_S1, LSST_DZ_S2, LSST_DZ_S3, LSST_DZ_S4, LSST_DZ_S5, LSST_A1_1, LSST_A1_2,
+            omegam_growth
+          ]
+        ]
+      - [2,
+          [
+            LSST_M1, LSST_M2, LSST_M3, LSST_M4, LSST_M5
+          ]
+        ]
+output: ./projects/lsst_y1/chains/EXAMPLE_PolyChord66

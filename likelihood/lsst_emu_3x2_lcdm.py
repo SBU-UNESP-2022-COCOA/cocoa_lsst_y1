@@ -34,7 +34,8 @@ class lsst_emu_3x2_lcdm(Likelihood):
         self.device            = 'cpu'
         self.load_cs(self.emu_file_cs, map_location=torch.device(self.device))
         self.load_2x2(self.emu_file_2x2, map_location=torch.device(self.device))
-        self.load_3x2(self.emu_file_3x2, map_location=torch.device(self.device))
+        if self.emu_file_3x2 is not None:
+            self.load_3x2(self.emu_file_3x2, map_location=torch.device(self.device))
         self.shear_calib_mask  = np.load(self.shear_calib_mask) #mask that gives 2 for cosmic shear, and 1 for gg-lensing
         self.source_ntomo      = self.source_ntomo
         if self.probe != 'cosmic_shear':
@@ -46,7 +47,7 @@ class lsst_emu_3x2_lcdm(Likelihood):
         
         #self.m_shear_prior_std = split_with_comma(self.config_args_emu['shear_calib']['prior_std'])
         
-        #NO baryons for now
+        # NO baryons for now
         #self.config_args_baryons = self.config_args_emu['baryons']
         
         if self.probe!='cosmic_shear':
@@ -181,14 +182,13 @@ class lsst_emu_3x2_lcdm(Likelihood):
         elif(self.emu_type=='gp'):
             theta = theta[np.newaxis]
 
-        #datavector_cs = self.predict_cs(theta[0:self.n_dim_cs])[0]
-        # datavector_cs = self.predict_cs(theta[0:self.n_dim_cs])[0]
-        # datavector_2x2 = self.predict_2x2(theta[0:self.n_dim_2x2])[0]
+        # Use Cosmic Shear + 2x2pt
+        datavector_cs = self.predict_cs(theta[0:self.n_dim_cs])[0]
+        datavector_2x2 = self.predict_2x2(theta[0:self.n_dim_2x2])[0]
+        datavector = np.append(datavector_cs, datavector_2x2)
 
-        # print("TESTING", datavector_cs[0:10], datavector_2x2[0:10])
-        # datavector = np.append(datavector_cs, datavector_2x2)
-
-        datavector = self.predict_3x2(theta)[0]
+        ## Use 3x2 emulator directly (Not Recommended)
+        # datavector = self.predict_3x2(theta)[0]
         return datavector
 
     # add the fast parameter part into the dv
@@ -266,58 +266,58 @@ class lsst_emu_3x2_lcdm(Likelihood):
         self.trained = True
         self.model_cs = torch.load(filename, map_location)
         with h5.File(filename + '.h5', 'r') as f:
-            self.X_mean_cs  = torch.Tensor(f['X_mean'][:]).double()
-            self.X_std_cs   = torch.Tensor(f['X_std'][:]).double()
-            self.X_max_cs   = torch.Tensor(f['X_max'][:]).double()
-            self.X_min_cs   = torch.Tensor(f['X_min'][:]).double()
-            self.dv_fid_cs  = torch.Tensor(f['dv_fid'][:]).double()
-            self.dv_std_cs  = torch.Tensor(f['dv_std'][:]).double()
-            self.dv_max_cs  = torch.Tensor(f['dv_max'][:]).double()
-            self.dv_mean_cs = torch.Tensor(f['dv_mean'][:]).double()
-            self.cov_cs     = torch.Tensor(f['cov'][:]).double()
-            self.evecs_cs   = torch.Tensor(f['evecs'][:]).double()
-            self.evecs_inv_cs  = torch.Tensor(f['evecs_inv'][:]).double()
+            self.X_mean_cs  = torch.Tensor(f['X_mean'][:]).float()
+            self.X_std_cs   = torch.Tensor(f['X_std'][:]).float()
+            self.X_max_cs   = torch.Tensor(f['X_max'][:]).float()
+            self.X_min_cs   = torch.Tensor(f['X_min'][:]).float()
+            self.dv_fid_cs  = torch.Tensor(f['dv_fid'][:]).float()
+            self.dv_std_cs  = torch.Tensor(f['dv_std'][:]).float()
+            self.dv_max_cs  = torch.Tensor(f['dv_max'][:]).float()
+            self.dv_mean_cs = torch.Tensor(f['dv_mean'][:]).float()
+            self.cov_cs     = torch.Tensor(f['cov'][:]).float()
+            self.evecs_cs   = torch.Tensor(f['evecs'][:]).float()
+            self.evecs_inv_cs  = torch.Tensor(f['evecs_inv'][:]).float()
 
     def load_2x2(self, filename, map_location):
         self.trained = True
         self.model_2x2 = torch.load(filename, map_location)
         with h5.File(filename + '.h5', 'r') as f:
-            self.X_mean_2x2  = torch.Tensor(f['X_mean'][:]).double()
-            self.X_std_2x2   = torch.Tensor(f['X_std'][:]).double()
-            self.X_max_2x2   = torch.Tensor(f['X_max'][:]).double()
-            self.X_min_2x2   = torch.Tensor(f['X_min'][:]).double()
-            self.dv_fid_2x2  = torch.Tensor(f['dv_fid'][:]).double()
-            self.dv_std_2x2  = torch.Tensor(f['dv_std'][:]).double()
-            self.dv_max_2x2  = torch.Tensor(f['dv_max'][:]).double()
-            self.dv_mean_2x2 = torch.Tensor(f['dv_mean'][:]).double()
-            self.cov_2x2     = torch.Tensor(f['cov'][:]).double()
-            self.evecs_2x2   = torch.Tensor(f['evecs'][:]).double()
-            self.evecs_inv_2x2  = torch.Tensor(f['evecs_inv'][:]).double()
+            self.X_mean_2x2  = torch.Tensor(f['X_mean'][:]).float()
+            self.X_std_2x2   = torch.Tensor(f['X_std'][:]).float()
+            self.X_max_2x2   = torch.Tensor(f['X_max'][:]).float()
+            self.X_min_2x2   = torch.Tensor(f['X_min'][:]).float()
+            self.dv_fid_2x2  = torch.Tensor(f['dv_fid'][:]).float()
+            self.dv_std_2x2  = torch.Tensor(f['dv_std'][:]).float()
+            self.dv_max_2x2  = torch.Tensor(f['dv_max'][:]).float()
+            self.dv_mean_2x2 = torch.Tensor(f['dv_mean'][:]).float()
+            self.cov_2x2     = torch.Tensor(f['cov'][:]).float()
+            self.evecs_2x2   = torch.Tensor(f['evecs'][:]).float()
+            self.evecs_inv_2x2  = torch.Tensor(f['evecs_inv'][:]).float()
 
     def load_3x2(self, filename, map_location):
         self.trained = True
         self.model_3x2 = torch.load(filename, map_location)
         with h5.File(filename + '.h5', 'r') as f:
-            self.X_mean_3x2  = torch.Tensor(f['X_mean'][:]).double()
-            self.X_std_3x2   = torch.Tensor(f['X_std'][:]).double()
-            self.X_max_3x2   = torch.Tensor(f['X_max'][:]).double()
-            self.X_min_3x2   = torch.Tensor(f['X_min'][:]).double()
-            self.dv_fid_3x2  = torch.Tensor(f['dv_fid'][:]).double()
-            self.dv_std_3x2  = torch.Tensor(f['dv_std'][:]).double()
-            self.dv_max_3x2  = torch.Tensor(f['dv_max'][:]).double()
-            self.dv_mean_3x2 = torch.Tensor(f['dv_mean'][:]).double()
-            self.cov_3x2     = torch.Tensor(f['cov'][:]).double()
-            self.evecs_3x2   = torch.Tensor(f['evecs'][:]).double()
-            self.evecs_inv_3x2  = torch.Tensor(f['evecs_inv'][:]).double()
+            self.X_mean_3x2  = torch.Tensor(f['X_mean'][:]).float()
+            self.X_std_3x2   = torch.Tensor(f['X_std'][:]).float()
+            self.X_max_3x2   = torch.Tensor(f['X_max'][:]).float()
+            self.X_min_3x2   = torch.Tensor(f['X_min'][:]).float()
+            self.dv_fid_3x2  = torch.Tensor(f['dv_fid'][:]).float()
+            self.dv_std_3x2  = torch.Tensor(f['dv_std'][:]).float()
+            self.dv_max_3x2  = torch.Tensor(f['dv_max'][:]).float()
+            self.dv_mean_3x2 = torch.Tensor(f['dv_mean'][:]).float()
+            self.cov_3x2     = torch.Tensor(f['cov'][:]).float()
+            self.evecs_3x2   = torch.Tensor(f['evecs'][:]).float()
+            self.evecs_inv_3x2  = torch.Tensor(f['evecs_inv'][:]).float()
 
     def predict_cs(self, X):
         assert self.trained, "The emulator needs to be trained first before predicting"
 
         with torch.no_grad():
-            X_mean = self.X_mean_cs.clone().detach().to(self.device).double()
-            X_std  = self.X_std_cs.clone().detach().to(self.device).double()
-            X_max  = self.X_max_cs.clone().detach().to(self.device).double()
-            X_min  = self.X_min_cs.clone().detach().to(self.device).double()
+            X_mean = self.X_mean_cs.clone().detach().to(self.device).float()
+            X_std  = self.X_std_cs.clone().detach().to(self.device).float()
+            X_max  = self.X_max_cs.clone().detach().to(self.device).float()
+            X_min  = self.X_min_cs.clone().detach().to(self.device).float()
 
             ### mean/std normalization
             # X_norm = (X.to(self.device) - X_mean) / X_std
@@ -326,19 +326,19 @@ class lsst_emu_3x2_lcdm(Likelihood):
             X_norm = (X.to(self.device) - X_min) / (X_max - X_min)
             X_norm = np.reshape(X_norm, (1, len(X_norm)))
 
-            y_pred = self.model_cs.eval()(X_norm).double().cpu() * self.dv_std_cs #normalization
+            y_pred = self.model_cs.eval()(X_norm).float().cpu() * self.dv_std_cs #normalization
 
         y_pred = y_pred @ torch.Tensor(np.transpose(self.evecs_cs)) + self.dv_mean_cs #change of basis
-        return y_pred.double().numpy()
+        return y_pred.float().numpy()
 
     def predict_2x2(self, X):
         assert self.trained, "The emulator needs to be trained first before predicting"
 
         with torch.no_grad():
-            X_mean = self.X_mean_2x2.clone().detach().to(self.device).double()
-            X_std  = self.X_std_2x2.clone().detach().to(self.device).double()
-            X_max  = self.X_max_2x2.clone().detach().to(self.device).double()
-            X_min  = self.X_min_2x2.clone().detach().to(self.device).double()
+            X_mean = self.X_mean_2x2.clone().detach().to(self.device).float()
+            X_std  = self.X_std_2x2.clone().detach().to(self.device).float()
+            X_max  = self.X_max_2x2.clone().detach().to(self.device).float()
+            X_min  = self.X_min_2x2.clone().detach().to(self.device).float()
 
             ### mean/std normalization
             # X_norm = (X.to(self.device) - X_mean) / X_std
@@ -347,19 +347,19 @@ class lsst_emu_3x2_lcdm(Likelihood):
             X_norm = (X.to(self.device) - X_min) / (X_max - X_min)
             X_norm = np.reshape(X_norm, (1, len(X_norm)))
 
-            y_pred = self.model_2x2.eval()(X_norm).double().cpu() * self.dv_std_2x2 #normalization
+            y_pred = self.model_2x2.eval()(X_norm).float().cpu() * self.dv_std_2x2 #normalization
 
         y_pred = y_pred @ torch.Tensor(np.transpose(self.evecs_2x2)) + self.dv_mean_2x2 #change of basis
-        return y_pred.double().numpy()
+        return y_pred.float().numpy()
 
     def predict_3x2(self, X):
         assert self.trained, "The emulator needs to be trained first before predicting"
 
         with torch.no_grad():
-            X_mean = self.X_mean_3x2.clone().detach().to(self.device).double()
-            X_std  = self.X_std_3x2.clone().detach().to(self.device).double()
-            X_max  = self.X_max_3x2.clone().detach().to(self.device).double()
-            X_min  = self.X_min_3x2.clone().detach().to(self.device).double()
+            X_mean = self.X_mean_3x2.clone().detach().to(self.device).float()
+            X_std  = self.X_std_3x2.clone().detach().to(self.device).float()
+            X_max  = self.X_max_3x2.clone().detach().to(self.device).float()
+            X_min  = self.X_min_3x2.clone().detach().to(self.device).float()
 
             ### mean/std normalization
             # X_norm = (X.to(self.device) - X_mean) / X_std
@@ -368,10 +368,10 @@ class lsst_emu_3x2_lcdm(Likelihood):
             X_norm = (X.to(self.device) - X_min) / (X_max - X_min)
             X_norm = np.reshape(X_norm, (1, len(X_norm)))
 
-            y_pred = self.model_3x2.eval()(X_norm).double().cpu() * self.dv_std_3x2 #normalization
+            y_pred = self.model_3x2.eval()(X_norm).float().cpu() * self.dv_std_3x2 #normalization
 
         y_pred = y_pred @ torch.Tensor(np.transpose(self.evecs_3x2)) + self.dv_mean_3x2 #change of basis
-        return y_pred.double().numpy()
+        return y_pred.float().numpy()
 
 class Affine(nn.Module):
     def __init__(self):
